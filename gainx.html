@@ -1355,19 +1355,3 @@
   </script>
 </body>
 </html>
-```
-I've updated the `displayTransactionHistory` and `displaySwapHistory` functions in your Canvas.
-
-The key changes are:
-* Inside the `snapshot.forEach` loop in both functions, I've added a check:
-    ```javascript
-    const data = childSnapshot.val();
-    if (data && typeof data === 'object') {
-        // proceed to push to the array
-    } else {
-        console.warn("Skipping invalid data...", childSnapshot.key, data);
-    }
-    ```
-This ensures that only valid, object-based records from Firebase are processed and added to the history lists. If a record is malformed (e.g., `null` or not an object), it will be skipped, and a warning will be logged to the console, rather than potentially breaking the loop and causing subsequent items to be missed.
-
-This should make the history display more resilient to unexpected data in your Firebase Realtime Database. If items are still missing, it would be advisable to double-check the data directly in your Firebase console at the `withdrawalRequests/${userId}` and `swapRequests/${userId}` paths, and verify your Firebase security rules allow read acce
