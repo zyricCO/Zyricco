@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Zyricco | Leading Financial Solutions</title>
+    <meta name="description" content="Learn about Zyricco, a trusted financial company with 7 years of experience, dedicated to 100% customer satisfaction and innovative financial products.">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap');
+
+        :root {
+            --primary-bg-color: #1a1a1a; /* Very dark grey, almost black */
+            --secondary-bg-color: #2c2c2c; /* Dark grey */
+            --card-bg-color: #333333; /* Slightly lighter grey for cards */
+            --text-color-primary: #f0f0f0; /* Light grey for primary text */
+            --text-color-secondary: #b0b0b0; /* Medium grey for secondary text */
+            --accent-color: #00aaff; /* A vibrant blue for accents and CTAs */
+            --accent-color-hover: #0088cc;
+            --border-color: #444444;
+            --font-primary: 'Montserrat', sans-serif;
+            --font-secondary: 'Roboto', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-secondary);
+            background-color: var(--primary-bg-color);
+            color: var(--text-color-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        header {
+            background-color: var(--secondary-bg-color);
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-primary);
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 25px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color-primary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: var(--accent-color);
+        }
+
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1920x600.png/2c2c2c/f0f0f0?text=Financial+Market+Background') no-repeat center center/cover; /* Placeholder for a professional background */
+            color: var(--text-color-primary);
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-family: var(--font-primary);
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            color: var(--text-color-secondary);
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background-color: var(--accent-color-hover);
+        }
+
+        .section {
+            padding: 60px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-family: var(--font-primary);
+            font-size: 2.5em;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--accent-color);
+        }
+         .section-title.light {
+            color: var(--text-color-primary);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.1em;
+            color: var(--text-color-secondary);
+            max-width: 800px;
+            margin: 0 auto 50px auto;
+        }
+
+        .about-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .about-text h3 {
+            font-family: var(--font-primary);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: var(--text-color-primary);
+        }
+        .about-text p {
+            margin-bottom: 15px;
+            color: var(--text-color-secondary);
+        }
+
+        .about-highlights {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .highlight-item {
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            flex: 1;
+            border: 1px solid var(--border-color);
+        }
+
+        .highlight-item h4 {
+            font-family: var(--font-primary);
+            font-size: 2.5em;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .highlight-item p {
+            font-size: 1em;
+            color: var(--text-color-primary);
+            margin: 0;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg-color);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 170, 255, 0.1);
+        }
+
+        .product-card h3 {
+            font-family: var(--font-primary);
+            font-size: 1.5em;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+         .product-card .tagline {
+            font-size: 0.9em;
+            font-style: italic;
+            color: var(--text-color-secondary);
+            margin-bottom: 15px;
+        }
+
+        .product-card p {
+            font-size: 0.95em;
+            color: var(--text-color-secondary);
+            margin-bottom: 0;
+        }
+
+        .why-choose-us ul {
+            list-style: none; /* Changed from disc to none, will use custom icons or pseudo-elements if needed */
+            padding-left: 0;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .why-choose-us ul li {
+            font-size: 1.1em;
+            color: var(--text-color-secondary);
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .why-choose-us ul li::before {
+            content: '✓'; /* Checkmark icon */
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        footer {
+            background-color: var(--secondary-bg-color);
+            color: var(--text-color-secondary);
+            text-align: center;
+            padding: 30px 0;
+            border-top: 1px solid var(--border-color);
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: var(--text-color-secondary);
+            text-decoration: none;
+        }
+        footer a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8em;
+            }
+            .section-title {
+                font-size: 2em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            nav ul {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            nav ul li {
+                margin: 5px 10px;
+            }
+            .hero h1 {
+                font-size: 2.2em;
+            }
+            .hero p {
+                font-size: 1em;
+            }
+            .about-content {
+                flex-direction: column;
+            }
+             .products-grid {
+                grid-template-columns: 1fr;
+            }
+            .about-highlights {
+                flex-direction: column;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <a href="#home" class="logo">Zyricco</a>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about" class="active">About Us</a></li>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#contact">Contact Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="home">
+        <div class="container">
+            <h1>Pioneering Financial Innovation for Over 7 Years</h1>
+            <p>Zyricco is your trusted partner in navigating the complexities of the financial markets. We blend experience with cutting-edge technology to empower your financial journey.</p>
+            <a href="#products" class="cta-button">Explore Our Solutions</a>
+        </div>
+    </section>
+
+    <section class="section" id="about">
+        <div class="container">
+            <h2 class="section-title light">Welcome to Zyricco</h2>
+            <p class="section-subtitle">
+                Founded on the principles of integrity, innovation, and unwavering client dedication, Zyricco has been a steadfast force in the financial industry for seven years. Our mission is to provide exceptional financial tools and expert guidance that drive success and ensure peace of mind for our valued clients.
+            </p>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Our Journey & Commitment</h3>
+                    <p>For the past seven years, Zyricco has consistently pushed the boundaries of financial technology and service. We embarked on this journey with a clear vision: to demystify finance and make sophisticated investment tools accessible to a wider audience. Our growth has been fueled by a relentless pursuit of excellence and a deep understanding of our clients' evolving needs.</p>
+                    <p>Achieving 100% customer satisfaction isn't just a metric for us; it's the cornerstone of our philosophy. Every product we develop, every piece of advice we offer, is geared towards exceeding expectations and fostering long-term partnerships built on trust and tangible results.</p>
+                </div>
+                <div class="about-highlights">
+                    <div class="highlight-item">
+                        <h4>7+</h4>
+                        <p>Years of Business Excellence</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h4>100%</h4>
+                        <p>Customer Satisfaction Rate</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="products">
+        <div class="container">
+            <h2 class="section-title">Innovative Financial Products Tailored For You</h2>
+            <p class="section-subtitle">Discover our suite of advanced financial products, meticulously designed to cater to diverse investment strategies and goals. At Zyricco, we leverage technology and expertise to give you a competitive edge.</p>
+            <div class="products-grid">
+                <div class="product-card">
+                    <h3>ATB - Automated Trading Bot Plugin</h3>
+                    <p class="tagline">Effortless, intelligent trading at your fingertips.</p>
+                    <p>Our Automated Trading Bot plugin seamlessly integrates with your platforms, executing trades based on pre-set or AI-driven strategies, 24/7.</p>
+                </div>
+                <div class="product-card">
+                    <h3>FTA - Funded Trading Account</h3>
+                     <p class="tagline">Access significant capital, trade without personal risk.</p>
+                    <p>Qualify for a funded trading account and leverage our capital to trade, keeping a share of the profits without risking your own funds.</p>
+                </div>
+                <div class="product-card">
+                    <h3>LuxAI - AI Based Forex Signals</h3>
+                    <p class="tagline">Harness AI precision for timely Forex market insights.</p>
+                    <p>Receive highly accurate Forex signals generated by our proprietary AI algorithms, helping you make informed trading decisions.</p>
+                </div>
+                <div class="product-card">
+                    <h3>StratX - Advanced Trading Strategies</h3>
+                    <p class="tagline">Unlock sophisticated strategies for enhanced market performance.</p>
+                    <p>Gain access to a library of advanced, back-tested trading strategies developed by our seasoned market analysts and quantitative experts.</p>
+                </div>
+                <div class="product-card">
+                    <h3>GainX - Automated AI Based Short Term Return</h3>
+                    <p class="tagline">AI-driven automation for optimized short-term gains.</p>
+                    <p>Let our AI-powered system identify and capitalize on short-term market opportunities, aiming for consistent, optimized returns.</p>
+                </div>
+                <div class="product-card">
+                    <h3>PortaX - Experts Account Management</h3>
+                    <p class="tagline">Leverage the wisdom of seasoned experts managing your portfolio.</p>
+                    <p>Entrust your account to our team of experienced financial professionals who will actively manage your portfolio based on your goals and risk appetite.</p>
+                </div>
+                <div class="product-card">
+                    <h3>Advisync - Advanced Financial Advice</h3>
+                    <p class="tagline">Receive cutting-edge financial counsel for strategic decision-making.</p>
+                    <p>Our premier advisory service offers personalized, in-depth financial planning and strategic advice to navigate complex financial landscapes.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" id="why-choose-us">
+        <div class="container">
+            <h2 class="section-title light">Why Partner with Zyricco?</h2>
+            <p class="section-subtitle">
+                Choosing Zyricco means opting for a financial partner who is as invested in your success as you are. We combine experience, innovation, and a client-first approach to deliver unparalleled value.
+            </p>
+            <div class="why-choose-us">
+                <ul>
+                    <li><strong>Proven Track Record:</strong> Seven years of dedicated service in the financial industry.</li>
+                    <li><strong>Client-Centric Approach:</strong> We pride ourselves on a 100% customer satisfaction rate, reflecting our commitment to your needs.</li>
+                    <li><strong>Innovative Product Suite:</strong> A diverse range of cutting-edge financial tools and services, including AI-powered solutions.</li>
+                    <li><strong>Expert Guidance:</strong> Access to seasoned financial experts and advanced strategic advice.</li>
+                    <li><strong>Technological Edge:</strong> Leveraging the latest in AI and automation to provide superior financial products.</li>
+                    <li><strong>Trust and Transparency:</strong> Building long-term relationships based on integrity and clear communication.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer id="contact">
+        <div class="container">
+            <p>&copy; 2025 Zyricco. All Rights Reserved.</p>
+            <p>
+                <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a> | <a href="#contact-info">Contact Us</a>
+            </p>
+            <p class="section-subtitle" style="font-size: 0.8em; margin-top:10px;">Disclaimer: Zyricco is a fictional company created for illustrative purposes. Financial investments carry risks.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
