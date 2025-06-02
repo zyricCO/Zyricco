@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GainX Wallet - Help & Support</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000; /* Base background is black */
+      color: #e5e7eb; /* Default light text color */
+    }
+    .content-section {
+      background-color: #111827; /* dark-gray-900 */
+      border: 1px solid #374151; /* dark-gray-700 */
+      border-radius: 0.5rem; /* rounded-lg */
+      padding: 1.5rem; /* p-6 */
+      margin-bottom: 2rem; /* mb-8 */
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+    }
+    .content-section h2 {
+      font-size: 1.5rem; /* text-2xl */
+      font-weight: 600; /* font-semibold */
+      color: #f3f4f6; /* gray-100 */
+      margin-bottom: 1rem; /* mb-4 */
+      padding-bottom: 0.5rem; /* pb-2 */
+      border-bottom: 1px solid #374151; /* border-b border-gray-700 */
+    }
+    .content-section h3 {
+      font-size: 1.125rem; /* text-lg */
+      font-weight: 600; /* font-semibold */
+      color: #d1d5db; /* gray-300 */
+      margin-top: 1.5rem; /* mt-6 */
+      margin-bottom: 0.75rem; /* mb-3 */
+    }
+    .content-section p, .content-section ul {
+      color: #9ca3af; /* gray-400 */
+      line-height: 1.6;
+      margin-bottom: 1rem; /* mb-4 */
+    }
+    .content-section ul {
+      list-style-type: disc;
+      padding-left: 1.5rem; /* pl-6 */
+    }
+    .content-section li {
+      margin-bottom: 0.5rem; /* mb-2 */
+    }
+    .content-section a {
+      color: #38bdf8; /* sky-400 */
+      text-decoration: underline;
+      transition: color 0.2s;
+    }
+    .content-section a:hover {
+      color: #7dd3fc; /* sky-300 */
+    }
+    .back-button {
+      display: inline-block;
+      margin-top: 1.5rem; /* mt-6 */
+      padding: 0.75rem 1.5rem; /* py-3 px-6 */
+      background-color: #0ea5e9; /* bg-sky-600 */
+      color: white;
+      font-weight: 600; /* font-semibold */
+      border-radius: 0.375rem; /* rounded-md */
+      transition: background-color 0.2s;
+      text-decoration: none;
+    }
+    .back-button:hover {
+      background-color: #0284c7; /* hover:bg-sky-700 */
+    }
+    .ticket-link {
+      color: #38bdf8; /* sky-400 */
+      text-decoration: underline;
+      font-weight: 500; /* medium */
+    }
+    .ticket-link:hover {
+      color: #7dd3fc; /* sky-300 */
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 bg-black">
+
+  <div class="w-full max-w-3xl space-y-8 mt-8 sm:mt-12">
+    <header class="text-center mb-10">
+      <div class="inline-block mb-3 text-4xl font-bold text-sky-400">
+        Gain<span class="text-gray-50">X</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-semibold text-gray-100">Help & Support</h1>
+      <p class="text-sm text-gray-400 mt-1">Find answers to your questions and get help with GainX Wallet.</p>
+    </header>
+
+    <section id="faq-section" class="content-section">
+      <h2>Frequently Asked Questions (FAQ)</h2>
+
+      <div>
+        <h3>Account & Security</h3>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">How do I create an account?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">Account creation is typically handled through our main platform. If you're accessing the wallet, you should already have an account. For new registrations, please visit our primary website or contact support.</p>
+        </details>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">How can I change my password?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">You can change your password by clicking on your user profile icon in the top right corner of the wallet, then selecting "Change Password". A password reset link will be sent to your registered email address.</p>
+        </details>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">What should I do if I suspect unauthorized activity on my account?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">If you suspect any unauthorized activity, please change your password immediately and <a href="tickets.html" class="ticket-link">create a support ticket</a> with our team.</p>
+        </details>
+      </div>
+
+      <div class="mt-6">
+        <h3>Deposits & Withdrawals</h3>
+         <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">How do I deposit USDT?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">Click the "Deposit" button on the main wallet page. This will take you to the deposit page where you'll find instructions and your unique deposit address for USDT (TRC20).</p>
+        </details>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">How long do withdrawals take?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">Withdrawal processing times generally range from 30 minutes to 24 hours. While most withdrawals are completed within approximately one hour, the exact duration can vary based on the chosen method (IMPS/NEFT or USDT-TRC20) and prevailing network conditions or banking system latencies.</p>
+        </details>
+         <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">Are there any withdrawal fees?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">Withdrawal fees may apply and can vary based on the method and network conditions. Any applicable fees will be displayed before you confirm your withdrawal.</p>
+        </details>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">What if I withdraw to the wrong address/account?</summary>
+            <div class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">
+                <p><strong>It is crucial to double-check all withdrawal details (wallet addresses, bank account numbers, IFSC codes) before confirming any transaction.</strong></p>
+                <p class="mt-2">Due to the nature of cryptocurrency transactions and banking processes:</p>
+                <ul class="list-disc pl-5 mt-1">
+                    <li><strong>Cryptocurrency (USDT-TRC20):</strong> Transactions on the blockchain are generally irreversible. If you send USDT to an incorrect TRC20 address, it is highly unlikely that the funds can be recovered unless you know the owner of that address and they are willing to return the funds. GainX does not have control over external wallet addresses.</li>
+                    <li><strong>Bank Transfers (IMPS/NEFT):</strong> Once a bank transfer is requested, the details are submitted to our automated payment portal. This portal collaborates with our partnered financial institutions to process the transfer, aiming to ensure users receive funds that are clear and not subject to any complaints or liens. If incorrect bank account details are provided, the transaction might fail. In such cases, funds may eventually be returned to your GainX wallet, though this process can take several days or even weeks and is subject to standard banking procedures. However, if the incorrect details match an existing, valid bank account, the funds might be credited to that unintended account. <strong>Please note that once a withdrawal request has been processed through our company portals, initiating a chargeback or reversal is not possible from our end.</strong> Recovery in such scenarios is exceptionally challenging and not guaranteed.</li>
+                </ul>
+                <p class="mt-2"><strong>User Responsibility:</strong> You are solely responsible for ensuring the accuracy of the withdrawal information you provide. GainX cannot be held liable for losses incurred due to withdrawals made to incorrect or unintended addresses/accounts provided by you.</p>
+                <p class="mt-2">If you realize you have made an error, please <a href="tickets.html" class="ticket-link">create a support ticket</a> immediately with all relevant transaction details. While we cannot guarantee recovery, we will provide any guidance possible based on the situation.</p>
+            </div>
+        </details>
+      </div>
+
+      <div class="mt-6">
+        <h3>Swapping Tokens</h3>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">How do I swap tokens (e.g., USDT to ZSG)?</summary>
+            <p class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">Click the "Swap Tokens" button. In the swap modal, select the token you want to swap from and the token you want to receive. Enter the amount, review the rate and approximate amount you'll receive, then confirm the swap.</p>
+        </details>
+        <details class="mb-2 bg-gray-800 p-3 rounded-md cursor-pointer">
+            <summary class="font-medium text-gray-200 hover:text-sky-400">What is the ZSG token?</summary>
+            <div class="mt-2 text-sm text-gray-400 pl-4 border-l-2 border-sky-500">
+                <p>ZSG is a decentralized crypto token, operating as the native utility asset of the GainX platform. It is engineered to empower users and facilitate a wide range of operations and benefits within our growing ecosystem. At GainX, we are deeply committed to fostering a secure, transparent, and robust environment for all ZSG token holders and platform participants.</p>
+                <p class="mt-2"><strong>Understanding ZSG - Key Aspects:</strong></p>
+                <ul class="list-disc pl-5 mt-1">
+                    <li><strong>Core Utility & Purpose:</strong> ZSG serves as a key component for accessing specific services, unlocking exclusive features, and participating in unique opportunities available on the GainX platform. Further details on evolving utilities will be consistently communicated through our official channels.</li>
+                    <li><strong>Acquisition Method:</strong> Currently, ZSG tokens can be conveniently acquired by swapping from USDT directly within your secure GainX Wallet. This process is designed to be seamless and user-friendly.</li>
+                    <li><strong>Market Dynamics & Value:</strong> As with other digital assets in the decentralized space, the value of ZSG can be influenced by various market dynamics, including supply and demand, overall market sentiment, and the ongoing development and adoption of the GainX project. We encourage all users to conduct their own research and understand these inherent factors.</li>
+                    <li><strong>Commitment to Transparency:</strong> GainX is dedicated to maintaining a high degree of transparency regarding ZSG's tokenomics, smart contract details (where applicable), and project development milestones. All official updates, news, and critical information will be disseminated through verified GainX communication channels.</li>
+                </ul>
+                <p class="mt-2">Our fundamental objective is to build sustainable, long-term value and expanding utility for the ZSG token within the GainX ecosystem. We strongly advise our users to stay updated by regularly checking our official announcements and to always exercise due diligence and responsible practices when engaging with any digital asset.</p>
+            </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="contact-support-section" class="content-section">
+      <h2>Contact Support</h2>
+      <p>If you can't find the answer to your question in our FAQ, or if you need further assistance, please don't hesitate to <a href="tickets.html" class="ticket-link">create a support ticket</a>.</p>
+      <p>Our support team aims to respond to all tickets within 24-48 business hours.</p>
+      <p>When creating a ticket, please provide as much detail as possible about your issue, including your User ID (if applicable), transaction IDs, and screenshots, to help us resolve your query quickly.</p>
+    </section>
+
+    <div class="text-center">
+      <a href="index.html" class="back-button">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 inline-block mr-2 -mt-1">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Back to Wallet
+      </a>
+    </div>
+  </div>
+
+  <footer class="w-full max-w-3xl mx-auto text-center py-8 mt-10 border-t border-gray-800">
+    <p class="text-sm text-gray-500">&copy; 2024-2025 GainX by ZYRICCO. All Rights Reserved.</p>
+    <p class="text-xs text-gray-600 mt-1">
+        ZYRICCO Finance Ltd. 85 Bishopsgate, London EC2N 4AJ. Company Reg: #ZE-5082291
+    </p>
+  </footer>
+
+  <script>
+    // Optional: Script to make <details> behave like acccorcdions (only one open at a time)
+    const detailsElements = document.querySelectorAll('details');
+    detailsElements.forEach(details => {
+        details.addEventListener('toggle', event => {
+            if (details.open) {
+                detailsElements.forEach(otherDetails => {
+                    if (otherDetails !== details && otherDetails.open) {
+                        otherDetails.open = false;
+                    }
+                });
+            }
+        });
+    });
+  </script>
+
+</body>
+</html>

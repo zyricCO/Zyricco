@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GainX Wallet - Support Tickets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      color: #e5e7eb;
+    }
+    .content-container {
+      background-color: #111827;
+      border: 1px solid #374151;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #374151;
+      background-color: #1f2937;
+      color: #e5e7eb;
+      border-radius: 0.375rem;
+      box-sizing: border-box;
+      font-size: 0.95em;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: #0ea5e9;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(14,165,233,0.3);
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #d1d5db;
+      font-size: 0.9rem;
+    }
+    .btn {
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.375rem;
+      font-weight: 600;
+      transition: background-color 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #0ea5e9; /* sky-600 */
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: #0284c7; /* sky-700 */
+    }
+    .btn-secondary {
+      background-color: #374151; /* gray-700 */
+      color: #e5e7eb;
+      border: 1px solid #4b5563; /* gray-600 */
+    }
+    .btn-secondary:hover {
+      background-color: #4b5563; /* gray-600 */
+    }
+    .ticket-item {
+      border-bottom: 1px solid #374151;
+      padding: 1rem 0;
+      cursor: pointer;
+    }
+    .ticket-item:last-child {
+      border-bottom: none;
+    }
+    .ticket-item:hover {
+      background-color: #1f2937; /* gray-800 */
+    }
+    .status-open { color: #fbbf24; /* amber-400 */ }
+    .status-in-progress { color: #38bdf8; /* sky-400 */ }
+    .status-resolved { color: #22c55e; /* green-500 */ }
+    .status-closed-by-user, .status-closed-by-admin { color: #9ca3af; /* gray-400 */ }
+
+    /* Message Modal (similar to index.html) */
+    #message-modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 70;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .message-modal-content {
+        background-color: #111827; /* bg-gray-900 */
+        color: #e5e7eb; /* text-gray-100 */
+        padding: 1.5rem 2rem; /* p-6 sm:p-8 */
+        border-radius: 0.5rem; /* rounded-lg */
+        border: 1px solid #374151; /* border-gray-700 */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5); /* shadow-2xl */
+        min-width: 300px;
+        max-width: 448px; /* max-w-md */
+    }
+    #modal-message-text {
+        margin-bottom: 1.5rem; /* mb-6 */
+        font-size: 1.125rem; /* text-lg */
+    }
+    #modal-close-button {
+        padding: 0.625rem 1.5rem; /* px-6 py-2.5 */
+    }
+
+    /* Ticket Detail Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 60;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.75);
+    }
+    .modal-content {
+      background-color: #111827;
+      color: #e5e7eb;
+      margin: 5% auto;
+      padding: 25px;
+      border: 1px solid #374151;
+      width: 90%;
+      max-width: 700px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .close-button {
+      color: #9ca3af;
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      line-height: 1;
+    }
+    .close-button:hover,
+    .close-button:focus {
+      color: #f3f4f6;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .message-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.75rem;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+    .message-user {
+        background-color: #0ea5e9; /* sky-600 */
+        color: white;
+        margin-left: auto;
+        text-align: right;
+    }
+    .message-admin {
+        background-color: #374151; /* gray-700 */
+        color: #e5e7eb;
+        margin-right: auto;
+        text-align: left;
+    }
+    .message-meta {
+        font-size: 0.75rem; /* text-xs */
+        color: #9ca3af; /* gray-400 */
+        margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 bg-black">
+
+  <div id="app-container" class="w-full max-w-3xl space-y-6 mt-8 sm:mt-12">
+    <header class="text-center mb-10">
+      <div class="inline-block mb-3 text-4xl font-bold text-sky-400">
+        Gain<span class="text-gray-50">X</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-semibold text-gray-100">Support Tickets</h1>
+      <p id="auth-status" class="text-sm text-gray-400 mt-1">Connecting...</p>
+      <p id="user-id-display" class="text-xs text-gray-500 mt-1">User ID: -</p>
+    </header>
+
+    <div id="create-ticket-section" class="content-container">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-100">Create New Ticket</h2>
+        <button id="toggleCreateTicketFormBtn" class="btn btn-secondary text-sm py-2 px-3">
+            <span id="formToggleIcon">+</span> <span id="formToggleText">New Support Request</span>
+        </button>
+      </div>
+      <form id="createTicketForm" class="hidden space-y-4">
+        <div>
+          <label for="ticketSubject" class="form-label">Subject</label>
+          <input type="text" id="ticketSubject" class="form-input" placeholder="e.g., Issue with USDT deposit" required>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label for="ticketCategory" class="form-label">Category</label>
+                <select id="ticketCategory" class="form-select">
+                  <option value="General Inquiry">General Inquiry</option>
+                  <option value="Deposits">Deposits</option>
+                  <option value="Withdrawals">Withdrawals</option>
+                  <option value="Swaps">Swaps</option>
+                  <option value="Account Access">Account Access</option>
+                  <option value="Technical Issue">Technical Issue</option>
+                  <option value="Other">Other</option>
+                </select>
+            </div>
+            <div>
+                <label for="ticketPriority" class="form-label">Priority</label>
+                <select id="ticketPriority" class="form-select">
+                  <option value="Low">Low</option>
+                  <option value="Medium" selected>Medium</option>
+                  <option value="High">High</option>
+                </select>
+            </div>
+        </div>
+        <div>
+          <label for="ticketDescription" class="form-label">Describe your issue</label>
+          <textarea id="ticketDescription" class="form-textarea" rows="5" placeholder="Please provide as much detail as possible..." required></textarea>
+        </div>
+        <button type="submit" id="submitTicketBtn" class="btn btn-primary w-full">Submit Ticket</button>
+      </form>
+    </div>
+
+    <div id="my-tickets-section" class="content-container">
+      <h2 class="text-xl font-semibold text-gray-100 mb-4">My Tickets</h2>
+      <div id="myTicketsList" class="space-y-1">
+        <p id="no-tickets-message" class="text-gray-500 p-4 text-center">Loading tickets...</p>
+        </div>
+    </div>
+    
+    <div class="text-center mt-8">
+      <a href="index.html" class="inline-flex items-center btn btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Back to Wallet
+      </a>
+       <a href="help.html" class="ml-4 inline-flex items-center btn btn-secondary">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+        </svg>
+        FAQ & Help
+      </a>
+    </div>
+  </div>
+
+  <div id="ticketDetailModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" id="closeTicketDetailModalBtn">&times;</span>
+      <h2 id="ticketDetailSubject" class="text-2xl font-semibold mb-3">Ticket Details</h2>
+      <div class="text-sm text-gray-400 mb-4">
+        <p><strong>Ticket ID:</strong> <span id="ticketDetailId"></span></p>
+        <p><strong>Status:</strong> <span id="ticketDetailStatus" class="font-medium"></span></p>
+        <p><strong>Category:</strong> <span id="ticketDetailCategory"></span></p>
+        <p><strong>Priority:</strong> <span id="ticketDetailPriority"></span></p>
+        <p><strong>Created:</strong> <span id="ticketDetailCreated"></span></p>
+        <p><strong>Last Updated:</strong> <span id="ticketDetailUpdated"></span></p>
+      </div>
+
+      <h3 class="text-lg font-semibold mt-6 mb-2 text-gray-200">Conversation</h3>
+      <div id="ticketMessagesContainer" class="max-h-60 overflow-y-auto border border-gray-700 p-3 rounded-md bg-gray-900 mb-4">
+        </div>
+
+      <div id="replyFormContainer">
+        <h3 class="text-lg font-semibold mt-4 mb-2 text-gray-200">Add Reply</h3>
+        <textarea id="ticketReplyMessage" class="form-textarea bg-gray-800 border-gray-600" rows="3" placeholder="Type your reply..."></textarea>
+        <div class="flex justify-end space-x-3 mt-3">
+            <button id="closeTicketByUserBtn" class="btn btn-secondary hidden">Close My Ticket</button>
+            <button id="submitReplyBtn" class="btn btn-primary">Send Reply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="message-modal" style="display: none;"> <div class="message-modal-content">
+      <p id="modal-message-text" class="mb-6 text-lg"></p>
+      <button id="modal-close-button" class="btn btn-primary">Close</button>
+    </div>
+  </div>
+
+  <footer class="w-full max-w-3xl mx-auto text-center py-8 mt-10 border-t border-gray-800">
+    <p class="text-sm text-gray-500">&copy; 2024-2025 GainX by ZYRICCO. All Rights Reserved.</p>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, query, orderByChild, equalTo, serverTimestamp, push, set, get, update } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+
+    const firebaseConfig = { // Using the same config as index.html
+      apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+      authDomain: "swiftgain.firebaseapp.com",
+      databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "swiftgain",
+      storageBucket: "swiftgain.firebasestorage.app",
+      messagingSenderId: "751911092919",
+      appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+    };
+
+    let app;
+    let auth;
+    let database;
+    let currentUserId = null;
+    let currentUserEmail = null; // To store user's email for tickets
+
+    // DOM Elements
+    const authStatusEl = document.getElementById('auth-status');
+    const userIdDisplayEl = document.getElementById('user-id-display');
+    const createTicketFormEl = document.getElementById('createTicketForm');
+    const toggleCreateTicketFormBtnEl = document.getElementById('toggleCreateTicketFormBtn');
+    const formToggleIconEl = document.getElementById('formToggleIcon');
+    const formToggleTextEl = document.getElementById('formToggleText');
+    const submitTicketBtnEl = document.getElementById('submitTicketBtn');
+    const myTicketsListEl = document.getElementById('myTicketsList');
+    const noTicketsMessageEl = document.getElementById('no-tickets-message');
+
+    const ticketDetailModalEl = document.getElementById('ticketDetailModal');
+    const closeTicketDetailModalBtnEl = document.getElementById('closeTicketDetailModalBtn');
+    const ticketDetailSubjectEl = document.getElementById('ticketDetailSubject');
+    const ticketDetailIdEl = document.getElementById('ticketDetailId');
+    const ticketDetailStatusEl = document.getElementById('ticketDetailStatus');
+    const ticketDetailCategoryEl = document.getElementById('ticketDetailCategory');
+    const ticketDetailPriorityEl = document.getElementById('ticketDetailPriority');
+    const ticketDetailCreatedEl = document.getElementById('ticketDetailCreated');
+    const ticketDetailUpdatedEl = document.getElementById('ticketDetailUpdated');
+    const ticketMessagesContainerEl = document.getElementById('ticketMessagesContainer');
+    const ticketReplyMessageEl = document.getElementById('ticketReplyMessage');
+    const submitReplyBtnEl = document.getElementById('submitReplyBtn');
+    const closeTicketByUserBtnEl = document.getElementById('closeTicketByUserBtn');
+    const replyFormContainerEl = document.getElementById('replyFormContainer');
+
+
+    // Message Modal Elements
+    const messageModalEl = document.getElementById("message-modal");
+    const modalMessageTextEl = document.getElementById("modal-message-text");
+    const modalCloseButtonEl = document.getElementById("modal-close-button");
+
+    let currentlyViewedTicketId = null;
+    let currentlyViewedTicketStatus = null;
+
+    // --- Firebase Initialization ---
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        database = getDatabase(app);
+        console.log("Firebase initialized successfully for Tickets page.");
+    } catch (error) {
+        console.error("Firebase initialization error on Tickets page:", error);
+        showGenericMessage("Error connecting to services. Please try again later.", true);
+    }
+
+    // --- Authentication ---
+    if (auth) {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                currentUserEmail = user.email;
+                if (authStatusEl) authStatusEl.textContent = `Logged in: ${user.email || 'Authenticated User'}`;
+                if (userIdDisplayEl) userIdDisplayEl.textContent = `User ID: ${user.uid}`;
+                loadUserTickets();
+                if (submitTicketBtnEl) submitTicketBtnEl.disabled = false;
+            } else {
+                currentUserId = null;
+                currentUserEmail = null;
+                if (authStatusEl) authStatusEl.textContent = 'Not Authenticated. Please log in to manage tickets.';
+                if (userIdDisplayEl) userIdDisplayEl.textContent = 'User ID: -';
+                if (myTicketsListEl) myTicketsListEl.innerHTML = '<p class="text-gray-500 p-4 text-center">Please log in to view your tickets.</p>';
+                if (noTicketsMessageEl) noTicketsMessageEl.style.display = 'none'; // Hide loading, show login prompt
+                if (submitTicketBtnEl) submitTicketBtnEl.disabled = true;
+            }
+        });
+    } else {
+         if (authStatusEl) authStatusEl.textContent = 'Authentication service unavailable.';
+    }
+
+    // --- Generic Message Modal Functions ---
+    function showGenericMessage(message, isError = false) {
+        if (modalMessageTextEl && messageModalEl) {
+            modalMessageTextEl.textContent = message;
+            modalMessageTextEl.className = `mb-6 text-lg font-medium ${isError ? "text-rose-400" : "text-emerald-400"}`;
+            messageModalEl.style.display = "flex"; // Use flex to center
+        } else {
+            console.warn("Message modal elements not found. Logging to console.");
+            console.log((isError ? "ERROR: " : "MESSAGE: ") + message);
+        }
+    }
+    if (modalCloseButtonEl) {
+        modalCloseButtonEl.addEventListener("click", () => {
+          if(messageModalEl) messageModalEl.style.display = "none";
+        });
+    }
+
+    // --- Toggle Create Ticket Form ---
+    if (toggleCreateTicketFormBtnEl && createTicketFormEl) {
+        toggleCreateTicketFormBtnEl.addEventListener('click', () => {
+            const isHidden = createTicketFormEl.classList.toggle('hidden');
+            if (isHidden) {
+                formToggleIconEl.textContent = '+';
+                formToggleTextEl.textContent = 'New Support Request'; 
+            } else {
+                formToggleIconEl.textContent = '-';
+                formToggleTextEl.textContent = 'Cancel'; 
+            }
+        });
+    }
+    
+    // --- Format Timestamp ---
+    function formatFirebaseTimestamp(timestamp) {
+        if (!timestamp) return 'N/A';
+        try {
+            return new Date(timestamp).toLocaleString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: 'numeric', minute: '2-digit', hour12: true
+            });
+        } catch (e) { return 'Invalid Date'; }
+    }
+
+    // --- Create New Ticket ---
+    if (createTicketFormEl) {
+        createTicketFormEl.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) {
+                showGenericMessage("You must be logged in to create a ticket.", true);
+                return;
+            }
+
+            const subject = document.getElementById('ticketSubject').value.trim();
+            const category = document.getElementById('ticketCategory').value;
+            const priority = document.getElementById('ticketPriority').value;
+            const description = document.getElementById('ticketDescription').value.trim();
+
+            if (!subject || !description) {
+                showGenericMessage("Subject and Description are required.", true);
+                return;
+            }
+
+            submitTicketBtnEl.disabled = true;
+            submitTicketBtnEl.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Submitting...`;
+
+            try {
+                const ticketsRef = ref(database, 'tickets');
+                const newTicketRef = push(ticketsRef);
+                const newTicketData = {
+                    userId: currentUserId,
+                    userEmail: currentUserEmail || 'N/A',
+                    ticketIdShort: newTicketRef.key.slice(-6).toUpperCase(), 
+                    subject: subject,
+                    category: category,
+                    priority: priority,
+                    description: description, 
+                    status: "Open", 
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                    lastReplyBy: "user",
+                    replies: [
+                        {
+                            senderId: currentUserId,
+                            senderType: "user",
+                            senderEmail: currentUserEmail || "User",
+                            message: description,
+                            timestamp: serverTimestamp()
+                        }
+                    ]
+                };
+                await set(newTicketRef, newTicketData);
+                // Updated success message below
+                showGenericMessage("Your support ticket has been successfully created. Our team will review your request, and you can typically expect an update or resolution within 24 to 48 business hours.", false);
+                createTicketFormEl.reset();
+                createTicketFormEl.classList.add('hidden'); 
+                formToggleIconEl.textContent = '+';
+                formToggleTextEl.textContent = 'New Support Request'; 
+                loadUserTickets(); 
+            } catch (error) {
+                console.error("Error creating ticket:", error);
+                showGenericMessage("Failed to create ticket: " + error.message, true);
+            } finally {
+                submitTicketBtnEl.disabled = false;
+                submitTicketBtnEl.textContent = "Submit Ticket";
+            }
+        });
+    }
+
+    // --- Load User Tickets ---
+    function loadUserTickets() {
+        if (!currentUserId || !database) return;
+
+        const ticketsQuery = query(ref(database, 'tickets'), orderByChild('userId'), equalTo(currentUserId));
+        onValue(ticketsQuery, (snapshot) => {
+            if (myTicketsListEl && noTicketsMessageEl) {
+                myTicketsListEl.innerHTML = ''; 
+                if (snapshot.exists()) {
+                    noTicketsMessageEl.style.display = 'none';
+                    let tickets = [];
+                    snapshot.forEach(childSnapshot => {
+                        tickets.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                    
+                    tickets.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+                    
+                    tickets.forEach(ticket => displayTicketInList(ticket));
+                } else {
+                    noTicketsMessageEl.textContent = 'No support tickets found.';
+                    noTicketsMessageEl.style.display = 'block';
+                }
+            }
+        }, (error) => {
+            console.error("Error loading tickets:", error);
+            if (noTicketsMessageEl) {
+                 noTicketsMessageEl.textContent = 'Could not load tickets.';
+                 noTicketsMessageEl.style.display = 'block';
+            }
+        });
+    }
+
+    function displayTicketInList(ticket) {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'ticket-item p-3 rounded-md hover:bg-gray-800 transition-colors';
+        const statusClass = `status-${ticket.status.toLowerCase().replace(/\s+/g, '-')}`;
+
+        itemEl.innerHTML = `
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="font-semibold text-gray-100">${ticket.subject}</p>
+                    <p class="text-xs text-gray-500">ID: ${ticket.ticketIdShort || ticket.id.slice(-6).toUpperCase()} | Category: ${ticket.category}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-medium ${statusClass} capitalize">${ticket.status}</p>
+                    <p class="text-xs text-gray-500">Updated: ${formatFirebaseTimestamp(ticket.updatedAt)}</p>
+                </div>
+            </div>
+        `;
+        itemEl.addEventListener('click', () => openTicketDetailModal(ticket.id));
+        myTicketsListEl.appendChild(itemEl);
+    }
+
+    // --- Ticket Detail Modal ---
+    async function openTicketDetailModal(ticketId) {
+        currentlyViewedTicketId = ticketId;
+        const ticketRef = ref(database, `tickets/${ticketId}`);
+        try {
+            const snapshot = await get(ticketRef);
+            if (snapshot.exists()) {
+                const ticket = snapshot.val();
+                currentlyViewedTicketStatus = ticket.status;
+
+                ticketDetailSubjectEl.textContent = ticket.subject;
+                ticketDetailIdEl.textContent = ticket.ticketIdShort || ticketId.slice(-6).toUpperCase();
+                ticketDetailStatusEl.textContent = ticket.status;
+                ticketDetailStatusEl.className = `font-medium capitalize status-${ticket.status.toLowerCase().replace(/\s+/g, '-')}`;
+                ticketDetailCategoryEl.textContent = ticket.category;
+                ticketDetailPriorityEl.textContent = ticket.priority;
+                ticketDetailCreatedEl.textContent = formatFirebaseTimestamp(ticket.createdAt);
+                ticketDetailUpdatedEl.textContent = formatFirebaseTimestamp(ticket.updatedAt);
+
+                ticketMessagesContainerEl.innerHTML = '';
+                if (ticket.replies && Array.isArray(ticket.replies)) {
+                    ticket.replies.forEach(reply => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message-bubble');
+                        const senderName = reply.senderType === 'user' ? (reply.senderEmail || 'You') : 'Support Team';
+                        
+                        messageDiv.innerHTML = `
+                            <p class="font-medium text-sm">${senderName}</p>
+                            <p>${reply.message}</p>
+                            <p class="message-meta">${formatFirebaseTimestamp(reply.timestamp)}</p>
+                        `;
+                        if (reply.senderType === 'user') {
+                            messageDiv.classList.add('message-user');
+                        } else {
+                            messageDiv.classList.add('message-admin');
+                        }
+                        ticketMessagesContainerEl.appendChild(messageDiv);
+                    });
+                } else if (ticket.description) { 
+                     const messageDiv = document.createElement('div');
+                        messageDiv.classList.add('message-bubble', 'message-user');
+                        messageDiv.innerHTML = `
+                            <p class="font-medium text-sm">${ticket.userEmail || 'You'}</p>
+                            <p>${ticket.description}</p>
+                            <p class="message-meta">${formatFirebaseTimestamp(ticket.createdAt)}</p>
+                        `;
+                        ticketMessagesContainerEl.appendChild(messageDiv);
+                }
+                ticketMessagesContainerEl.scrollTop = ticketMessagesContainerEl.scrollHeight;
+
+
+                if (ticket.status === "Open" || ticket.status === "In Progress") {
+                    replyFormContainerEl.style.display = "block";
+                    closeTicketByUserBtnEl.style.display = "none";
+                    submitReplyBtnEl.disabled = false;
+                } else if (ticket.status === "Resolved") {
+                    replyFormContainerEl.style.display = "block"; 
+                    closeTicketByUserBtnEl.style.display = "inline-block";
+                    submitReplyBtnEl.disabled = false; 
+                } else { 
+                    replyFormContainerEl.style.display = "none";
+                    closeTicketByUserBtnEl.style.display = "none";
+                }
+
+
+                ticketDetailModalEl.style.display = "block";
+            } else {
+                showGenericMessage("Ticket not found.", true);
+            }
+        } catch (error) {
+            console.error("Error fetching ticket details:", error);
+            showGenericMessage("Could not load ticket details.", true);
+        }
+    }
+
+    if (closeTicketDetailModalBtnEl) {
+        closeTicketDetailModalBtnEl.onclick = () => {
+            ticketDetailModalEl.style.display = "none";
+            currentlyViewedTicketId = null;
+            currentlyViewedTicketStatus = null;
+            ticketReplyMessageEl.value = ''; 
+        }
+    }
+    window.addEventListener('click', (event) => { 
+        if (event.target == ticketDetailModalEl) {
+            ticketDetailModalEl.style.display = "none";
+            currentlyViewedTicketId = null;
+            currentlyViewedTicketStatus = null;
+            ticketReplyMessageEl.value = '';
+        }
+    });
+
+    // --- Submit Reply ---
+    if (submitReplyBtnEl) {
+        submitReplyBtnEl.addEventListener('click', async () => {
+            if (!currentlyViewedTicketId || !currentUserId) return;
+
+            const message = ticketReplyMessageEl.value.trim();
+            if (!message) {
+                showGenericMessage("Reply message cannot be empty.", true);
+                return;
+            }
+            submitReplyBtnEl.disabled = true;
+            submitReplyBtnEl.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Sending...`;
+
+            try {
+                const ticketRef = ref(database, `tickets/${currentlyViewedTicketId}`);
+                const snapshot = await get(ticketRef);
+                if (!snapshot.exists()) throw new Error("Ticket not found for replying.");
+                
+                const ticketData = snapshot.val();
+                const replies = ticketData.replies || [];
+                replies.push({
+                    senderId: currentUserId,
+                    senderType: "user",
+                    senderEmail: currentUserEmail || "User",
+                    message: message,
+                    timestamp: serverTimestamp()
+                });
+
+                const updates = {
+                    replies: replies,
+                    updatedAt: serverTimestamp(),
+                    lastReplyBy: "user"
+                };
+                
+                if (ticketData.status === "Open") {
+                    updates.status = "In Progress"; 
+                }
+
+
+                await update(ticketRef, updates);
+                ticketReplyMessageEl.value = ''; 
+                showGenericMessage("Reply sent.", false);
+                
+                await openTicketDetailModal(currentlyViewedTicketId);
+
+            } catch (error) {
+                console.error("Error submitting reply:", error);
+                showGenericMessage("Failed to send reply: " + error.message, true);
+            } finally {
+                 submitReplyBtnEl.disabled = false;
+                 submitReplyBtnEl.textContent = "Send Reply";
+            }
+        });
+    }
+    
+    // --- Close Ticket by User ---
+    if (closeTicketByUserBtnEl) {
+        closeTicketByUserBtnEl.addEventListener('click', async () => {
+            if (!currentlyViewedTicketId || currentlyViewedTicketStatus !== "Resolved") {
+                showGenericMessage("This ticket cannot be closed by you at this time.", true);
+                return;
+            }
+            
+            const userConfirmation = window.confirm("Are you sure you want to close this ticket? This action cannot be undone by you.");
+            if (!userConfirmation) return;
+
+            closeTicketByUserBtnEl.disabled = true;
+            closeTicketByUserBtnEl.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Closing...`;
+
+            try {
+                const ticketRef = ref(database, `tickets/${currentlyViewedTicketId}`);
+                await update(ticketRef, {
+                    status: "Closed by User",
+                    updatedAt: serverTimestamp()
+                });
+                showGenericMessage("Ticket closed successfully.", false);
+                ticketDetailModalEl.style.display = "none";
+                loadUserTickets(); 
+            } catch (error) {
+                console.error("Error closing ticket:", error);
+                showGenericMessage("Failed to close ticket: " + error.message, true);
+            } finally {
+                closeTicketByUserBtnEl.disabled = false;
+                closeTicketByUserBtnEl.textContent = "Close My Ticket";
+            }
+        });
+    }
+
+  </script>
+</body>
+</html>
