@@ -318,6 +318,9 @@
             <button id="changePasswordMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
               Change Password
             </button>
+            <button id="helpMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+              Help
+            </button>
             <button id="logoutMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
               Logout
             </button>
@@ -380,7 +383,7 @@
       </div>
 
        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <button id="topupFundsBtn" onclick="window.location.href='main-deposit.html'" class="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Topup</button>
+        <button id="topupFundsBtn" onclick="window.location.href='./deposit.html'" class="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Topup</button>
         <button type="button" id="openSwapModalBtn" class="w-full px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Swap Tokens</button>
         <button type="button" id="openWithdrawModalGainxBtn" class="w-full px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Withdraw</button>
       </div>
@@ -641,6 +644,7 @@
     const userMenuEmailEl = document.getElementById('userMenuEmail');
     const changePasswordMenuBtnEl = document.getElementById('changePasswordMenuBtn');
     const logoutMenuBtnEl = document.getElementById('logoutMenuBtn');
+    const helpMenuBtnEl = document.getElementById('helpMenuBtn');
 
     // Event Listeners for Modals
     if (modalCloseButtonEl) {
@@ -1077,6 +1081,8 @@
                 await signOut(auth);
                 showGenericMessage("Successfully logged out.", false);
                 if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
+                 // Redirect to login page after logout
+                window.location.href = './index.html'; // FIXED: Changed to absolute path
             } catch (error) {
                 console.error("Logout Error:", error);
                 showGenericMessage("Logout failed: " + error.message, true);
@@ -1099,6 +1105,14 @@
         });
     }
 
+    if (helpMenuBtnEl) {
+        helpMenuBtnEl.addEventListener('click', () => {
+            window.location.href = './help.html'; // FIXED: Changed to absolute path
+            if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
+        });
+    }
+
+
     if (auth && database) {
         onAuthStateChanged(auth, (user) => {
           const authStatusEl = document.getElementById("auth-status");
@@ -1115,9 +1129,14 @@
           } else {
             currentUserId = null;
             currentUserData = null;
-            if (authStatusEl) authStatusEl.textContent = 'Not Authenticated. Please log in.';
+            if (authStatusEl) authStatusEl.textContent = 'Not Authenticated. Redirecting to login...';
             if (userIdDisplayEl) userIdDisplayEl.textContent = 'User ID: -';
-            setInitialLoadingState();
+            // Redirect to login page if not authenticated
+            setTimeout(() => {
+                window.location.href = './index.html'; // FIXED: Changed to absolute path
+            }, 1500); // Delay for user to see the message
+
+            setInitialLoadingState(); // Reset UI elements
             if (currentRoiDisplayEl) currentRoiDisplayEl.innerHTML = `0.00%`;
             if (planDisplayEl) planDisplayEl.textContent = `N/A`;
             if (settlementTimeDisplayEl) {
@@ -1133,13 +1152,13 @@
             if (noSwapsMessageEl) { noSwapsMessageEl.textContent = 'Please log in to view history.'; noSwapsMessageEl.style.display = 'block';}
             if (swapHistoryListEl) swapHistoryListEl.innerHTML = '';
             if (userNoticeBannerEl) userNoticeBannerEl.style.display = 'none';
-            if (appContainerEl) appContainerEl.style.display = 'block';
+            // Do not hide appContainerEl immediately, let redirect handle it.
             if (userMenuToggleBtnEl) userMenuToggleBtnEl.classList.add('hidden');
             if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
             if (userMenuEmailEl) userMenuEmailEl.textContent = 'Loading...';
-            if(topupFundsBtnEl) topupFundsBtnEl.disabled = false;
-            if(openSwapModalBtnEl) { openSwapModalBtnEl.disabled = false; openSwapModalBtnEl.classList.remove('opacity-50', 'cursor-not-allowed'); }
-            if(openWithdrawModalButtonEl) { openWithdrawModalButtonEl.disabled = false; openWithdrawModalButtonEl.classList.remove('opacity-50', 'cursor-not-allowed'); }
+            if(topupFundsBtnEl) topupFundsBtnEl.disabled = true; // Disable actions if not logged in
+            if(openSwapModalBtnEl) { openSwapModalBtnEl.disabled = true; openSwapModalBtnEl.classList.add('opacity-50', 'cursor-not-allowed'); }
+            if(openWithdrawModalButtonEl) { openWithdrawModalButtonEl.disabled = true; openWithdrawModalButtonEl.classList.add('opacity-50', 'cursor-not-allowed'); }
           }
         });
     } else {
@@ -1285,7 +1304,7 @@
         }
         const amtSwap = parseFloat(swapAmountInputEl.value);
         if (isNaN(amtSwap) || amtSwap <= 0) { receiveAmountDisplayEl.value = '0.0000'; return; }
-        const amtRec = amtSwap / currentZSGValue; 
+        const amtRec = amtSwap / currentZSGValue;
         receiveAmountDisplayEl.value = amtRec.toFixed(4);
     }
     function setupSwapModal() {
@@ -1302,7 +1321,7 @@
             if (!currentUserId) return showGenericMessage("Please log in to swap.", true);
             if (currentUserData && currentUserData.isWithdrawalBlocked) return showGenericMessage("Swaps disabled (withdrawals blocked).", true);
             if (currentZSGValue <= 0) return showGenericMessage("Swap rate unavailable.", true);
-            
+
             if(swapAmountInputEl) swapAmountInputEl.value = '';
             if(receiveAmountDisplayEl) receiveAmountDisplayEl.value = '';
             setupSwapModal();
@@ -1332,23 +1351,23 @@
             let newUBal, newZBal, amtRec;
 
             if (amtSwap > uBal) throw new Error(`Insufficient ${getCurrencyLabelHtml('USDT', 'small')} balance.`);
-            amtRec = amtSwap / currentZSGValue; 
-            newUBal = uBal - amtSwap; 
+            amtRec = amtSwap / currentZSGValue;
+            newUBal = uBal - amtSwap;
             newZBal = zBal + amtRec;
-            
+
             await update(userRef, {
                 usdtBalance: parseFloat(newUBal.toFixed(2)),
                 zsgTokenBalance: parseFloat(newZBal.toFixed(4))
             });
             const swapReqRef = push(ref(database, `swapRequests/${currentUserId}`));
             await set(swapReqRef, {
-                userId: currentUserId, 
-                fromCurrency: 'USDT', 
+                userId: currentUserId,
+                fromCurrency: 'USDT',
                 toCurrency: 'ZSG',
-                amountSwapped: amtSwap, 
+                amountSwapped: amtSwap,
                 amountReceived: parseFloat(amtRec.toFixed(4)),
-                rateSnapshot: currentZSGValue, 
-                swappedAt: serverTimestamp(), 
+                rateSnapshot: currentZSGValue,
+                swappedAt: serverTimestamp(),
                 status: 'Completed'
             });
             showGenericMessage("Swap successful!", false);
