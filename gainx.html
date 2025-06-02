@@ -336,6 +336,9 @@
             <p id="userMenuEmail" class="text-sm font-medium text-gray-100 truncate text-left">Loading...</p>
           </div>
           <nav class="py-1">
+            <button id="helpMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+              Help
+            </button>
             <button id="changePasswordMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
               Change Password
             </button>
@@ -387,7 +390,7 @@
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <button id="depositFundsBtn" onclick="window.location.href='deposit_usdt.html'" class="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Deposit</button>
+        <button id="depositFundsBtn" onclick="window.location.href='deposit.html'" class="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Deposit</button>
         <button type="button" id="openSwapModalBtn" class="w-full px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Swap Tokens</button>
         <button type="button" id="openWithdrawModalGainxBtn" class="w-full px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-md font-semibold transition shadow-md hover:shadow-lg">Withdraw</button>
       </div>
@@ -631,6 +634,7 @@
     const userMenuToggleBtnEl = document.getElementById('userMenuToggleBtn');
     const userDropdownMenuEl = document.getElementById('userDropdownMenu');
     const userMenuEmailEl = document.getElementById('userMenuEmail');
+    const helpMenuBtnEl = document.getElementById('helpMenuBtn'); // Added Help Button
     const changePasswordMenuBtnEl = document.getElementById('changePasswordMenuBtn');
     const logoutMenuBtnEl = document.getElementById('logoutMenuBtn');
 
@@ -1025,6 +1029,13 @@
             if (!userMenuContainerEl.contains(event.target) && !userDropdownMenuEl.classList.contains('hidden')) {
                 userDropdownMenuEl.classList.add('hidden');
             }
+        });
+    }
+
+    if (helpMenuBtnEl) { // Added event listener for Help button
+        helpMenuBtnEl.addEventListener('click', () => {
+            window.location.href = 'help.html';
+            if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden'); // Close menu
         });
     }
 
