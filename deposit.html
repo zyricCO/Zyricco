@@ -13,8 +13,8 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f4f7f6;
-            color: #333;
+            background-color: #1a1a1a; /* DARK THEME */
+            color: #e0e0e0; /* DARK THEME */
         }
 
         /* Styles for the full-page loader */
@@ -24,11 +24,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f4f7f6; /* Match body background */
+            background-color: #1a1a1a; /* DARK THEME: Match body background */
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999; /* Ensure it's on top */
+            z-index: 9999;
         }
 
         /* UPDATED LOADER SPINNER STYLES */
@@ -36,19 +36,17 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            /* Softer track color, derived from your theme or a neutral light gray */
-            border: 8px solid rgba(42, 157, 143, 0.2); /* Light shade of theme color for the track */
-            border-top-color: #2a9d8f;    /* Active spinning part, theme color */
-            animation: spin 1s linear infinite; /* Linear for smooth, continuous spin */
-            /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Subtle shadow for depth and a more "realistic" feel */
+            border: 8px solid rgba(255, 255, 255, 0.2); /* DARK THEME: Light track */
+            border-top-color: #2a9d8f;   /* Active spinning part, theme color */
+            animation: spin 1s linear infinite;
         }
         /* End of updated loader styles */
 
         .deposit-container {
-            background-color: #ffffff;
+            background-color: #2c2c2c; /* DARK THEME */
             padding: 30px 40px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* DARK THEME */
             text-align: center;
             width: 90%;
             max-width: 400px;
@@ -65,7 +63,7 @@
         .back-button {
             display: inline-block;
             padding: 8px 15px;
-            background-color: #6c757d;
+            background-color: #4f5b62; /* DARK THEME */
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -74,7 +72,7 @@
         }
 
         .back-button:hover {
-            background-color: #5a6268;
+            background-color: #6a737b; /* DARK THEME */
         }
 
         h2 {
@@ -84,7 +82,7 @@
 
         .address-section p {
             font-size: 0.9em;
-            color: #555;
+            color: #b0b0b0; /* DARK THEME */
             margin-bottom: 5px;
         }
 
@@ -93,11 +91,11 @@
             font-size: 1em;
             color: #e76f51;
             padding: 10px;
-            border: 1px dashed #ccc;
+            border: 1px dashed #555; /* DARK THEME */
             border-radius: 5px;
             word-break: break-all;
             margin-bottom: 15px;
-            background-color: #fdf2e9;
+            background-color: rgba(231, 111, 81, 0.1); /* DARK THEME */
         }
 
         .qr-code-section img {
@@ -119,19 +117,19 @@
 
         .status-text {
             font-size: 1.1em;
-            color: #264653;
+            color: #c5d7dc; /* DARK THEME */
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .spinner { /* Spinner for "Waiting for Payment" */
-            border: 4px solid rgba(0, 0, 0, 0.1);
+            border: 4px solid rgba(255, 255, 255, 0.1); /* DARK THEME */
             width: 24px;
             height: 24px;
             border-radius: 50%;
             border-left-color: #2a9d8f;
-            animation: spin 1s ease infinite; /* This one can stay 'ease' or change to 'linear' too for consistency */
+            animation: spin 1s ease infinite;
             margin-right: 10px;
         }
 
@@ -169,9 +167,9 @@
 
         .instructions {
             font-size: 0.85em;
-            color: #666;
+            color: #b0b0b0; /* DARK THEME */
             margin-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #3a3a3a; /* DARK THEME */
             padding-top: 20px;
         }
          .instructions ul {
@@ -190,7 +188,7 @@
 
         .troubleshooting-section p {
             font-size: 0.9em;
-            color: #555;
+            color: #a0a0a0; /* DARK THEME */
         }
 
         .troubleshooting-section a {
@@ -206,10 +204,10 @@
         .transaction-details-form {
             display: none;
             margin-top: 20px;
-            background-color: #fdf2e9;
+            background-color: #3a3a3a; /* DARK THEME */
             padding: 25px;
             border-radius: 8px;
-            border: 1px solid #e9c46a;
+            border: 1px solid #555; /* DARK THEME */
             text-align: left;
         }
 
@@ -228,17 +226,25 @@
             display: block;
             margin-bottom: 5px;
             font-size: 0.9em;
-            color: #264653;
+            color: #c5d7dc; /* DARK THEME */
         }
 
         .transaction-details-form input[type="text"],
         .transaction-details-form input[type="email"] {
             width: calc(100% - 22px);
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #555; /* DARK THEME */
             border-radius: 5px;
             font-size: 0.9em;
             box-sizing: border-box;
+            background-color: #1a1a1a; /* DARK THEME */
+            color: #e0e0e0; /* DARK THEME */
+        }
+
+        /* DARK THEME: Style for placeholder text */
+        ::placeholder {
+            color: #777;
+            opacity: 1; /* Firefox */
         }
 
         .transaction-details-form .copy-button {
@@ -387,7 +393,7 @@
 
             if (!transactionHash || !email) {
                 feedbackElement.innerText = 'Please fill in both fields.';
-                feedbackElement.style.color = '#e76f51';
+                feedbackElement.style.color = '#e76f51'; // This error color works well on dark backgrounds
                 setTimeout(() => {
                     feedbackElement.innerText = '';
                 }, 3000);
@@ -396,7 +402,7 @@
 
             if (!validateEmail(email)) {
                 feedbackElement.innerText = 'Please enter a valid email address.';
-                feedbackElement.style.color = '#e76f51';
+                feedbackElement.style.color = '#e76f51'; // This error color works well on dark backgrounds
                 setTimeout(() => {
                     feedbackElement.innerText = '';
                 }, 3000);
@@ -407,7 +413,7 @@
             console.log('Email:', email);
 
             feedbackElement.innerText = 'Details submitted successfully!';
-            feedbackElement.style.color = '#2a9d8f';
+            feedbackElement.style.color = '#2a9d8f'; // This success color also works well
 
             transactionHashInput.value = '';
             emailInput.value = '';
