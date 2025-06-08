@@ -239,7 +239,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script> <script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script>
         // Initialize Firebase with YOUR project's configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
@@ -309,6 +310,9 @@
                                 } else {
                                     window.location.href = 'gainx.html';
                                 }
+                                break;
+                            case 'novice': // <-- ADDED THIS CASE
+                                window.location.href = 'selectplans.html';
                                 break;
                             default:
                                 alert('Unknown user role: ' + userRole + '. Redirecting to standard page.');
