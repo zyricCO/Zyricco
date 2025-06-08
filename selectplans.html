@@ -33,7 +33,8 @@
     <header class="bg-gray-900 shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-6 py-4 flex justify-between items-center">
             <div class="flex items-center">
-                <img src="logo.png" alt="Zyricco Logo" class="h-8 w-auto mr-2">
+                <!-- Fallback for logo in case it doesn't load -->
+                <img src="logo.png" alt="Zyricco Logo" class="h-8 w-auto mr-2" onerror="this.onerror=null;this.src='https://placehold.co/100x32/111827/a78bfa?text=Zyricco';">
                 <h1 class="text-2xl font-bold text-indigo-400">Zyricco</h1>
             </div>
             <nav class="space-x-4">
@@ -52,84 +53,9 @@
             <p class="text-lg text-indigo-400 mt-2">Choose the plan that best suits your trading ambitions.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card flex flex-col">
-                <div class="p-6 flex-grow">
-                    <h3 class="text-2xl font-semibold text-indigo-400 mb-2">GainX Starter</h3>
-                    <p class="text-gray-400 text-sm mb-4">Entry-level access to our AI-driven profit strategies, designed for consistent short-term growth potential.</p>
-                    <p class="text-3xl font-bold text-gray-100 mb-6">$49<span class="text-lg font-normal text-gray-400">/mo</span></p>
-                    <ul class="text-gray-300 text-sm mb-6 feature-list">
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Targets 8.2%-12.1% Daily Profit Potential*</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Rapid 1:3 Day Success Cycle Integration</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Top-Up Eligible for Capital Boosts</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Core AI Market Scanning</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Automated Trade Execution</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Standard Email Support</li>
-                    </ul>
-                    <p class="text-xs text-gray-500 mt-auto pt-4">*Profit targets are based on historical AI performance and are not guaranteed. Trading involves risk.</p>
-                </div>
-                <div class="p-6 bg-gray-800">
-                    <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-                        Choose Starter
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card border-2 border-indigo-500 flex flex-col relative">
-                <div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">Most Popular</div>
-                <div class="p-6 flex-grow">
-                    <h3 class="text-2xl font-semibold text-indigo-400 mb-2">GainX Professional</h3>
-                    <p class="text-gray-400 text-sm mb-4">Enhanced AI precision for active traders seeking accelerated growth and robust risk management.</p>
-                    <p class="text-3xl font-bold text-gray-100 mb-6">$79<span class="text-lg font-normal text-gray-400">/mo</span></p>
-                    <ul class="text-gray-300 text-sm mb-6 feature-list">
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Targets 14.3%-16.1% Daily Profit Potential*</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Optimized 1:2 Day Success Cycle</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Top-Up Eligible with Bonus Credits</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Advanced AI Predictive Modeling</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Increased Trade Volume Capacity</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Premium Market Data Feeds</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Dedicated Risk Management Suite</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Performance Analytics Dashboard</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Credit Transfer Facility</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Priority Email & Chat Support</li>
-                    </ul>
-                    <p class="text-xs text-gray-500 mt-auto pt-4">*Profit targets are based on historical AI performance and are not guaranteed. Trading involves risk.</p>
-                </div>
-                <div class="p-6 bg-gray-800">
-                    <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-                        Choose Professional
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card flex flex-col">
-                <div class="p-6 flex-grow">
-                    <h3 class="text-2xl font-semibold text-indigo-400 mb-2">GainX Elite</h3>
-                    <p class="text-gray-400 text-sm mb-4">Institutional-grade AI for maximum profit potential, unlimited capacity, and bespoke service.</p>
-                    <p class="text-3xl font-bold text-gray-100 mb-6">$189<span class="text-lg font-normal text-gray-400">/mo</span></p>
-                    <ul class="text-gray-300 text-sm mb-6 feature-list">
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Targets 16.7%-19.2% Daily Profit Potential*</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Continuous Real-Time Success Cycle</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Top-Up Eligible with Preferential Rates</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Proprietary Deep Learning & Adaptive AI Models</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Unlimited Trade Execution</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Institutional Grade, Low-Latency Data</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Advanced Customizable Risk Controls</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>API Access & Custom Strategy Integration</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Credit Transfer Facility (Enhanced)</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Early Access to New AI Models & Features</li>
-                        <li><svg class="w-5 h-5 text-green-500" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>Dedicated Account Manager & 24/7 VIP Support</li>
-                    </ul>
-                    <p class="text-xs text-gray-500 mt-auto pt-4">*Profit targets are based on historical AI performance and are not guaranteed. Trading involves risk.</p>
-                </div>
-                <div class="p-6 bg-gray-800">
-                    <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-                        Choose Elite
-                    </button>
-                </div>
-            </div>
-
+        <!-- This container will be filled dynamically by Firebase data -->
+        <div id="plans-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <p class="text-center md:col-span-2 lg:col-span-4 text-lg">Loading plans...</p>
         </div>
     </main>
 
@@ -140,9 +66,106 @@
         </div>
     </footer>
 
+    <!-- Firebase SDKs (using compat libraries for easier setup) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
     <script>
         // Set current year in footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // --- START: FIREBASE INTEGRATION ---
+
+        // Your Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+            authDomain: "swiftgain.firebaseapp.com",
+            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "swiftgain",
+            storageBucket: "swiftgain.appspot.com",
+            messagingSenderId: "751911092919",
+            appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Get reference to the container where plans will be displayed
+        const plansContainer = document.getElementById('plans-container');
+
+        // Function to fetch and render plans from Realtime Database
+        const fetchAndRenderPlans = () => {
+            const plansRef = database.ref('newplans'); 
+            plansRef.once('value', (snapshot) => {
+                const plansData = snapshot.val();
+
+                if (!plansData) {
+                    plansContainer.innerHTML = '<p class="text-center col-span-4">No plans available at the moment. Please set them up in your Realtime Database under the "/newplans" path.</p>';
+                    return;
+                }
+
+                // Convert the plans object into an array and sort it
+                const plansArray = Object.values(plansData);
+                plansArray.sort((a, b) => a.sortOrder - b.sortOrder);
+
+                // Clear the 'Loading...' message
+                plansContainer.innerHTML = '';
+
+                // Loop through each plan and create the HTML card
+                plansArray.forEach(plan => {
+                    // --- Build the feature list ---
+                    let featuresHTML = '';
+                    if (plan.features && Array.isArray(plan.features)) {
+                        plan.features.forEach(feature => {
+                            featuresHTML += `
+                                <li class="text-gray-300">
+                                    <svg class="w-5 h-5 text-green-500 mr-2 flex-shrink-0" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M5 13l4 4L19 7"></path></svg>
+                                    <span>${feature}</span>
+                                </li>
+                            `;
+                        });
+                    }
+
+                    // --- Check for 'Most Popular' tag and border ---
+                    const popularBadgeHTML = plan.isPopular ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">Most Popular</div>' : '';
+                    const popularBorderClass = plan.isPopular ? 'border-2 border-indigo-500' : '';
+                    
+                    // --- Construct the complete card HTML ---
+                    const planCardHTML = `
+                        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card flex flex-col ${popularBorderClass} relative">
+                            ${popularBadgeHTML}
+                            <div class="p-6 flex-grow">
+                                <h3 class="text-2xl font-semibold text-indigo-400 mb-2">${plan.name || 'Unnamed Plan'}</h3>
+                                <p class="text-gray-400 text-sm mb-4">${plan.description || ''}</p>
+                                <p class="text-3xl font-bold text-gray-100 mb-6">$${plan.price || '0'}<span class="text-lg font-normal text-gray-400">/yr</span></p>
+                                <ul class="text-sm mb-6 feature-list">
+                                    ${featuresHTML}
+                                </ul>
+                                <p class="text-xs text-gray-500 mt-auto pt-4">*Profit targets are based on historical AI performance and are not guaranteed. Trading involves risk.</p>
+                            </div>
+                            <div class="p-6 bg-gray-800">
+                                <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
+                                    Choose ${(plan.name || '').replace('GainX ', '')}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Append the new card to the container
+                    plansContainer.innerHTML += planCardHTML;
+                });
+
+            }).catch((error) => {
+                console.error("Error fetching plans: ", error);
+                plansContainer.innerHTML = '<p class="text-center col-span-4 text-red-500">Could not load plans. Check the console for errors and ensure your database rules allow reads.</p>';
+            });
+        };
+
+        // Call the function when the page loads
+        document.addEventListener('DOMContentLoaded', fetchAndRenderPlans);
+        
+        // --- END: FIREBASE INTEGRATION ---
     </script>
 
 </body>
