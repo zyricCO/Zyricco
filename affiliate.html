@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GainX by Zyricco - Affiliate Page (Realtime DB)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .transition-all { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <!-- Main Application Container -->
+    <div id="app-container" style="display: none;">
+
+        <!-- Header -->
+        <header class="bg-white shadow-md">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gray-800">
+                    <span class="text-indigo-600">GainX</span> by Zyricco
+                </h1>
+                <button id="signOutBtn" class="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition-all">
+                    Sign Out
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 py-10">
+            <div class="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+                <!-- Dashboard Header -->
+                <div class="flex flex-col md:flex-row justify-between md:items-center border-b pb-4 mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Affiliate Dashboard</h2>
+                        <p class="text-sm text-gray-500 mt-1">Your Admin ID: <span id="adminId" class="font-mono bg-gray-200 px-2 py-1 rounded">...</span></p>
+                    </div>
+                    <div class="mt-4 md:mt-0 text-right">
+                       <div class="flex items-center justify-end bg-indigo-100 text-indigo-800 font-semibold px-4 py-2 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 11a4 4 0 110-5.292" /></svg>
+                            <span id="affiliateCounter">0 / 0 Affiliate Accounts</span>
+                       </div>
+                    </div>
+                </div>
+
+                <!-- Create New Affiliate Form -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Create New Affiliate Account</h3>
+                    <form id="createAffiliateForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="col-span-1"><label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label><input id="fullName" type="text" placeholder="John Doe" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required /></div>
+                        <div class="col-span-1"><label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label><input id="email" type="email" placeholder="user@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required /></div>
+                        <div class="col-span-1"><label for="dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label><input id="dob" type="date" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required /></div>
+                        <div class="col-span-1"><label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label><input id="password" type="password" placeholder="••••••••" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500" required /><p class="text-xs text-red-600 mt-1">Warning: For demo only. Do not use real passwords.</p></div>
+                        <div class="md:col-span-2 flex justify-end"><button id="createBtn" type="submit" class="flex items-center justify-center bg-indigo-600 text-white font-bold py-3 px-6 rounded-md hover:bg-indigo-700 transition-all disabled:bg-indigo-300 disabled:cursor-not-allowed"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg><span id="createBtnText">Create Account</span></button></div>
+                    </form>
+                </div>
+
+                <!-- Affiliate Accounts List -->
+                <div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-semibold text-gray-700">Your Affiliate Accounts</h3>
+                    </div>
+                    <div id="affiliateList" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center py-6 text-sm text-gray-500"><p>&copy; <span id="year"></span> GainX by Zyricco. All rights reserved.</p></footer>
+    </div>
+
+    <!-- UI State Screens -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gray-50 flex items-center justify-center z-50"><div class="text-center"><h1 class="text-2xl font-bold text-gray-700">Loading Affiliate Dashboard...</h1><p class="text-gray-500">Please wait.</p></div></div>
+    <div id="errorScreen" class="hidden fixed inset-0 bg-red-50 flex items-center justify-center p-4 z-50"><div class="bg-white shadow-lg rounded-lg p-8 max-w-md text-center"><h1 class="text-2xl font-bold text-red-700">An Error Occurred</h1><p id="errorMessage" class="text-red-600 mt-2"></p><p class="text-gray-500 mt-4 text-sm">Please see the browser console (F12) for more details.</p></div></div>
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"><div class="bg-white rounded-lg shadow-xl p-6 w-11/12 md:w-1/3"><h3 class="text-lg font-bold text-gray-800 mb-4">Notification</h3><p id="modalMessage" class="text-gray-600"></p><button id="modalCloseBtn" class="mt-6 w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition-all">Close</button></div></div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, query, orderByChild, equalTo, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // DOM Element References
+        const loadingScreen = document.getElementById('loadingScreen'), errorScreen = document.getElementById('errorScreen'), errorMessage = document.getElementById('errorMessage'), appContainer = document.getElementById('app-container'), adminIdEl = document.getElementById('adminId'), affiliateCounterEl = document.getElementById('affiliateCounter'), affiliateListEl = document.getElementById('affiliateList'), createAffiliateForm = document.getElementById('createAffiliateForm'), createBtn = document.getElementById('createBtn'), createBtnText = document.getElementById('createBtnText'), signOutBtn = document.getElementById('signOutBtn'), modal = document.getElementById('modal'), modalMessage = document.getElementById('modalMessage'), modalCloseBtn = document.getElementById('modalCloseBtn');
+        document.getElementById('year').textContent = new Date().getFullYear();
+        
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+            authDomain: "swiftgain.firebaseapp.com",
+            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "swiftgain",
+            storageBucket: "swiftgain.appspot.com",
+            messagingSenderId: "751911092919",
+            appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+        };
+
+        // App State
+        let auth, db, currentUser;
+        let userData = null;
+        let affiliates = [];
+        
+        // Helper Functions
+        const showLoading = (isLoading) => { loadingScreen.style.display = isLoading ? 'flex' : 'none'; };
+        const showError = (message) => { errorMessage.textContent = message; errorScreen.style.display = 'flex'; showLoading(false); appContainer.style.display = 'none'; };
+        const showModal = (message) => { modalMessage.textContent = message; modal.style.display = 'flex'; };
+        modalCloseBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+
+        // --- UPDATE FUNCTIONALITY ---
+        // Expose function to window to be called from onclick attribute
+        window.handleUpdateClick = (affiliateId) => {
+            console.log('Update button clicked for affiliate:', affiliateId);
+            // This now shows a success message as requested.
+            showModal("User updated successfully");
+        };
+
+
+        // Main App Initialization
+        try {
+            const app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getDatabase(app);
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    currentUser = user;
+                    adminIdEl.textContent = user.uid;
+                    listenForUserData(user.uid);
+                    listenForAffiliates(user.uid);
+                    showLoading(false);
+                    appContainer.style.display = 'block';
+                } else {
+                    signInAnonymously(auth).catch((error) => showError("Authentication failed."));
+                }
+            });
+        } catch (e) {
+            showError("Firebase initialization error.");
+        }
+        
+        // --- DATA FUNCTIONS ---
+
+        function listenForUserData(uid) {
+            const userRef = ref(db, 'users/' + uid);
+            onValue(userRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    userData = snapshot.val();
+                    // Safeguard: If user exists but is missing the limit, set a default.
+                    if (typeof userData.maxAffiliates !== 'number') {
+                        userData.maxAffiliates = 2; // Use default in UI immediately
+                        // Asynchronously update the database with the default value
+                        set(ref(db, `users/${uid}/maxAffiliates`), 2).catch(err => {
+                            console.error("Failed to patch missing maxAffiliates field:", err);
+                        });
+                    }
+                } else {
+                    // If user profile doesn't exist, create it with a default limit.
+                    console.log(`User profile for ${uid} not found in DB. Creating...`);
+                    userData = { email: currentUser.email || 'anonymous', maxAffiliates: 2 };
+                    // Set the new user profile in the database and handle potential errors.
+                    set(userRef, userData).catch(error => {
+                        console.error("Failed to create user profile in Realtime DB:", error);
+                        showError("Could not save your user profile. This is likely due to database security rules. Ensure the '/users' path is writable.");
+                    });
+                }
+                updateUI(); // Update UI whenever user data changes
+            }, (error) => {
+                // This will catch read permission errors for the '/users/{uid}' path
+                console.error("Permission denied to read user data:", error);
+                showError(`Could not read your user profile. Please check your Realtime Database rules for the '/users' path.`);
+            });
+        }
+
+        function listenForAffiliates(uid) {
+            const affiliatesRef = ref(db, 'affiliate');
+            const affiliatesQuery = query(affiliatesRef, orderByChild('createdBy'), equalTo(uid));
+            onValue(affiliatesQuery, (snapshot) => {
+                const data = snapshot.val();
+                affiliates = [];
+                if (data) {
+                    for (const key in data) {
+                        affiliates.push({ id: key, ...data[key] });
+                    }
+                }
+                updateUI();
+            }, (error) => {
+                console.error("Realtime DB Read Error:", error);
+                showError("Could not load affiliate list. Check your Realtime Database rules.");
+            });
+        }
+        
+        function updateUI() {
+            if (!userData) return;
+
+            affiliateListEl.innerHTML = '';
+            if (affiliates.length === 0) {
+                 affiliateListEl.innerHTML = `<div class="text-center py-8 px-4 border-2 border-dashed rounded-lg"><p class="text-gray-500">No affiliate accounts found.</p></div>`;
+            } else {
+                affiliates.forEach(account => {
+                    const createdDate = new Date(account.createdAt).toLocaleDateString();
+                    // Each affiliate item now includes an "Update" and a disabled "Boost" button
+                    affiliateListEl.innerHTML += `
+                        <div class="bg-gray-50 p-4 rounded-lg flex flex-col md:flex-row justify-between md:items-center border border-gray-200 gap-4">
+                            <div>
+                                <p class="font-semibold text-gray-800">${account.fullName}</p>
+                                <p class="text-sm text-gray-600">${account.email}</p>
+                            </div>
+                            <div class="flex items-center gap-4 w-full md:w-auto">
+                                <div class="text-sm text-gray-500 text-left md:text-right flex-grow">
+                                    <p>DOB: ${account.dob}</p>
+                                    <p>Created: ${createdDate}</p>
+                                </div>
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <button 
+                                        onclick="window.handleUpdateClick('${account.id}')" 
+                                        class="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                        Update
+                                    </button>
+                                    <button 
+                                        disabled
+                                        class="bg-red-500 text-white py-2 px-4 rounded-md transition-all disabled:bg-red-300 disabled:cursor-not-allowed">
+                                        Boost
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+
+            const currentCount = affiliates.length;
+            const maxCount = userData.maxAffiliates;
+            affiliateCounterEl.textContent = `${currentCount} / ${maxCount} Affiliate Accounts`;
+
+            if (currentCount >= maxCount) {
+                createBtn.disabled = true;
+                createBtnText.textContent = 'Limit Reached';
+            } else {
+                createBtn.disabled = false;
+                createBtnText.textContent = 'Create Account';
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+        createAffiliateForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) { showModal("You must be signed in."); return; }
+
+            if (affiliates.length >= userData.maxAffiliates) {
+                showModal(`Your limit of ${userData.maxAffiliates} affiliate accounts has been reached.`);
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtnText.textContent = 'Creating...';
+            
+            try {
+                const affiliateListRef = ref(db, 'affiliate');
+                await push(affiliateListRef, {
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    dob: document.getElementById('dob').value,
+                    password: document.getElementById('password').value, // Note: Storing passwords in plain text is not secure.
+                    createdAt: serverTimestamp(),
+                    createdBy: currentUser.uid
+                });
+                showModal("Affiliate account created successfully!");
+                createAffiliateForm.reset();
+            } catch (error) {
+                console.error("Realtime DB Write Error:", error);
+                showModal("Failed to create affiliate. Please check your Realtime Database Rules.");
+            } finally {
+                // The updateUI function will re-enable the button if appropriate after data syncs
+            }
+        });
+        
+        signOutBtn.addEventListener('click', () => { signOut(auth).catch(error => showModal("Failed to sign out.")); });
+
+    </script>
+</body>
+</html>
