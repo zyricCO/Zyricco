@@ -36,6 +36,8 @@
             background-color: var(--primary-bg-color);
             color: var(--text-color-primary);
             line-height: 1.6;
+            background: url('/images/mainbg.gif') no-repeat center center fixed; /* Moved to body for consistent background */
+            background-size: cover;
         }
 
         .container {
@@ -46,9 +48,11 @@
         }
 
         header {
-            background-color: var(--secondary-bg-color);
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border-color);
+            background-image: url('/images/headerbg.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            padding: 43px 0;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -58,21 +62,78 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative; /* Added for absolute positioning of hamburger */
         }
 
-        .logo img { /* Updated logo height */
-            height: 160px; /* <<< CHANGED FROM 120px to 160px */
-            width: auto;
-            vertical-align: middle;
+        .logo {
+            font-family: var(--font-primary);
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--text-color-primary);
+            text-decoration: none;
         }
 
-        nav ul {
-            list-style: none;
+        /* Hamburger menu styles */
+        .hamburger {
             display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            cursor: pointer;
+            z-index: 1001;
+            /* New positioning for top right corner */
+            position: absolute;
+            top: 50%; /* Center vertically within the header container */
+            right: 0; /* Align to the right edge */
+            transform: translateY(-50%); /* Adjust for perfect vertical centering */
+        }
+
+        .hamburger .bar {
+            width: 100%;
+            height: 3px;
+            background-color: #000; /* Changed to black */
+            border-radius: 2px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Animation for opening/closing hamburger */
+        .hamburger.open .bar:nth-child(1) {
+            transform: translateY(11px) rotate(45deg);
+        }
+
+        .hamburger.open .bar:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.open .bar:nth-child(3) {
+            transform: translateY(-11px) rotate(-45deg);
+        }
+
+        /* Navigation menu - always a dropdown */
+        nav ul {
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            position: absolute;
+            top: 80px; /* Adjust based on header height */
+            right: 0; /* Align to the right for the dropdown */
+            width: 100%; /* Full width for the dropdown */
+            max-width: 300px; /* Optional: Limit the width of the dropdown menu */
+            background-color: var(--secondary-bg-color); /* Darker background for menu */
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            padding: 20px 0;
+            text-align: center;
+            list-style: none; /* Ensure no bullets */
+            margin: 0; /* Remove default margins */
+        }
+
+        nav ul.active {
+            display: flex; /* Show when active */
         }
 
         nav ul li {
-            margin-left: 25px;
+            margin: 15px 0; /* Vertically stack menu items */
         }
 
         nav ul li a {
@@ -80,12 +141,15 @@
             color: var(--text-color-primary);
             font-weight: 500;
             transition: color 0.3s ease;
+            display: block; /* Make links block level for better click area */
+            padding: 5px 0; /* Add padding for better click area */
         }
 
         nav ul li a:hover,
         nav ul li a.active {
             color: var(--accent-color);
         }
+
 
         .hero-main {
             background: linear-gradient(rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.75)), url('http://googleusercontent.com/image_generation_content/0') no-repeat center center/cover;
@@ -159,7 +223,7 @@
             margin-bottom: 40px;
             color: var(--accent-color);
         }
-         .section-title.light {
+           .section-title.light {
             color: var(--text-color-primary);
         }
 
@@ -253,6 +317,36 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
+            color: var(--text-color-primary);
+            overflow: hidden; /* Ensure image doesn't overflow rounded corners */
+            position: relative; /* For absolute positioning of text over image */
+        }
+
+        .product-card::before { /* Overlay to make text readable */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.4), rgba(26, 26, 26, 0.8));
+            z-index: 1;
+        }
+
+        .product-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the entire area */
+            border-radius: 8px; /* Match card border-radius */
+            z-index: 0; /* Behind the content and overlay */
+        }
+
+        .product-card > * { /* All direct children of product-card go above the overlay */
+            position: relative;
+            z-index: 2;
         }
 
         .product-card:hover {
@@ -266,7 +360,7 @@
             color: var(--accent-color);
             margin-bottom: 10px;
         }
-         .product-card .tagline {
+           .product-card .tagline {
             font-size: 0.9em;
             font-style: italic;
             color: var(--text-color-secondary);
@@ -350,19 +444,9 @@
         }
 
         @media (max-width: 768px) {
+            /* Adjust header container padding for smaller screens if needed */
             header .container {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .logo img {
-                height: 100px; /* <<< CHANGED FROM 80px to 100px for mobile */
-            }
-            nav ul {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-            nav ul li {
-                margin: 5px 10px;
+                padding: 15px 0;
             }
             .hero-main {
                 padding: 80px 20px;
@@ -384,9 +468,9 @@
                 justify-content: center;
             }
             .intro-image-container img {
-                 max-width: 90%;
+                max-width: 90%;
             }
-             .products-grid {
+               .products-grid {
                 grid-template-columns: 1fr;
             }
             .about-highlights {
@@ -404,10 +488,12 @@
 
     <header>
         <div class="container">
-            <a href="#page-top" class="logo">
-                <img src="logo.png" alt="Zyricco Logo">
-            </a>
-            <nav>
+            <div class="hamburger" id="hamburger-menu">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+            <nav id="main-nav">
                 <ul>
                     <li><a href="#page-top" class="active">Home</a></li>
                     <li><a href="#our-story">About Us</a></li>
@@ -461,36 +547,43 @@
             <p class="section-subtitle">Discover our suite of advanced financial products, meticulously designed to cater to diverse investment strategies and goals. At Zyricco, we leverage technology and expertise to give you a competitive edge.</p>
             <div class="products-grid">
                 <div class="product-card">
+                    <img src="images/product1.gif" alt="Automated Trading Bot">
                     <h3>ATB - Automated Trading Bot Plugin</h3>
                     <p class="tagline">Effortless, intelligent trading at your fingertips.</p>
                     <p>Our Automated Trading Bot plugin seamlessly integrates with your platforms, executing trades based on pre-set or AI-driven strategies, 24/7.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product2.gif" alt="Funded Trading Account">
                     <h3>FTA - Funded Trading Account</h3>
-                     <p class="tagline">Access significant capital, trade without personal risk.</p>
+                    <p class="tagline">Access significant capital, trade without personal risk.</p>
                     <p>Qualify for a funded trading account and leverage our capital to trade, keeping a share of the profits without risking your own funds.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product3.gif" alt="AI Based Forex Signals">
                     <h3>LuxAI - AI Based Forex Signals</h3>
                     <p class="tagline">Harness AI precision for timely Forex market insights.</p>
                     <p>Receive highly accurate Forex signals generated by our proprietary AI algorithms, helping you make informed trading decisions.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product4.gif" alt="Advanced Trading Strategies">
                     <h3>StratX - Advanced Trading Strategies</h3>
                     <p class="tagline">Unlock sophisticated strategies for enhanced market performance.</p>
                     <p>Gain access to a library of advanced, back-tested trading strategies developed by our seasoned market analysts and quantitative experts.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product5.gif" alt="Automated AI Based Short Term Return">
                     <h3>GainX - Automated AI Based Short Term Return</h3>
                     <p class="tagline">AI-driven automation for optimized short-term gains.</p>
                     <p>Let our AI-powered system identify and capitalize on short-term market opportunities, aiming for consistent, optimized returns.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product6.gif" alt="Experts Account Management">
                     <h3>PortaX - Experts Account Management</h3>
                     <p class="tagline">Leverage the wisdom of seasoned experts managing your portfolio.</p>
                     <p>Entrust your account to our team of experienced financial professionals who will actively manage your portfolio based on your goals and risk appetite.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product7.gif" alt="Advanced Financial Advice">
                     <h3>Advisync - Advanced Financial Advice</h3>
                     <p class="tagline">Receive cutting-edge financial counsel for strategic decision-making.</p>
                     <p>Our premier advisory service offers personalized, in-depth financial planning and strategic advice to navigate complex financial landscapes.</p>
@@ -517,30 +610,60 @@
     </section>
 
     <footer id="contact-footer">
-            <div class="container">
-                    <div class="licenses-info">
-                            <p style="font-weight: bold; color: var(--text-color-primary); margin-bottom: 10px;">Regulatory Information & Licenses (Illustrative)</p>
-                            <p style="font-size: 0.85em; margin-bottom: 8px;">
-                                    Zyricco is represented as being registered with the fictional International Securities & Derivatives Commission (ISDC) as an Investment Advisor (RIA No. ISDC-RIA-ZYR-00125) and holding an ISDC Forex Signal Provider Permit (No. FXSP-ZYR-907B).
-                                </p>
-                            <p style="font-size: 0.85em; margin-bottom: 8px;">
-                                    Certified by the fictional Global Financial Technologies Authority (GFTA) as a Financial Solutions Provider (License No. GFTA-2025-07Z88X).
-                                </p>
-                             <p style="font-size: 0.85em; margin-bottom: 15px;">
-                                    Holds certification from the fictional National Futures & Algorithmic Trading Registry (NFATR) for its Automated Trading Systems (Cert. No. ATS-ZYR-C54321).
-                                </p>
-                        </div>
-        
-                    <p>&copy; 2025 Zyricco. All Rights Reserved.</p>
-                    <p>
-                            <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a> | <a href="#contact-info">Contact Info</a>
-                        </p>
-                     <p style="font-size: 0.8em; margin-top:15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                            <strong>Disclaimer:</strong> Zyricco is a fictional company created for illustrative purposes only. The services, products, licenses, and regulatory bodies mentioned are also fictional and part of this illustrative example.
-                            Financial investments carry inherent risks. Always conduct thorough research and consult with a qualified, licensed financial advisor before making any investment decisions.
-                         </p>
-                </div>
-        </footer>
+        <div class="container">
+            <div class="licenses-info">
+                <p style="font-weight: bold; color: var(--text-color-primary); margin-bottom: 10px;">Regulatory Information & Licenses (Illustrative)</p>
+                <p style="font-size: 0.85em; margin-bottom: 8px;">
+                    Zyricco is represented as being registered with the fictional International Securities & Derivatives Commission (ISDC) as an Investment Advisor (RIA No. ISDC-RIA-ZYR-00125) and holding an ISDC Forex Signal Provider Permit (No. FXSP-ZYR-907B).
+                </p>
+                <p style="font-size: 0.85em; margin-bottom: 8px;">
+                    Certified by the fictional Global Financial Technologies Authority (GFTA) as a Financial Solutions Provider (License No. GFTA-2025-07Z88X).
+                </p>
+                <p style="font-size: 0.85em; margin-bottom: 15px;">
+                    Holds certification from the fictional National Futures & Algorithmic Trading Registry (NFATR) for its Automated Trading Systems (Cert. No. ATS-ZYR-C54321).
+                </p>
+            </div>
 
+            <p>&copy; 2025 Zyricco. All Rights Reserved.</p>
+            <p>
+                <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a> | <a href="#contact-info">Contact Info</a>
+            </p>
+            <p style="font-size: 0.8em; margin-top:15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <strong>Disclaimer:</strong> Zyricco is a fictional company created for illustrative purposes only. The services, products, licenses, and regulatory bodies mentioned are also fictional and part of this illustrative example.
+                Financial investments carry inherent risks. Always conduct thorough research and consult with a qualified, licensed financial advisor before making any investment decisions.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.getElementById('hamburger-menu');
+            const nav = document.getElementById('main-nav').querySelector('ul');
+
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('open');
+                nav.classList.toggle('active');
+            });
+
+            // Close menu when a navigation link is clicked (for smooth scrolling)
+            nav.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    // Only close the menu if it's currently open
+                    if (nav.classList.contains('active')) {
+                        hamburger.classList.remove('open');
+                        nav.classList.remove('active');
+                    }
+                });
+            });
+
+            // Optional: Close menu if clicked outside
+            document.addEventListener('click', (event) => {
+                if (!nav.contains(event.target) && !hamburger.contains(event.target) && nav.classList.contains('active')) {
+                    hamburger.classList.remove('open');
+                    nav.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
