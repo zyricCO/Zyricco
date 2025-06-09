@@ -75,7 +75,7 @@
     <header class="text-center mb-8">
       <h1 class="text-3xl md:text-4xl font-semibold text-gray-100 mb-3">Notifications</h1>
       <p class="text-sm text-gray-400">Important updates and announcements.</p>
-      <a href="wallet.html" class="text-sky-400 hover:text-sky-300 transition-colors mt-4 inline-block">&larr; Back to Wallet</a>
+      <a id="back-to-wallet-link" href="gainx.html" class="text-sky-400 hover:text-sky-300 transition-colors mt-4 inline-block">&larr; Back to Wallet</a>
     </header>
 
     <div id="admin-panel" class="bg-black shadow-xl rounded-lg p-6 border border-gray-800">
@@ -105,10 +105,10 @@
   </div>
   
   <div id="message-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[70] hidden"> <div class="bg-gray-900 text-gray-100 p-6 sm:p-8 rounded-lg border border-gray-700 text-center shadow-2xl min-w-[300px] max-w-md">
-      <p id="modal-message-text" class="mb-6 text-lg"></p>
-      <button id="modal-close-button" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-md font-semibold transition-colors">Close</button>
-    </div>
-  </div>
+      <p id="modal-message-text" class="mb-6 text-lg"></p>
+      <button id="modal-close-button" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-md font-semibold transition-colors">Close</button>
+    </div>
+  </div>
 
 
   <script type="module">
@@ -138,6 +138,7 @@
     const postNotificationBtn = document.getElementById('postNotificationBtn');
     const notificationTitleInput = document.getElementById('notificationTitle');
     const notificationMessageInput = document.getElementById('notificationMessage');
+    const backToWalletLink = document.getElementById('back-to-wallet-link'); // MODIFIED: Get the link element
     
     // Message Modal Elements
     const messageModalEl = document.getElementById("message-modal");
@@ -152,11 +153,11 @@
         messageModalEl.classList.remove("hidden");
     }
 
-    // --- Authentication and Role Check ---
+    // --- Authentication and User Profile Loading ---
     onAuthStateChanged(auth, user => {
       if (user) {
         // User is signed in.
-        checkIfAdmin(user.uid);
+        loadUserProfile(user.uid); // MODIFIED: Call the updated function
         loadNotifications();
       } else {
         // User is signed out. Redirect to login.
@@ -165,18 +166,41 @@
       }
     });
 
-    async function checkIfAdmin(userId) {
+    // MODIFIED: Renamed function and added logic to update the wallet link
+    async function loadUserProfile(userId) {
       const userRef = ref(database, `users/${userId}`);
       try {
         const snapshot = await get(userRef);
-        if (snapshot.exists() && snapshot.val().isAdmin === true) {
-          console.log("User is an admin. Showing admin panel.");
-          if(adminPanel) adminPanel.style.display = 'block';
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          
+          // Check for admin status
+          if (userData.isAdmin === true) {
+            console.log("User is an admin. Showing admin panel.");
+            if(adminPanel) adminPanel.style.display = 'block';
+          } else {
+            console.log("User is not an admin.");
+          }
+
+          // Set "Back to Wallet" link based on user's plan
+          if (backToWalletLink) {
+            if (userData.plan === 'pre') {
+              backToWalletLink.href = 'pregainx.html';
+            } else {
+              backToWalletLink.href = 'gainx.html';
+            }
+            console.log(`Wallet link updated to: ${backToWalletLink.href}`);
+          }
+
         } else {
-          console.log("User is not an admin.");
+            console.warn("User data not found in the database.");
+            // Default link if user profile doesn't exist for some reason
+            if(backToWalletLink) backToWalletLink.href = 'gainx.html';
         }
       } catch (error) {
-        console.error("Error checking admin status:", error);
+        console.error("Error loading user profile:", error);
+        // Fallback link in case of an error
+        if(backToWalletLink) backToWalletLink.href = 'gainx.html';
       }
     }
 
