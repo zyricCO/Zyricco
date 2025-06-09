@@ -36,9 +36,38 @@
             background-color: var(--primary-bg-color);
             color: var(--text-color-primary);
             line-height: 1.6;
-            background: url('/images/mainbg.gif') no-repeat center center fixed; /* Moved to body for consistent background */
+            background: url('/images/mainbg.gif') no-repeat center center fixed; /* Corrected url() syntax */
             background-size: cover;
         }
+
+        /* === PRELOADER STYLES START === */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background-color: var(--primary-bg-color); /* Use site's background color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.75s ease, visibility 0.75s ease; /* For smooth fade out */
+        }
+
+        #preloader.hidden {
+            opacity: 0;
+            visibility: hidden; /* Hides the element and removes it from the accessibility tree */
+        }
+        
+        #preloader img {
+            width: 150px; /* Adjust size as needed */
+        }
+        
+        body.loading {
+            overflow: hidden; /* Prevents scrolling while preloader is active */
+        }
+        /* === PRELOADER STYLES END === */
 
         .container {
             width: 90%;
@@ -48,7 +77,7 @@
         }
 
         header {
-            background-image: url('/images/headerbg.png');
+            background-image: url('/images/headerbg.gif'); /* Corrected url() syntax */
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
@@ -150,7 +179,6 @@
             color: var(--accent-color);
         }
 
-
         .hero-main {
             background: linear-gradient(rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.75)), url('http://googleusercontent.com/image_generation_content/0') no-repeat center center/cover;
             color: var(--text-color-primary);
@@ -205,7 +233,6 @@
             color: #fff;
         }
 
-
         .section {
             padding: 60px 0;
             border-bottom: 1px solid var(--border-color);
@@ -213,7 +240,6 @@
         .section:last-of-type {
             border-bottom: none;
         }
-
 
         .section-title {
             font-family: var(--font-primary);
@@ -223,7 +249,7 @@
             margin-bottom: 40px;
             color: var(--accent-color);
         }
-           .section-title.light {
+            .section-title.light {
             color: var(--text-color-primary);
         }
 
@@ -247,7 +273,6 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-
 
         .about-content {
             display: flex;
@@ -360,7 +385,7 @@
             color: var(--accent-color);
             margin-bottom: 10px;
         }
-           .product-card .tagline {
+            .product-card .tagline {
             font-size: 0.9em;
             font-style: italic;
             color: var(--text-color-secondary);
@@ -412,7 +437,7 @@
             line-height: 1.5;
         }
         .licenses-info p:last-child {
-           margin-bottom: 0;
+            margin-bottom: 0;
         }
 
         footer {
@@ -470,7 +495,7 @@
             .intro-image-container img {
                 max-width: 90%;
             }
-               .products-grid {
+                .products-grid {
                 grid-template-columns: 1fr;
             }
             .about-highlights {
@@ -486,6 +511,9 @@
 </head>
 <body>
 
+    <div id="preloader">
+        <img src="/images/load.gif" alt="Loading...">
+    </div>
     <header>
         <div class="container">
             <div class="hamburger" id="hamburger-menu">
@@ -637,6 +665,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- PRELOADER LOGIC START ---
+            const preloader = document.getElementById('preloader');
+            const body = document.body;
+            body.classList.add('loading'); // Prevent scrolling while preloader is visible
+
+            setTimeout(() => {
+                if (preloader) {
+                    // Add 'hidden' class to fade out the preloader
+                    preloader.classList.add('hidden');
+                }
+                // Allow scrolling again
+                body.classList.remove('loading');
+            }, 10000); // 10000 milliseconds = 10 seconds
+            // --- PRELOADER LOGIC END ---
+
+
+            // --- ORIGINAL MENU LOGIC ---
             const hamburger = document.getElementById('hamburger-menu');
             const nav = document.getElementById('main-nav').querySelector('ul');
 
