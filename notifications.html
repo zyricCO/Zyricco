@@ -1,1 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications - GainX Wallet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #000;
+      color: #e5e7eb;
+    }
+    .notification-item {
+      background-color: #111827; /* bg-gray-900 */
+      border: 1px solid #374151; /* border-gray-700 */
+      border-radius: 0.5rem; /* rounded-lg */
+      padding: 1.5rem; /* p-6 */
+      margin-bottom: 1rem; /* mb-4 */
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    }
+    .notification-item h3 {
+      font-size: 1.25rem; /* text-xl */
+      font-weight: 600; /* font-semibold */
+      color: #f3f4f6; /* text-gray-100 */
+    }
+    .notification-item p {
+      margin-top: 0.5rem; /* mt-2 */
+      color: #d1d5db; /* text-gray-300 */
+    }
+    .notification-item .timestamp {
+      font-size: 0.75rem; /* text-xs */
+      color: #6b7280; /* text-gray-500 */
+      margin-top: 1rem; /* mt-4 */
+    }
+    /* Styles for the admin panel form */
+    #admin-panel {
+        display: none; /* Hidden by default */
+    }
+    .form-section input[type="text"],
+    .form-section textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border: 1px solid #374151;
+      background-color: #1f2937;
+      color: #e5e7eb;
+      border-radius: 6px;
+    }
+    .form-section button {
+      background-color: #0ea5e9; /* bg-sky-600 */
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+    .form-section button:hover {
+      background-color: #0284c7; /* hover:bg-sky-700 */
+    }
+    .form-section button:disabled {
+        background-color: #4b5563;
+        cursor: not-allowed;
+    }
+  </style>
+</head>
+<body style="background-image: url('/images/mainbg.gif'); background-size: cover; background-repeat: no-repeat; background-attachment: fixed; background-color: #000;" class="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
 
+  <div id="app-container" class="w-full max-w-2xl space-y-8 mt-8 sm:mt-12">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-semibold text-gray-100 mb-3">Notifications</h1>
+      <p class="text-sm text-gray-400">Important updates and announcements.</p>
+      <a href="wallet.html" class="text-sky-400 hover:text-sky-300 transition-colors mt-4 inline-block">&larr; Back to Wallet</a>
+    </header>
+
+    <div id="admin-panel" class="bg-black shadow-xl rounded-lg p-6 border border-gray-800">
+        <h2 class="text-2xl font-bold text-sky-400 mb-4">Admin Panel</h2>
+        <div class="form-section">
+            <label for="notificationTitle" class="block mb-2 font-medium">Title</label>
+            <input type="text" id="notificationTitle" placeholder="Enter notification title" required>
+
+            <label for="notificationMessage" class="block mb-2 font-medium">Message</label>
+            <textarea id="notificationMessage" rows="4" placeholder="Enter notification message" required></textarea>
+
+            <button type="button" id="postNotificationBtn">Post Notification</button>
+        </div>
+    </div>
+
+
+    <div id="notifications-container" class="space-y-4">
+      <h2 class="text-xl font-medium text-gray-100 mb-5">Recent Announcements</h2>
+      <div id="notifications-list">
+        <p id="loading-message" class="text-gray-500 text-center">Loading notifications...</p>
+      </div>
+    </div>
+
+    <footer class="w-full max-w-2xl mx-auto text-center py-8 mt-12 border-t border-gray-800">
+      <p class="text-sm text-gray-500">&copy; 2024-2025 GainX by ZYRICCO. All Rights Reserved.</p>
+    </footer>
+  </div>
+  
+  <div id="message-modal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[70] hidden"> <div class="bg-gray-900 text-gray-100 p-6 sm:p-8 rounded-lg border border-gray-700 text-center shadow-2xl min-w-[300px] max-w-md">
+      <p id="modal-message-text" class="mb-6 text-lg"></p>
+      <button id="modal-close-button" class="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-md font-semibold transition-colors">Close</button>
+    </div>
+  </div>
+
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
+    import { getDatabase, ref, onValue, query, orderByChild, push, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+        authDomain: "swiftgain.firebaseapp.com",
+        databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "swiftgain",
+        storageBucket: "swiftgain.firebasestorage.app",
+        messagingSenderId: "751911092919",
+        appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    
+    // UI Elements
+    const adminPanel = document.getElementById('admin-panel');
+    const notificationList = document.getElementById('notifications-list');
+    const loadingMessage = document.getElementById('loading-message');
+    const postNotificationBtn = document.getElementById('postNotificationBtn');
+    const notificationTitleInput = document.getElementById('notificationTitle');
+    const notificationMessageInput = document.getElementById('notificationMessage');
+    
+    // Message Modal Elements
+    const messageModalEl = document.getElementById("message-modal");
+    const modalMessageTextEl = document.getElementById("modal-message-text");
+    const modalCloseButtonEl = document.getElementById("modal-close-button");
+
+    modalCloseButtonEl.addEventListener("click", () => messageModalEl.classList.add("hidden"));
+
+    function showGenericMessage(message, isError = false) {
+        modalMessageTextEl.textContent = message;
+        modalMessageTextEl.className = `mb-6 text-lg font-medium ${isError ? "text-rose-400" : "text-emerald-400"}`;
+        messageModalEl.classList.remove("hidden");
+    }
+
+    // --- Authentication and Role Check ---
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        // User is signed in.
+        checkIfAdmin(user.uid);
+        loadNotifications();
+      } else {
+        // User is signed out. Redirect to login.
+        console.log("User not logged in. Redirecting...");
+        window.location.href = './index.html';
+      }
+    });
+
+    async function checkIfAdmin(userId) {
+      const userRef = ref(database, `users/${userId}`);
+      try {
+        const snapshot = await get(userRef);
+        if (snapshot.exists() && snapshot.val().isAdmin === true) {
+          console.log("User is an admin. Showing admin panel.");
+          if(adminPanel) adminPanel.style.display = 'block';
+        } else {
+          console.log("User is not an admin.");
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
+      }
+    }
+
+    // --- Load and Display Notifications ---
+    function loadNotifications() {
+        const notificationsRef = query(ref(database, 'notifications'), orderByChild('timestamp'));
+
+        onValue(notificationsRef, (snapshot) => {
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            if (notificationList) notificationList.innerHTML = '';
+            
+            if (snapshot.exists()) {
+                let notifications = [];
+                snapshot.forEach(childSnapshot => {
+                    notifications.push({ key: childSnapshot.key, ...childSnapshot.val() });
+                });
+
+                // Reverse to show newest first
+                notifications.reverse().forEach(data => {
+                    const notificationElement = document.createElement('div');
+                    notificationElement.className = 'notification-item';
+
+                    const date = new Date(data.timestamp).toLocaleString('en-US', {
+                        year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+
+                    notificationElement.innerHTML = `
+                        <h3>${data.title}</h3>
+                        <p>${data.message}</p>
+                        <div class="timestamp">Posted on: ${date}</div>
+                    `;
+                    if (notificationList) notificationList.appendChild(notificationElement);
+                });
+            } else {
+                if (notificationList) notificationList.innerHTML = '<p class="text-gray-500 text-center">No notifications yet.</p>';
+            }
+        }, (error) => {
+            console.error(error);
+            if (loadingMessage) loadingMessage.textContent = 'Error loading notifications.';
+        });
+    }
+    
+    // --- Admin Functionality ---
+    if(postNotificationBtn) {
+        postNotificationBtn.addEventListener('click', async () => {
+            const title = notificationTitleInput.value.trim();
+            const message = notificationMessageInput.value.trim();
+
+            if (!title || !message) {
+                showGenericMessage("Title and message cannot be empty.", true);
+                return;
+            }
+
+            postNotificationBtn.disabled = true;
+            postNotificationBtn.textContent = 'Posting...';
+
+            const notificationsRef = ref(database, 'notifications');
+            try {
+                await push(notificationsRef, {
+                    title: title,
+                    message: message,
+                    timestamp: serverTimestamp()
+                });
+                
+                showGenericMessage("Notification posted successfully!", false);
+                notificationTitleInput.value = '';
+                notificationMessageInput.value = '';
+
+            } catch (error) {
+                console.error("Error posting notification:", error);
+                showGenericMessage("Failed to post notification. See console for details.", true);
+            } finally {
+                postNotificationBtn.disabled = false;
+                postNotificationBtn.textContent = 'Post Notification';
+            }
+        });
+    }
+
+  </script>
+</body>
+</html>
