@@ -1,110 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zyricco | Intelligent Financial Solutions & Expert Advice</title>
-    <meta name="description" content="Welcome to Zyricco. Discover our 7 years of business excellence, 100% customer satisfaction, and a suite of innovative financial products including ATB, FTA, LuxAI, and expert financial advice.">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap');
-
-        :root {
-            --primary-bg-color: #1a1a1a; /* Very dark grey, almost black */
-            --secondary-bg-color: #2c2c2c; /* Dark grey */
-            --card-bg-color: #333333; /* Slightly lighter grey for cards */
-            --text-color-primary: #f0f0f0; /* Light grey for primary text */
-            --text-color-secondary: #b0b0b0; /* Medium grey for secondary text */
-            --accent-color: #00aaff; /* A vibrant blue for accents and CTAs */
-            --accent-color-hover: #0088cc;
-            --border-color: #444444;
-            --font-primary: 'Montserrat', sans-serif;
-            --font-secondary: 'Roboto', sans-serif;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-secondary);
-            background-color: var(--primary-bg-color);
-            color: var(--text-color-primary);
-            line-height: 1.6;
-            background: url('/images/mainbg.gif') no-repeat center center fixed; /* Corrected url() syntax */
+background-color: var(--primary-bg-color);
+color: var(--text-color-primary);
+line-height: 1.6;
+            background: url('/images/mainbg.gif') no-repeat center center fixed; /* Moved to body for consistent background */
             background-size: cover;
-        }
+}
 
-        /* === PRELOADER STYLES START === */
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;
-            background-color: var(--primary-bg-color); /* Use site's background color */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.75s ease, visibility 0.75s ease; /* For smooth fade out */
-        }
+.container {
+@@ -46,9 +48,11 @@
+}
 
-        #preloader.hidden {
-            opacity: 0;
-            visibility: hidden; /* Hides the element and removes it from the accessibility tree */
-        }
-        
-        #preloader img {
-            width: 150px; /* Adjust size as needed */
-        }
-        
-        body.loading {
-            overflow: hidden; /* Prevents scrolling while preloader is active */
-        }
-        /* === PRELOADER STYLES END === */
-
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 0;
-        }
-
-        header {
-            background-image: url('/images/headerbg.png'); /* Corrected url() syntax */
+header {
+            background-color: var(--secondary-bg-color);
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+            background-image: url('/images/headerbg.png');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
             padding: 43px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+position: sticky;
+top: 0;
+z-index: 1000;
+@@ -58,35 +62,95 @@
+display: flex;
+justify-content: space-between;
+align-items: center;
             position: relative; /* Added for absolute positioning of hamburger */
-        }
+}
 
+        .logo img { /* Updated logo height */
+            height: 160px; /* <<< CHANGED FROM 120px to 160px */
+            width: auto;
+            vertical-align: middle;
         .logo {
             font-family: var(--font-primary);
             font-size: 1.8em;
             font-weight: 700;
             color: var(--text-color-primary);
             text-decoration: none;
-        }
+}
 
+        nav ul {
+            list-style: none;
         /* Hamburger menu styles */
         .hamburger {
-            display: flex;
+display: flex;
             flex-direction: column;
             justify-content: space-around;
             width: 30px;
@@ -159,189 +99,44 @@
 
         nav ul.active {
             display: flex; /* Show when active */
-        }
+}
 
-        nav ul li {
+nav ul li {
+            margin-left: 25px;
             margin: 15px 0; /* Vertically stack menu items */
-        }
+}
 
-        nav ul li a {
-            text-decoration: none;
-            color: var(--text-color-primary);
-            font-weight: 500;
-            transition: color 0.3s ease;
+nav ul li a {
+text-decoration: none;
+color: var(--text-color-primary);
+font-weight: 500;
+transition: color 0.3s ease;
             display: block; /* Make links block level for better click area */
             padding: 5px 0; /* Add padding for better click area */
-        }
+}
 
-        nav ul li a:hover,
-        nav ul li a.active {
-            color: var(--accent-color);
-        }
+nav ul li a:hover,
+nav ul li a.active {
+color: var(--accent-color);
+}
 
-        .hero-main {
-            background: linear-gradient(rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.75)), url('http://googleusercontent.com/image_generation_content/0') no-repeat center center/cover;
-            color: var(--text-color-primary);
-            padding: 120px 0;
-            text-align: center;
-            min-height: 80vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .hero-main h1 {
-            font-family: var(--font-primary);
-            font-size: 3.2em;
-            margin-bottom: 20px;
-            font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-        }
+.hero-main {
+background: linear-gradient(rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.75)), url('http://googleusercontent.com/image_generation_content/0') no-repeat center center/cover;
+color: var(--text-color-primary);
+@@ -159,7 +223,7 @@
+margin-bottom: 40px;
+color: var(--accent-color);
+}
+         .section-title.light {
+           .section-title.light {
+color: var(--text-color-primary);
+}
 
-        .hero-main p {
-            font-size: 1.2em;
-            max-width: 750px;
-            margin: 0 auto 30px auto;
-            color: var(--text-color-secondary);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: var(--accent-color);
-            color: #fff;
-            padding: 12px 25px;
-            font-size: 1em;
-            font-weight: 600;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 10px;
-        }
-        .cta-button:hover {
-            background-color: var(--accent-color-hover);
-            transform: translateY(-2px);
-        }
-        .cta-button.login-prompt {
-            background-color: transparent;
-            border: 2px solid var(--accent-color);
-            color: var(--accent-color);
-        }
-        .cta-button.login-prompt:hover {
-            background-color: var(--accent-color);
-            color: #fff;
-        }
-
-        .section {
-            padding: 60px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .section:last-of-type {
-            border-bottom: none;
-        }
-
-        .section-title {
-            font-family: var(--font-primary);
-            font-size: 2.5em;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 40px;
-            color: var(--accent-color);
-        }
-            .section-title.light {
-            color: var(--text-color-primary);
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.1em;
-            color: var(--text-color-secondary);
-            max-width: 800px;
-            margin: 0 auto 50px auto;
-        }
-
-        .intro-image-container {
-            flex: 1;
-            min-width: 300px;
-            text-align: center;
-        }
-        .intro-image-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .about-content {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .about-text {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .about-text h3 {
-            font-family: var(--font-primary);
-            font-size: 1.8em;
-            margin-bottom: 15px;
-            color: var(--text-color-primary);
-        }
-        .about-text p {
-            margin-bottom: 15px;
-            color: var(--text-color-secondary);
-        }
-
-        .about-highlights {
-            display: flex;
-            gap: 30px;
-            margin-top: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .highlight-item {
-            background-color: var(--card-bg-color);
-            padding: 25px;
-            border-radius: 8px;
-            text-align: center;
-            flex-basis: 280px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-
-        .highlight-item h4 {
-            font-family: var(--font-primary);
-            font-size: 2.8em;
-            color: var(--accent-color);
-            margin-bottom: 5px;
-        }
-
-        .highlight-item p {
-            font-size: 1em;
-            color: var(--text-color-primary);
-            margin: 0;
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-
-        .product-card {
-            background-color: var(--card-bg-color);
-            padding: 25px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            display: flex;
-            flex-direction: column;
+@@ -253,6 +317,36 @@
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+display: flex;
+flex-direction: column;
             color: var(--text-color-primary);
             overflow: hidden; /* Ensure image doesn't overflow rounded corners */
             position: relative; /* For absolute positioning of text over image */
@@ -372,272 +167,142 @@
         .product-card > * { /* All direct children of product-card go above the overlay */
             position: relative;
             z-index: 2;
-        }
+}
 
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 170, 255, 0.1);
-        }
+.product-card:hover {
+@@ -266,7 +360,7 @@
+color: var(--accent-color);
+margin-bottom: 10px;
+}
+         .product-card .tagline {
+           .product-card .tagline {
+font-size: 0.9em;
+font-style: italic;
+color: var(--text-color-secondary);
+@@ -350,19 +444,9 @@
+}
 
-        .product-card h3 {
-            font-family: var(--font-primary);
-            font-size: 1.5em;
-            color: var(--accent-color);
-            margin-bottom: 10px;
-        }
-            .product-card .tagline {
-            font-size: 0.9em;
-            font-style: italic;
-            color: var(--text-color-secondary);
-            margin-bottom: 15px;
-            flex-grow: 1;
-        }
-
-        .product-card p:not(.tagline) {
-            font-size: 0.95em;
-            color: var(--text-color-secondary);
-            margin-bottom: 0;
-        }
-
-        .why-choose-us ul {
-            list-style: none;
-            padding-left: 0;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .why-choose-us ul li {
-            font-size: 1.1em;
-            color: var(--text-color-secondary);
-            margin-bottom: 15px;
-            padding-left: 25px;
-            position: relative;
-        }
-        .why-choose-us ul li::before {
-            content: '✓';
-            color: var(--accent-color);
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-
-        .licenses-info {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-            text-align: center;
-        }
-
-        .licenses-info p {
-            font-size: 0.9em;
-            color: var(--text-color-secondary);
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .licenses-info p:last-child {
-            margin-bottom: 0;
-        }
-
-        footer {
-            background-color: var(--secondary-bg-color);
-            color: var(--text-color-secondary);
-            text-align: center;
-            padding: 30px 0;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 0.9em;
-        }
-        footer a {
-            color: var(--text-color-secondary);
-            text-decoration: none;
-        }
-        footer a:hover {
-            color: var(--accent-color);
-        }
-
-        @media (max-width: 992px) {
-            .hero-main h1 {
-                font-size: 2.8em;
-            }
-            .section-title {
-                font-size: 2.2em;
-            }
-        }
-
-        @media (max-width: 768px) {
+@media (max-width: 768px) {
             /* Adjust header container padding for smaller screens if needed */
-            header .container {
-                padding: 15px 0;
-            }
-            .hero-main {
-                padding: 80px 20px;
-                min-height: 70vh;
-            }
-            .hero-main h1 {
-                font-size: 2.2em;
-            }
-            .hero-main p {
-                font-size: 1em;
-            }
-            .about-content {
+header .container {
                 flex-direction: column;
+                gap: 15px;
             }
-            .intro-image-container {
-                margin-top:30px;
-                width: 100%;
-                display: flex;
+            .logo img {
+                height: 100px; /* <<< CHANGED FROM 80px to 100px for mobile */
+            }
+            nav ul {
                 justify-content: center;
+                flex-wrap: wrap;
             }
-            .intro-image-container img {
+            nav ul li {
+                margin: 5px 10px;
+                padding: 15px 0;
+}
+.hero-main {
+padding: 80px 20px;
+@@ -384,9 +468,9 @@
+justify-content: center;
+}
+.intro-image-container img {
+                 max-width: 90%;
                 max-width: 90%;
-            }
-                .products-grid {
-                grid-template-columns: 1fr;
-            }
-            .about-highlights {
-                flex-direction: column;
-                gap: 20px;
-            }
-            .highlight-item {
-                flex-basis: auto;
-            }
-        }
+}
+             .products-grid {
+               .products-grid {
+grid-template-columns: 1fr;
+}
+.about-highlights {
+@@ -404,10 +488,12 @@
 
-    </style>
-</head>
-<body>
-
-    <div id="preloader">
-        <img src="/images/load.gif" alt="Loading...">
-    </div>
-    <header>
-        <div class="container">
+<header>
+<div class="container">
+            <a href="#page-top" class="logo">
+                <img src="logo.png" alt="Zyricco Logo">
+            </a>
+            <nav>
             <div class="hamburger" id="hamburger-menu">
                 <div class="bar"></div>
                 <div class="bar"></div>
                 <div class="bar"></div>
             </div>
             <nav id="main-nav">
-                <ul>
-                    <li><a href="#page-top" class="active">Home</a></li>
-                    <li><a href="#our-story">About Us</a></li>
-                    <li><a href="#products">Products</a></li>
-                    <li><a href="#contact-footer">Contact Us</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
-
-    <section class="hero-main" id="page-top">
-        <div class="container">
-            <h1>Welcome to Zyricco Financial Solutions</h1>
-            <p>Your trusted partner for intelligent trading tools, expert financial strategies, and dedicated account management. Explore excellence, backed by 7 years of experience and 100% customer satisfaction.</p>
-            <a href="login.html" class="cta-button">Explore Our Products</a>
-        </div>
-    </section>
-
-    <section class="section" id="our-story">
-        <div class="container">
-            <h2 class="section-title light">Our Journey & Unwavering Commitment</h2>
-            <p class="section-subtitle">
-                Founded on the principles of integrity, innovation, and unwavering client dedication, Zyricco has been a steadfast force in the financial industry for seven years. Our mission is to provide exceptional financial tools and expert guidance that drive success and ensure peace of mind for our valued clients.
-            </p>
-            <div class="about-content">
-                <div class="about-text">
-                    <h3>Forging Success Through Expertise</h3>
-                    <p>For the past seven years, Zyricco has consistently pushed the boundaries of financial technology and service. We embarked on this journey with a clear vision: to demystify finance and make sophisticated investment tools accessible to a wider audience. Our growth has been fueled by a relentless pursuit of excellence and a deep understanding of our clients' evolving needs.</p>
-                    <p>Achieving 100% customer satisfaction isn't just a metric for us; it's the cornerstone of our philosophy. Every product we develop, every piece of advice we offer, is geared towards exceeding expectations and fostering long-term partnerships built on trust and tangible results.</p>
-                </div>
-                <div class="intro-image-container">
-                    <img src="bg.png" alt="Zyricco Strategic Innovation">
-                </div>
-            </div>
-            <div class="about-highlights">
-                <div class="highlight-item">
-                    <h4>7+</h4>
-                    <p>Years of Business Excellence</p>
-                </div>
-                <div class="highlight-item">
-                    <h4>100%</h4>
-                    <p>Customer Satisfaction Rate</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section" id="products">
-        <div class="container">
-            <h2 class="section-title">Innovative Financial Products Tailored For You</h2>
-            <p class="section-subtitle">Discover our suite of advanced financial products, meticulously designed to cater to diverse investment strategies and goals. At Zyricco, we leverage technology and expertise to give you a competitive edge.</p>
-            <div class="products-grid">
-                <div class="product-card">
+<ul>
+<li><a href="#page-top" class="active">Home</a></li>
+<li><a href="#our-story">About Us</a></li>
+@@ -461,36 +547,43 @@ <h2 class="section-title">Innovative Financial Products Tailored For You</h2>
+<p class="section-subtitle">Discover our suite of advanced financial products, meticulously designed to cater to diverse investment strategies and goals. At Zyricco, we leverage technology and expertise to give you a competitive edge.</p>
+<div class="products-grid">
+<div class="product-card">
                     <img src="images/product1.gif" alt="Automated Trading Bot">
-                    <h3>ATB - Automated Trading Bot Plugin</h3>
-                    <p class="tagline">Effortless, intelligent trading at your fingertips.</p>
-                    <p>Our Automated Trading Bot plugin seamlessly integrates with your platforms, executing trades based on pre-set or AI-driven strategies, 24/7.</p>
-                </div>
-                <div class="product-card">
+<h3>ATB - Automated Trading Bot Plugin</h3>
+<p class="tagline">Effortless, intelligent trading at your fingertips.</p>
+<p>Our Automated Trading Bot plugin seamlessly integrates with your platforms, executing trades based on pre-set or AI-driven strategies, 24/7.</p>
+</div>
+<div class="product-card">
                     <img src="images/product2.gif" alt="Funded Trading Account">
-                    <h3>FTA - Funded Trading Account</h3>
+<h3>FTA - Funded Trading Account</h3>
+                     <p class="tagline">Access significant capital, trade without personal risk.</p>
                     <p class="tagline">Access significant capital, trade without personal risk.</p>
-                    <p>Qualify for a funded trading account and leverage our capital to trade, keeping a share of the profits without risking your own funds.</p>
-                </div>
-                <div class="product-card">
+<p>Qualify for a funded trading account and leverage our capital to trade, keeping a share of the profits without risking your own funds.</p>
+</div>
+<div class="product-card">
                     <img src="images/product3.gif" alt="AI Based Forex Signals">
-                    <h3>LuxAI - AI Based Forex Signals</h3>
-                    <p class="tagline">Harness AI precision for timely Forex market insights.</p>
-                    <p>Receive highly accurate Forex signals generated by our proprietary AI algorithms, helping you make informed trading decisions.</p>
-                </div>
-                <div class="product-card">
+<h3>LuxAI - AI Based Forex Signals</h3>
+<p class="tagline">Harness AI precision for timely Forex market insights.</p>
+<p>Receive highly accurate Forex signals generated by our proprietary AI algorithms, helping you make informed trading decisions.</p>
+</div>
+<div class="product-card">
                     <img src="images/product4.gif" alt="Advanced Trading Strategies">
-                    <h3>StratX - Advanced Trading Strategies</h3>
-                    <p class="tagline">Unlock sophisticated strategies for enhanced market performance.</p>
-                    <p>Gain access to a library of advanced, back-tested trading strategies developed by our seasoned market analysts and quantitative experts.</p>
-                </div>
-                <div class="product-card">
+<h3>StratX - Advanced Trading Strategies</h3>
+<p class="tagline">Unlock sophisticated strategies for enhanced market performance.</p>
+<p>Gain access to a library of advanced, back-tested trading strategies developed by our seasoned market analysts and quantitative experts.</p>
+</div>
+<div class="product-card">
                     <img src="images/product5.gif" alt="Automated AI Based Short Term Return">
-                    <h3>GainX - Automated AI Based Short Term Return</h3>
-                    <p class="tagline">AI-driven automation for optimized short-term gains.</p>
-                    <p>Let our AI-powered system identify and capitalize on short-term market opportunities, aiming for consistent, optimized returns.</p>
-                </div>
-                <div class="product-card">
+<h3>GainX - Automated AI Based Short Term Return</h3>
+<p class="tagline">AI-driven automation for optimized short-term gains.</p>
+<p>Let our AI-powered system identify and capitalize on short-term market opportunities, aiming for consistent, optimized returns.</p>
+</div>
+<div class="product-card">
                     <img src="images/product6.gif" alt="Experts Account Management">
-                    <h3>PortaX - Experts Account Management</h3>
-                    <p class="tagline">Leverage the wisdom of seasoned experts managing your portfolio.</p>
-                    <p>Entrust your account to our team of experienced financial professionals who will actively manage your portfolio based on your goals and risk appetite.</p>
-                </div>
-                <div class="product-card">
+<h3>PortaX - Experts Account Management</h3>
+<p class="tagline">Leverage the wisdom of seasoned experts managing your portfolio.</p>
+<p>Entrust your account to our team of experienced financial professionals who will actively manage your portfolio based on your goals and risk appetite.</p>
+</div>
+<div class="product-card">
                     <img src="images/product7.gif" alt="Advanced Financial Advice">
-                    <h3>Advisync - Advanced Financial Advice</h3>
-                    <p class="tagline">Receive cutting-edge financial counsel for strategic decision-making.</p>
-                    <p>Our premier advisory service offers personalized, in-depth financial planning and strategic advice to navigate complex financial landscapes.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+<h3>Advisync - Advanced Financial Advice</h3>
+<p class="tagline">Receive cutting-edge financial counsel for strategic decision-making.</p>
+<p>Our premier advisory service offers personalized, in-depth financial planning and strategic advice to navigate complex financial landscapes.</p>
+@@ -517,30 +610,60 @@ <h2 class="section-title light">Why Partner with Zyricco?</h2>
+</section>
 
-    <section class="section why-choose-us" id="why-choose-us">
-        <div class="container">
-            <h2 class="section-title light">Why Partner with Zyricco?</h2>
-            <p class="section-subtitle">
-                Choosing Zyricco means opting for a financial partner who is as invested in your success as you are. We combine experience, innovation, and a client-first approach to deliver unparalleled value.
-            </p>
-            <ul>
-                <li><strong>Proven Track Record:</strong> Seven years of dedicated service in the financial industry.</li>
-                <li><strong>Client-Centric Approach:</strong> We pride ourselves on a 100% customer satisfaction rate, reflecting our commitment to your needs.</li>
-                <li><strong>Innovative Product Suite:</strong> A diverse range of cutting-edge financial tools and services, including AI-powered solutions.</li>
-                <li><strong>Expert Guidance:</strong> Access to seasoned financial experts and advanced strategic advice.</li>
-                <li><strong>Technological Edge:</strong> Leveraging the latest in AI and automation to provide superior financial products.</li>
-                <li><strong>Trust and Transparency:</strong> Building long-term relationships based on integrity and clear communication.</li>
-            </ul>
-        </div>
-    </section>
-
-    <footer id="contact-footer">
+<footer id="contact-footer">
+            <div class="container">
+                    <div class="licenses-info">
+                            <p style="font-weight: bold; color: var(--text-color-primary); margin-bottom: 10px;">Regulatory Information & Licenses (Illustrative)</p>
+                            <p style="font-size: 0.85em; margin-bottom: 8px;">
+                                    Zyricco is represented as being registered with the fictional International Securities & Derivatives Commission (ISDC) as an Investment Advisor (RIA No. ISDC-RIA-ZYR-00125) and holding an ISDC Forex Signal Provider Permit (No. FXSP-ZYR-907B).
+                                </p>
+                            <p style="font-size: 0.85em; margin-bottom: 8px;">
+                                    Certified by the fictional Global Financial Technologies Authority (GFTA) as a Financial Solutions Provider (License No. GFTA-2025-07Z88X).
+                                </p>
+                             <p style="font-size: 0.85em; margin-bottom: 15px;">
+                                    Holds certification from the fictional National Futures & Algorithmic Trading Registry (NFATR) for its Automated Trading Systems (Cert. No. ATS-ZYR-C54321).
+                                </p>
+                        </div>
+        
+                    <p>&copy; 2025 Zyricco. All Rights Reserved.</p>
+                    <p>
+                            <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a> | <a href="#contact-info">Contact Info</a>
+                        </p>
+                     <p style="font-size: 0.8em; margin-top:15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <strong>Disclaimer:</strong> Zyricco is a fictional company created for illustrative purposes only. The services, products, licenses, and regulatory bodies mentioned are also fictional and part of this illustrative example.
+                            Financial investments carry inherent risks. Always conduct thorough research and consult with a qualified, licensed financial advisor before making any investment decisions.
+                         </p>
+                </div>
+        </footer>
         <div class="container">
             <div class="licenses-info">
                 <p style="font-weight: bold; color: var(--text-color-primary); margin-bottom: 10px;">Regulatory Information & Licenses (Illustrative)</p>
@@ -665,23 +330,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- PRELOADER LOGIC START ---
-            const preloader = document.getElementById('preloader');
-            const body = document.body;
-            body.classList.add('loading'); // Prevent scrolling while preloader is visible
-
-            setTimeout(() => {
-                if (preloader) {
-                    // Add 'hidden' class to fade out the preloader
-                    preloader.classList.add('hidden');
-                }
-                // Allow scrolling again
-                body.classList.remove('loading');
-            }, 10000); // 10000 milliseconds = 10 seconds
-            // --- PRELOADER LOGIC END ---
-
-
-            // --- ORIGINAL MENU LOGIC ---
             const hamburger = document.getElementById('hamburger-menu');
             const nav = document.getElementById('main-nav').querySelector('ul');
 
