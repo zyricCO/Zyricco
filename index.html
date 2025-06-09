@@ -9,14 +9,14 @@
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap');
 
         :root {
-            --primary-bg-color: #0D0D0D; /* Even darker grey, very close to black */
-            --secondary-bg-color: #1A1A1A; /* Darker grey, previously primary */
-            --card-bg-color: #262626; /* Darker grey for cards */
-            --text-color-primary: #f0f0f0; /* Light grey for primary text - remains visible */
-            --text-color-secondary: #b0b0b0; /* Medium grey for secondary text - remains visible */
+            --primary-bg-color: #1a1a1a; /* Very dark grey, almost black */
+            --secondary-bg-color: #2c2c2c; /* Dark grey */
+            --card-bg-color: #333333; /* Slightly lighter grey for cards */
+            --text-color-primary: #f0f0f0; /* Light grey for primary text */
+            --text-color-secondary: #b0b0b0; /* Medium grey for secondary text */
             --accent-color: #00aaff; /* A vibrant blue for accents and CTAs */
             --accent-color-hover: #0088cc;
-            --border-color: #333333; /* Darker border color */
+            --border-color: #444444;
             --font-primary: 'Montserrat', sans-serif;
             --font-secondary: 'Roboto', sans-serif;
         }
@@ -61,7 +61,7 @@
         }
 
         .logo img { /* Updated logo height */
-            height: 160px; 
+            height: 160px; /* <<< CHANGED FROM 120px to 160px */
             width: auto;
             vertical-align: middle;
         }
@@ -88,8 +88,7 @@
         }
 
         .hero-main {
-            /* Updated background image to a placeholder, ensuring text is visible on darker theme */
-            background: linear-gradient(rgba(13, 13, 13, 0.8), rgba(13, 13, 13, 0.8)), url('https://placehold.co/1920x1080/0D0D0D/f0f0f0?text=Financial+Excellence') no-repeat center center/cover;
+            background: linear-gradient(rgba(26, 26, 26, 0.75), rgba(26, 26, 26, 0.75)), url('http://googleusercontent.com/image_generation_content/0') no-repeat center center/cover;
             color: var(--text-color-primary);
             padding: 120px 0;
             text-align: center;
@@ -105,7 +104,7 @@
             font-size: 3.2em;
             margin-bottom: 20px;
             font-weight: 700;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* Slightly stronger shadow for darker bg */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
         .hero-main p {
@@ -113,13 +112,13 @@
             max-width: 750px;
             margin: 0 auto 30px auto;
             color: var(--text-color-secondary);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* Slightly stronger shadow */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
         .cta-button {
             display: inline-block;
             background-color: var(--accent-color);
-            color: #fff; /* Ensuring CTA button text is white and visible */
+            color: #fff;
             padding: 12px 25px;
             font-size: 1em;
             font-weight: 600;
@@ -139,7 +138,7 @@
         }
         .cta-button.login-prompt:hover {
             background-color: var(--accent-color);
-            color: #fff; /* Ensure text becomes white on hover */
+            color: #fff;
         }
 
 
@@ -147,7 +146,7 @@
             padding: 60px 0;
             border-bottom: 1px solid var(--border-color);
         }
-        .section:last-of-type { 
+        .section:last-of-type {
             border-bottom: none;
         }
 
@@ -160,8 +159,8 @@
             margin-bottom: 40px;
             color: var(--accent-color);
         }
-         .section-title.light {
-            color: var(--text-color-primary); /* This will still be light grey, contrasting with dark bg */
+           .section-title.light {
+            color: var(--text-color-primary);
         }
 
         .section-subtitle {
@@ -182,7 +181,7 @@
             height: auto;
             border-radius: 8px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); /* Adjusted shadow for darker theme */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
 
@@ -222,9 +221,9 @@
             padding: 25px;
             border-radius: 8px;
             text-align: center;
-            flex-basis: 280px; 
+            flex-basis: 280px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Adjusted shadow for darker theme */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
 
         .highlight-item h4 {
@@ -254,11 +253,41 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
+            color: var(--text-color-primary);
+            overflow: hidden; /* Ensure image doesn't overflow rounded corners */
+            position: relative; /* For absolute positioning of text over image */
+        }
+
+        .product-card::before { /* Overlay to make text readable */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 0.4), rgba(26, 26, 26, 0.8));
+            z-index: 1;
+        }
+
+        .product-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cover the entire area */
+            border-radius: 8px; /* Match card border-radius */
+            z-index: 0; /* Behind the content and overlay */
+        }
+
+        .product-card > * { /* All direct children of product-card go above the overlay */
+            position: relative;
+            z-index: 2;
         }
 
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 170, 255, 0.15); /* Slightly more pronounced shadow for accent */
+            box-shadow: 0 10px 20px rgba(0, 170, 255, 0.1);
         }
 
         .product-card h3 {
@@ -267,23 +296,23 @@
             color: var(--accent-color);
             margin-bottom: 10px;
         }
-         .product-card .tagline {
+           .product-card .tagline {
             font-size: 0.9em;
             font-style: italic;
             color: var(--text-color-secondary);
             margin-bottom: 15px;
-            flex-grow: 1; 
+            flex-grow: 1;
         }
 
         .product-card p:not(.tagline) {
             font-size: 0.95em;
             color: var(--text-color-secondary);
-            margin-bottom: 0; 
+            margin-bottom: 0;
         }
 
         .why-choose-us ul {
-            list-style: none; 
-            padding-left: 0; 
+            list-style: none;
+            padding-left: 0;
             max-width: 800px;
             margin: 0 auto;
         }
@@ -292,11 +321,11 @@
             font-size: 1.1em;
             color: var(--text-color-secondary);
             margin-bottom: 15px;
-            padding-left: 25px; 
+            padding-left: 25px;
             position: relative;
         }
         .why-choose-us ul li::before {
-            content: '✓'; 
+            content: '✓';
             color: var(--accent-color);
             position: absolute;
             left: 0;
@@ -306,7 +335,7 @@
         .licenses-info {
             margin-bottom: 30px;
             padding: 20px;
-            background-color: rgba(26,26,26,0.5); /* Darker transparent background */
+            background-color: rgba(0,0,0,0.1);
             border: 1px solid var(--border-color);
             border-radius: 5px;
             text-align: center;
@@ -341,8 +370,7 @@
             color: var(--accent-color);
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 992px) { 
+        @media (max-width: 992px) {
             .hero-main h1 {
                 font-size: 2.8em;
             }
@@ -351,23 +379,23 @@
             }
         }
 
-        @media (max-width: 768px) { 
+        @media (max-width: 768px) {
             header .container {
                 flex-direction: column;
                 gap: 15px;
             }
             .logo img {
-                height: 100px; 
+                height: 100px; /* <<< CHANGED FROM 80px to 100px for mobile */
             }
             nav ul {
                 justify-content: center;
-                flex-wrap: wrap; 
+                flex-wrap: wrap;
             }
             nav ul li {
-                margin: 5px 10px; 
+                margin: 5px 10px;
             }
             .hero-main {
-                padding: 80px 20px; 
+                padding: 80px 20px;
                 min-height: 70vh;
             }
             .hero-main h1 {
@@ -377,43 +405,44 @@
                 font-size: 1em;
             }
             .about-content {
-                flex-direction: column; 
+                flex-direction: column;
             }
             .intro-image-container {
-                margin-top:30px; 
-                width: 100%; 
+                margin-top:30px;
+                width: 100%;
                 display: flex;
                 justify-content: center;
             }
             .intro-image-container img {
-                 max-width: 90%; 
+                max-width: 90%;
             }
              .products-grid {
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr;
             }
             .about-highlights {
-                flex-direction: column; 
+                flex-direction: column;
                 gap: 20px;
             }
             .highlight-item {
-                flex-basis: auto; 
+                flex-basis: auto;
             }
         }
 
     </style>
 </head>
 <body>
+
     <header>
         <div class="container">
             <a href="#page-top" class="logo">
-                <img src="logo.png" alt="Zyricco Logo" onerror="this.onerror=null;this.src='https://placehold.co/320x100/1A1A1A/f0f0f0?text=Logo+Not+Found';">
+                <img src="logo.png" alt="Zyricco Logo">
             </a>
             <nav>
                 <ul>
                     <li><a href="#page-top" class="active">Home</a></li>
                     <li><a href="#our-story">About Us</a></li>
                     <li><a href="#products">Products</a></li>
-                    <li><a href="#contact-footer">Contact Us</a></li> 
+                    <li><a href="#contact-footer">Contact Us</a></li>
                 </ul>
             </nav>
         </div>
@@ -440,7 +469,7 @@
                     <p>Achieving 100% customer satisfaction isn't just a metric for us; it's the cornerstone of our philosophy. Every product we develop, every piece of advice we offer, is geared towards exceeding expectations and fostering long-term partnerships built on trust and tangible results.</p>
                 </div>
                 <div class="intro-image-container">
-                    <img src="bg.png" alt="Zyricco Strategic Innovation" onerror="this.onerror=null;this.src='https://placehold.co/600x400/262626/f0f0f0?text=Image+Not+Found';">
+                    <img src="bg.png" alt="Zyricco Strategic Innovation">
                 </div>
             </div>
             <div class="about-highlights">
@@ -462,36 +491,43 @@
             <p class="section-subtitle">Discover our suite of advanced financial products, meticulously designed to cater to diverse investment strategies and goals. At Zyricco, we leverage technology and expertise to give you a competitive edge.</p>
             <div class="products-grid">
                 <div class="product-card">
+                    <img src="images/product1.gif" alt="Automated Trading Bot">
                     <h3>ATB - Automated Trading Bot Plugin</h3>
                     <p class="tagline">Effortless, intelligent trading at your fingertips.</p>
                     <p>Our Automated Trading Bot plugin seamlessly integrates with your platforms, executing trades based on pre-set or AI-driven strategies, 24/7.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product2.gif" alt="Funded Trading Account">
                     <h3>FTA - Funded Trading Account</h3>
-                     <p class="tagline">Access significant capital, trade without personal risk.</p>
+                    <p class="tagline">Access significant capital, trade without personal risk.</p>
                     <p>Qualify for a funded trading account and leverage our capital to trade, keeping a share of the profits without risking your own funds.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product3.gif" alt="AI Based Forex Signals">
                     <h3>LuxAI - AI Based Forex Signals</h3>
                     <p class="tagline">Harness AI precision for timely Forex market insights.</p>
                     <p>Receive highly accurate Forex signals generated by our proprietary AI algorithms, helping you make informed trading decisions.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product4.gif" alt="Advanced Trading Strategies">
                     <h3>StratX - Advanced Trading Strategies</h3>
                     <p class="tagline">Unlock sophisticated strategies for enhanced market performance.</p>
                     <p>Gain access to a library of advanced, back-tested trading strategies developed by our seasoned market analysts and quantitative experts.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product5.gif" alt="Automated AI Based Short Term Return">
                     <h3>GainX - Automated AI Based Short Term Return</h3>
                     <p class="tagline">AI-driven automation for optimized short-term gains.</p>
                     <p>Let our AI-powered system identify and capitalize on short-term market opportunities, aiming for consistent, optimized returns.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product6.gif" alt="Experts Account Management">
                     <h3>PortaX - Experts Account Management</h3>
                     <p class="tagline">Leverage the wisdom of seasoned experts managing your portfolio.</p>
                     <p>Entrust your account to our team of experienced financial professionals who will actively manage your portfolio based on your goals and risk appetite.</p>
                 </div>
                 <div class="product-card">
+                    <img src="images/product7.gif" alt="Advanced Financial Advice">
                     <h3>Advisync - Advanced Financial Advice</h3>
                     <p class="tagline">Receive cutting-edge financial counsel for strategic decision-making.</p>
                     <p>Our premier advisory service offers personalized, in-depth financial planning and strategic advice to navigate complex financial landscapes.</p>
@@ -517,7 +553,7 @@
         </div>
     </section>
 
-    <footer id="contact-footer"> 
+    <footer id="contact-footer">
         <div class="container">
             <div class="licenses-info">
                 <p style="font-weight: bold; color: var(--text-color-primary); margin-bottom: 10px;">Regulatory Information & Licenses (Illustrative)</p>
@@ -531,18 +567,16 @@
                     Holds certification from the fictional National Futures & Algorithmic Trading Registry (NFATR) for its Automated Trading Systems (Cert. No. ATS-ZYR-C54321).
                 </p>
             </div>
-        
+
             <p>&copy; 2025 Zyricco. All Rights Reserved.</p>
             <p>
-                <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a> | <a href="#contact-footer">Contact Info</a> 
+                <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a> | <a href="#contact-info">Contact Info</a>
             </p>
             <p style="font-size: 0.8em; margin-top:15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <strong>Disclaimer:</strong> 
-                Financial investments carry inherent risks. Always conduct thorough research and consult with a qualified, licensed financial advisor before making any investment decisions.
+        
             </p>
         </div>
     </footer>
 
 </body>
 </html>
-
