@@ -30,11 +30,6 @@
 </head>
 <body class="bg-black text-gray-200">
 
-    <!-- 
-      MODIFIED NAVIGATION BUTTON
-      - The href has been changed from "index.html" to "products.html".
-      - The button text has been changed from "Back to Home" to "Back to Services".
-    -->
     <div class="container mx-auto px-6 pt-6">
         <a href="products.html" class="inline-flex items-center bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
             <svg class="w-5 h-5 mr-2" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,7 +45,6 @@
             <p class="text-lg text-indigo-400 mt-2">Choose the plan that best suits your trading ambitions.</p>
         </div>
 
-        <!-- This container will be filled dynamically by Firebase data -->
         <div id="plans-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <p class="text-center md:col-span-2 lg:col-span-4 text-lg">Loading plans...</p>
         </div>
@@ -63,7 +57,6 @@
         </div>
     </footer>
 
-    <!-- Firebase SDKs (using compat libraries for easier setup) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
@@ -71,7 +64,7 @@
         // Set current year in footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-        // --- START: FIREBASE INTEGRATION ---
+        // --- START: MODIFIED SCRIPT ---
 
         // Your Firebase project configuration
         const firebaseConfig = {
@@ -91,6 +84,14 @@
         // Get reference to the container where plans will be displayed
         const plansContainer = document.getElementById('plans-container');
 
+        /**
+         * MODIFICATION: Redirects the user to the payment page.
+         * This function is called by the 'Choose' button's onclick event.
+         */
+        function redirectToPayment() {
+            window.location.href = 'regpayment.html';
+        }
+
         // Function to fetch and render plans from Realtime Database
         const fetchAndRenderPlans = () => {
             const plansRef = database.ref('newplans'); 
@@ -102,14 +103,11 @@
                     return;
                 }
 
-                // Convert the plans object into an array and sort it
                 const plansArray = Object.values(plansData);
                 plansArray.sort((a, b) => a.sortOrder - b.sortOrder);
 
-                // Clear the 'Loading...' message
-                plansContainer.innerHTML = '';
+                plansContainer.innerHTML = ''; // Clear the 'Loading...' message
 
-                // Loop through each plan and create the HTML card
                 plansArray.forEach(plan => {
                     // --- Build the feature list ---
                     let featuresHTML = '';
@@ -128,9 +126,37 @@
                     const popularBadgeHTML = plan.isPopular ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">Most Popular</div>' : '';
                     const popularBorderClass = plan.isPopular ? 'border-2 border-indigo-500' : '';
                     
+                    /**
+                     * --- MODIFICATION: Handle Plan Availability ---
+                     * Checks for `plan.isAvailable === false`.
+                     * - If unavailable, it grays out the card and shows a disabled "Stock Out" button.
+                     * - If available, it shows the normal "Choose" button with the onclick redirect.
+                     */
+                    let buttonHTML;
+                    let cardStateClasses = '';
+
+                    if (plan.isAvailable === false) {
+                        cardStateClasses = 'opacity-60 grayscale'; // Classes for the entire card
+                        buttonHTML = `
+                            <div class="p-6 bg-gray-800">
+                                <button class="w-full bg-gray-700 text-gray-400 font-semibold py-3 px-4 rounded-lg cursor-not-allowed" disabled>
+                                    Stock Out
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        buttonHTML = `
+                            <div class="p-6 bg-gray-800">
+                                <button onclick="redirectToPayment()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
+                                    Choose ${(plan.name || '').replace('GainX ', '')}
+                                </button>
+                            </div>
+                        `;
+                    }
+                    
                     // --- Construct the complete card HTML ---
                     const planCardHTML = `
-                        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card flex flex-col ${popularBorderClass} relative">
+                        <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden plan-card flex flex-col ${popularBorderClass} ${cardStateClasses} relative">
                             ${popularBadgeHTML}
                             <div class="p-6 flex-grow">
                                 <h3 class="text-2xl font-semibold text-indigo-400 mb-2">${plan.name || 'Unnamed Plan'}</h3>
@@ -141,15 +167,10 @@
                                 </ul>
                                 <p class="text-xs text-gray-500 mt-auto pt-4">*Profit targets are based on historical AI performance and are not guaranteed. Trading involves risk.</p>
                             </div>
-                            <div class="p-6 bg-gray-800">
-                                <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-                                    Choose ${(plan.name || '').replace('GainX ', '')}
-                                </button>
-                            </div>
+                            ${buttonHTML}
                         </div>
                     `;
                     
-                    // Append the new card to the container
                     plansContainer.innerHTML += planCardHTML;
                 });
 
@@ -162,7 +183,7 @@
         // Call the function when the page loads
         document.addEventListener('DOMContentLoaded', fetchAndRenderPlans);
         
-        // --- END: FIREBASE INTEGRATION ---
+        // --- END: MODIFIED SCRIPT ---
     </script>
 
 </body>
