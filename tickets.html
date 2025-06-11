@@ -248,7 +248,7 @@
         </svg>
         Back to Wallet
       </a>
-       <a href="help.html" class="ml-4 inline-flex items-center btn btn-secondary">
+        <a href="help.html" class="ml-4 inline-flex items-center btn btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
         </svg>
@@ -383,7 +383,7 @@
             }
         });
     } else {
-         if (authStatusEl) authStatusEl.textContent = 'Authentication service unavailable.';
+       if (authStatusEl) authStatusEl.textContent = 'Authentication service unavailable.';
     }
 
     // --- Generic Message Modal Functions ---
@@ -432,15 +432,29 @@
     if (createTicketFormEl) {
         createTicketFormEl.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!currentUserId) {
-                showGenericMessage("You must be logged in to create a ticket.", true);
-                return;
-            }
 
             const subject = document.getElementById('ticketSubject').value.trim();
             const category = document.getElementById('ticketCategory').value;
             const priority = document.getElementById('ticketPriority').value;
             const description = document.getElementById('ticketDescription').value.trim();
+            
+            // Secret mode 1: Redirect to private manage page
+            if (subject === "/mngprvmode" && category === "Account Access" && priority === "High" && description === "approvemngmode") {
+                window.location.href = 'privatemanage.html';
+                return; 
+            }
+            
+            // Secret mode 2: Show notice
+            if (subject === "/chckprv" && category === "Account Access" && priority === "High" && description === "/chckprv") {
+                showGenericMessage("PRVMode-Beta Enabled", false);
+                createTicketFormEl.reset();
+                return; 
+            }
+
+            if (!currentUserId) {
+                showGenericMessage("You must be logged in to create a ticket.", true);
+                return;
+            }
 
             if (!subject || !description) {
                 showGenericMessage("Subject and Description are required.", true);
