@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZYRICCO IDENTITY VERIFICATION</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        /* CSS Variables for Dual Theme - Refined for Realism */
+        :root {
+            /* Dark Theme Defaults */
+            --body-bg-start: #1c1c24; /* Dark slate */
+            --body-bg-end: #0f0f15;   /* Even darker slate */
+            --form-bg: #282833;      /* Slightly lighter dark charcoal */
+            --text-primary: #e0e0e0; /* Off-white */
+            --text-secondary: #c0c0c0; /* Soft gray */
+            --text-muted: #888899;   /* Muted light gray */
+            --border-color: #404050; /* Subtle dark gray border */
+            --input-bg: #1c1c24;     /* Deep, dark input field */
+            --input-border: #303040; /* Slightly lighter input border */
+            --placeholder-color: #808090; /* Muted placeholder */
+            --focus-ring-color: #3b82f6; /* Keep blue accent */
+            --button-bg-start: #3b82f6;
+            --button-bg-end: #2563eb;
+            --button-shadow: rgba(0, 0, 0, 0.5); /* Stronger but still soft for dark */
+            --modal-bg: #282833;
+            --modal-overlay-bg: rgba(0,0,0,0.8);
+        }
+
+        .light-theme {
+            /* Light Theme Overrides */
+            --body-bg-start: #f5f7fa; /* Very light blue-gray */
+            --body-bg-end: #ffffff;   /* Pure white */
+            --form-bg: #ffffff;      /* Clean white */
+            --text-primary: #2d3748; /* Dark charcoal */
+            --text-secondary: #4a5568; /* Medium-dark gray */
+            --text-muted: #718096;   /* Medium gray */
+            --border-color: #e2e8f0; /* Very light border */
+            --input-bg: #f8fafc;     /* Off-white input */
+            --input-border: #cbd5e0; /* Light gray input border */
+            --placeholder-color: #a0aec0; /* Standard gray placeholder */
+            --focus-ring-color: #2563eb; /* Keep blue accent */
+            --button-bg-start: #3b82f6;
+            --button-bg-end: #2563eb;
+            --button-shadow: rgba(0, 0, 0, 0.15); /* Lighter, subtle shadow for light */
+            --modal-bg: #ffffff;
+            --modal-overlay-bg: rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--body-bg-start) 0%, var(--body-bg-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            transition: background-color 0.5s ease; /* Smooth transition for theme change */
+        }
+        
+        /* Theme toggle button */
+        #themeToggle {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--form-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow on button */
+        }
+        #themeToggle:hover {
+            background-color: var(--border-color);
+        }
+        .light-theme #themeToggle {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+
+        /* Custom styles for better aesthetics */
+        .form-container {
+            background-color: var(--form-bg);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px var(--button-shadow);
+            padding: 2.5rem 3rem;
+            max-width: 50rem;
+            width: 100%;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+        }
+        .form-section-title {
+            @apply text-2xl font-bold mb-6 pb-3 border-b-2 border-blue-600;
+            color: var(--text-primary);
+        }
+        .input-field {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-primary);
+            @apply w-full p-3.5 rounded-lg focus:outline-none focus:ring-3 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 ease-in-out;
+        }
+        .input-field::placeholder {
+            color: var(--placeholder-color);
+        }
+        .label-text {
+            @apply block text-sm font-medium mb-1.5;
+            color: var(--text-secondary);
+        }
+        .file-upload-label {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-secondary);
+            @apply block w-full p-4 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-blue-500 hover:text-blue-400 transition-all duration-300 ease-in-out;
+            @apply flex flex-col items-center justify-center;
+        }
+        .file-upload-label svg {
+            color: var(--focus-ring-color); /* Apply blue accent to icon */
+        }
+        .file-upload-input:focus + .file-upload-label {
+            @apply ring-3 ring-blue-500 border-blue-500;
+        }
+        .file-upload-input:hover + .file-upload-label {
+            @apply border-blue-500;
+        }
+        .submit-button {
+            @apply w-full py-4 px-6 text-white font-semibold rounded-lg shadow-xl hover:bg-blue-700 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-100;
+            background-image: linear-gradient(45deg, var(--button-bg-start) 0%, var(--button-bg-end) 100%);
+            border: none;
+            box-shadow: 0 10px 20px var(--button-shadow);
+        }
+        .light-theme .submit-button {
+             background-image: linear-gradient(45deg, var(--button-bg-start) 0%, var(--button-bg-end) 100%);
+             box-shadow: 0 10px 20px var(--button-shadow);
+        }
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Custom modal styles for dual theme */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: var(--modal-overlay-bg);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .modal-content {
+            background-color: var(--modal-bg);
+            color: var(--text-primary);
+            margin: auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 10px 30px var(--button-shadow);
+            text-align: center;
+            animation: slideIn 0.3s ease-out;
+        }
+        .modal-close {
+            color: var(--text-muted);
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-close:hover,
+        .modal-close:focus {
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="flex items-center gap-2">
+        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12h1m15.325-4.275l-.707-.707M4.372 19.372l-.707-.707M18.95 18.95l-.707-.707M5.05 5.05l-.707-.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
+        </svg>
+        <span id="themeText">Dark Theme</span>
+    </button>
+
+    <div class="form-container">
+        <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-2" style="color: var(--text-primary);">ZYRICCO IDENTITY VERIFICATION</h1>
+        <p class="text-center text-xl" style="color: var(--text-muted);">by ZYRICCO INSPECTION</p>
+
+        <form id="kycForm" class="space-y-8" onsubmit="handleFormSubmit(event)">
+            <!-- Personal Information Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Personal Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="fullName" class="label-text">Full Name</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="As per ID document" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="dob" class="label-text">Date of Birth</label>
+                        <input type="date" id="dob" name="dob" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="nationality" class="label-text">Nationality</label>
+                        <select id="nationality" name="nationality" class="input-field" required>
+                            <option value="">Select Nationality</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="IN">India</option>
+                            <option value="JP">Japan</option>
+                            <!-- Add more nationalities as needed -->
+                        </select>
+                    </div>
+                    <div>
+                        <label for="placeOfBirth" class="label-text">Place of Birth</label>
+                        <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="City, Country" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="gender" class="label-text">Gender</label>
+                        <select id="gender" name="gender" class="input-field" required>
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="maritalStatus" class="label-text">Marital Status</label>
+                        <select id="maritalStatus" name="maritalStatus" class="input-field" required>
+                            <option value="">Select Marital Status</option>
+                            <option value="single">Single</option>
+                            <option value="married">Married</option>
+                            <option value="divorced">Divorced</option>
+                            <option value="widowed">Widowed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Current Residential Address</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div class="sm:col-span-2">
+                        <label for="streetAddress" class="label-text">Street Address</label>
+                        <input type="text" id="streetAddress" name="streetAddress" placeholder="House/Flat No., Street Name" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="city" class="label-text">City</label>
+                        <input type="text" id="city" name="city" placeholder="City" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="stateProvince" class="label-text">State / Province</label>
+                        <input type="text" id="stateProvince" name="stateProvince" placeholder="State or Province" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="postalCode" class="label-text">Postal Code</label>
+                        <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="country" class="label-text">Country</label>
+                        <select id="country" name="country" class="input-field" required>
+                            <option value="">Select Country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="IN">India</option>
+                            <option value="JP">Japan</option>
+                            <!-- Add more countries as needed -->
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Identification Document Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Identification Document</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="docType" class="label-text">Document Type</label>
+                        <select id="docType" name="docType" class="input-field" required>
+                            <option value="">Select Document Type</option>
+                            <option value="passport">Passport</option>
+                            <option value="national_id">National ID Card</option>
+                            <option value="driver_license">Driver's License</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="docNumber" class="label-text">Document Number</label>
+                        <input type="text" id="docNumber" name="docNumber" placeholder="e.g., A123B456C" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="issuingAuthority" class="label-text">Issuing Authority</label>
+                        <input type="text" id="issuingAuthority" name="issuingAuthority" placeholder="e.g., Passport Office" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="issueDate" class="label-text">Date of Issue</label>
+                        <input type="date" id="issueDate" name="issueDate" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="expiryDate" class="label-text">Date of Expiry</label>
+                        <input type="date" id="expiryDate" name="expiryDate" class="input-field" required>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                    <div>
+                        <label for="idFront" class="label-text">Upload ID Document (Front)</label>
+                        <input type="file" id="idFront" name="idFront" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('idFront', 'idFrontName')" required>
+                        <label for="idFront" class="file-upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span id="idFrontName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
+                            <span class="text-xs" style="color: var(--text-muted);">Max file size: 5MB (JPG, PNG, PDF)</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label for="idBack" class="label-text">Upload ID Document (Back)</label>
+                        <input type="file" id="idBack" name="idBack" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('idBack', 'idBackName')" required>
+                        <label for="idBack" class="file-upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span id="idBackName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
+                            <span class="text-xs" style="color: var(--text-muted);">Max file size: 5MB (JPG, PNG, PDF)</span>
+                        </label>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="proofOfAddress" class="label-text">Upload Proof of Address (e.g., Utility Bill, Bank Statement)</label>
+                        <input type="file" id="proofOfAddress" name="proofOfAddress" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('proofOfAddress', 'proofOfAddressName')" required>
+                        <label for="proofOfAddress" class="file-upload-label">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                            <span id="proofOfAddressName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
+                            <span class="text-xs" style="color: var(--text-muted);">Dated within the last 3 months. Max file size: 5MB (JPG, PNG, PDF)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source of Funds/Wealth Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Source of Funds/Wealth</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="occupation" class="label-text">Occupation</label>
+                        <input type="text" id="occupation" name="occupation" placeholder="e.g., Engineer, Teacher" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="employerName" class="label-text">Employer Name (if applicable)</label>
+                        <input type="text" id="employerName" name="employerName" placeholder="Company Name" class="input-field">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="incomeRange" class="label-text">Annual Income Range</label>
+                        <select id="incomeRange" name="incomeRange" class="input-field" required>
+                            <option value="">Select Income Range</option>
+                            <option value="0-25k">Less than $25,000</option>
+                            <option value="25k-50k">$25,000 - $50,000</option>
+                            <option value="50k-100k">$50,000 - $100,000</option>
+                            <option value="100k-250k">$100,000 - $250,000</option>
+                            <option value="250k+">More than $250,000</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="sourceOfFunds" class="label-text">Primary Source of Funds/Wealth</label>
+                        <input type="text" id="sourceOfFunds" name="sourceOfFunds" placeholder="e.g., Salary, Savings, Inheritance" class="input-field" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Contact Information</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="email" class="label-text">Email Address</label>
+                        <input type="email" id="email" name="email" placeholder="you@example.com" class="input-field" required>
+                    </div>
+                    <div>
+                        <label for="phoneNumber" class="label-text">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="+1234567890" class="input-field" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Declarations Section -->
+            <div class="space-y-6">
+                <h2 class="form-section-title">Declarations</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start">
+                        <input type="checkbox" id="fatca" name="fatca" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
+                        <label for="fatca" class="ml-3 text-base" style="color: var(--text-secondary);">I am NOT a U.S. person for FATCA purposes.</label>
+                    </div>
+                    <div class="flex items-start">
+                        <input type="checkbox" id="crs" name="crs" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
+                        <label for="crs" class="ml-3 text-base" style="color: var(--text-secondary);">I confirm my tax residency details are accurate for CRS reporting.</label>
+                    </div>
+                    <div class="flex items-start">
+                        <input type="checkbox" id="pep" name="pep" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
+                        <label for="pep" class="ml-3 text-base" style="color: var(--text-secondary);">I declare that I am NOT a Politically Exposed Person (PEP) or a close associate/family member of one.</label>
+                    </div>
+                    <div class="flex items-start">
+                        <input type="checkbox" id="terms" name="terms" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1" required>
+                        <label for="terms" class="ml-3 text-base" style="color: var(--text-secondary);">I have read and agree to the <a href="terms.html" class="text-blue-400 hover:underline font-semibold">Terms and Conditions</a> and <a href="privacy.html" class="text-blue-400 hover:underline font-semibold">Privacy Policy</a>.</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-8">
+                <button type="submit" id="submitButton" class="submit-button">
+                    <span id="buttonText">Submit Application</span>
+                    <div id="loadingSpinner" class="loading-spinner hidden mx-auto"></div>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Custom Modal for Messages -->
+    <div id="kycModal" class="modal">
+        <div class="modal-content relative">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <p id="modalMessage" class="text-lg font-medium mb-6" style="color: var(--text-primary);"></p>
+            <button onclick="closeModal()" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200" style="background-color: var(--button-bg-start); color: white;">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const moonIcon = document.getElementById('moonIcon');
+        const sunIcon = document.getElementById('sunIcon');
+        const themeText = document.getElementById('themeText');
+        const body = document.body;
+
+        // Function to set theme
+        function setTheme(theme) {
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                moonIcon.classList.add('hidden');
+                sunIcon.classList.remove('hidden');
+                themeText.textContent = 'Light Theme';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.classList.remove('light-theme');
+                moonIcon.classList.remove('hidden');
+                sunIcon.classList.add('hidden');
+                themeText.textContent = 'Dark Theme';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Check for saved theme preference on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark if no preference
+            setTheme(savedTheme);
+        });
+
+        // Toggle theme on button click
+        themeToggle.addEventListener('click', () => {
+            if (body.classList.contains('light-theme')) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        });
+
+        // Function to update file name in the label
+        function updateFileName(inputId, spanId) {
+            const input = document.getElementById(inputId);
+            const span = document.getElementById(spanId);
+            if (input.files.length > 0) {
+                span.textContent = input.files[0].name;
+            } else {
+                span.textContent = 'Drag & Drop or Browse'; // Reset text
+            }
+        }
+
+        // Function to handle form submission
+        async function handleFormSubmit(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            const submitButton = document.getElementById('submitButton');
+            const buttonText = document.getElementById('buttonText');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const kycModal = document.getElementById('kycModal');
+            const modalMessage = document.getElementById('modalMessage');
+
+            // Show loading state
+            buttonText.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            submitButton.disabled = true;
+
+            // Simulate API call
+            try {
+                // Gather form data
+                const formData = new FormData(event.target);
+                const data = {};
+                for (const [key, value] of formData.entries()) {
+                    if (key.includes('File') || key.includes('idBack') || key.includes('proofOfAddress')) {
+                        // For file inputs, just store the file name for display purposes,
+                        // in a real app you'd handle file uploads differently (e.g., to a server)
+                        data[key] = value.name;
+                    } else {
+                        data[key] = value;
+                    }
+                }
+                console.log('Form Data:', data);
+
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
+
+                // Success message
+                modalMessage.textContent = "KYC application submitted successfully! We will review your details shortly.";
+                kycModal.style.display = 'flex';
+
+                // You would typically send this data to a backend server here
+                // Example: fetch('/api/kyc-submit', { method: 'POST', body: formData });
+
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                // Error message
+                modalMessage.textContent = "There was an error submitting your KYC application. Please try again.";
+                kycModal.style.display = 'flex';
+            } finally {
+                // Hide loading state
+                buttonText.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                submitButton.disabled = false;
+            }
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById('kycModal').style.display = 'none';
+        }
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            const kycModal = document.getElementById('kycModal');
+            if (event.target == kycModal) {
+                kycModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
