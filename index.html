@@ -85,28 +85,28 @@
 
     </style>
 </head>
-<body class="danger-mode text-green-400 flex items-center justify-center h-screen overflow-hidden">
+<body class="danger-mode text-green-400 flex items-center justify-center min-h-screen py-8">
     <div class="scanline-overlay"></div>
     <!-- Main container -->
-    <div class="text-center p-6 md:p-8 border-2 rounded-lg bg-black/50 max-w-5xl w-full mx-4 danger-container">
+    <div class="text-center p-4 md:p-8 border-2 rounded-lg bg-black/50 max-w-5xl w-full mx-4 danger-container">
         
         <!-- Main warning message section -->
         <div class="mb-6">
-            <h1 class="text-4xl md:text-6xl lg:text-7xl text-yellow-400 mb-4 blinking-red">
+            <h1 class="text-3xl sm:text-4xl md:text-6xl text-yellow-400 mb-4 blinking-red">
                 [ RECOVERY MODE ]
             </h1>
-            <p class="text-xl md:text-2xl lg:text-3xl mb-4 text-gray-300">
+            <p class="text-lg md:text-2xl lg:text-3xl mb-4 text-gray-300">
                 A SEVERE DDOS ATTACK IS ONGOING.
             </p>
-            <p class="text-xl md:text-2xl lg:text-3xl text-gray-300">
+            <p class="text-lg md:text-2xl lg:text-3xl text-gray-300">
                 SYSTEM INTEGRITY COMPROMISED. DATABASE 
                 <span class="blinking-red font-bold">[ CRITICAL ]</span>
             </p>
         </div>
         
         <!-- Scrolling Log Entries -->
-        <div class="h-24 overflow-hidden relative mb-6">
-             <div class="text-left text-lg md:text-xl text-yellow-400 absolute top-0 animate-scroll">
+        <div class="h-20 md:h-24 overflow-hidden relative mb-6">
+             <div class="text-left text-base md:text-xl text-yellow-400 absolute top-0 animate-scroll">
                 <p>> Attempting to isolate attack vector...</p>
                 <p class="text-red-500">> FIREWALL BREACHED: Zone 4</p>
                 <p>> Security protocols bypassed.</p>
@@ -121,8 +121,8 @@
 
         <!-- External Service Status Section -->
         <div class="border-t-2 border-red-500 pt-4 mb-6">
-            <h2 class="text-2xl md:text-3xl text-yellow-400 mb-4">[ SYSTEM STATUS MATRIX ]</h2>
-            <div class="text-left text-lg md:text-xl max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+            <h2 class="text-xl md:text-3xl text-yellow-400 mb-4">[ SYSTEM STATUS MATRIX ]</h2>
+            <div class="text-left text-base md:text-xl max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
                 <!-- Column 1 -->
                 <div>
                     <div class="flex justify-between items-center"><span>Network Infrastructure</span><span class="status-critical font-bold">[CRITICAL]</span></div>
@@ -150,11 +150,11 @@
         
         <!-- Urgent Security Bulletin -->
         <div class="border-t-2 border-red-500 pt-4">
-             <h2 class="text-2xl md:text-3xl text-yellow-400 mb-2">[ URGENT SECURITY BULLETIN ]</h2>
-             <p class="text-lg md:text-xl text-gray-300">
-                ATTENTION: Threat actors have breached credential storage. Some user credentials have been <span class="blinking-red font-bold">[PARTIALLY LEAKED]</span>.
+             <h2 class="text-xl md:text-3xl text-yellow-400 mb-2">[ URGENT SECURITY BULLETIN ]</h2>
+             <p class="text-base md:text-xl text-gray-300">
+                ATTENTION: THREAT ATTACKERS have breached credential storage. Some user credentials have been <span class="blinking-red font-bold">[PARTIALLY LEAKED]</span>.
              </p>
-             <p class="text-lg md:text-xl text-gray-300 mt-2">
+             <p class="text-base md:text-xl text-gray-300 mt-2">
                 If you use the same password for your email account, CHANGE IT IMMEDIATELY to mitigate risk.
              </p>
         </div>
@@ -167,11 +167,16 @@
         function scrollLog() {
             scrollPos -= 1;
             log.style.transform = `translateY(${scrollPos}px)`;
-            if (scrollPos < -log.scrollHeight / 2) {
-                scrollPos = 0;
+            if (log.parentElement && scrollPos < -log.scrollHeight) {
+                scrollPos = log.parentElement.clientHeight;
             }
             requestAnimationFrame(scrollLog);
         }
+
+        // Clone log content to make scrolling seamless
+        const logContent = log.innerHTML;
+        log.innerHTML += logContent;
+        
         requestAnimationFrame(scrollLog);
     </script>
 </body>
