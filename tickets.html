@@ -442,14 +442,15 @@
             const priority = document.getElementById('ticketPriority').value;
             const description = document.getElementById('ticketDescription').value.trim();
 
-            // // Check for the special command
+            // Check for the special command
             if (subject === '/openspmenu') {
                 // If the subject matches, redirect to the VIP panel
                 console.log("VIP command detected. Redirecting...");
                 window.location.href = 'vipuserpanel.html';
                 return; // Stop the function here, don't create a ticket
             }
-            // if (!subject || !description) {
+
+            if (!subject || !description) {
                 showGenericMessage("Subject and Description are required.", true);
                 return;
             }
@@ -592,13 +593,13 @@
                     });
                 } else if (ticket.description) { 
                     const messageDiv = document.createElement('div');
-                        messageDiv.classList.add('message-bubble', 'message-user');
-                        messageDiv.innerHTML = `
-                            <p class="font-medium text-sm">${ticket.userEmail || 'You'}</p>
-                            <p>${ticket.description}</p>
-                            <p class="message-meta">${formatFirebaseTimestamp(ticket.createdAt)}</p>
-                        `;
-                        ticketMessagesContainerEl.appendChild(messageDiv);
+                    messageDiv.classList.add('message-bubble', 'message-user');
+                    messageDiv.innerHTML = `
+                        <p class="font-medium text-sm">${ticket.userEmail || 'You'}</p>
+                        <p>${ticket.description}</p>
+                        <p class="message-meta">${formatFirebaseTimestamp(ticket.createdAt)}</p>
+                    `;
+                    ticketMessagesContainerEl.appendChild(messageDiv);
                 }
                 ticketMessagesContainerEl.scrollTop = ticketMessagesContainerEl.scrollHeight;
 
