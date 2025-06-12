@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>!! CRITICAL ALERT !!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <style>
+        /* Custom font for the terminal look */
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #000;
+        }
+
+        /* Keyframes for the main red glowing/blinking text */
+        @keyframes blink-glow {
+            0%, 100% {
+                color: #ff0000;
+                text-shadow: 0 0 7px #ff0000, 0 0 12px #ff0000, 0 0 25px #ff0000, 0 0 50px #ff0000, 0 0 70px #ff3333;
+            }
+            50% {
+                color: #ff4d4d;
+                text-shadow: 0 0 10px #ff0000, 0 0 22px #ff0000, 0 0 35px #ff0000, 0 0 60px #ff0000, 0 0 90px #ff3333;
+            }
+        }
+
+        /* Keyframes for the background pulse */
+        @keyframes background-pulse {
+            0% { background-color: #1a0000; }
+            50% { background-color: #330000; }
+            100% { background-color: #1a0000; }
+        }
+
+        /* Keyframes for the scanline effect */
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+
+        /* Class to apply the main critical animation */
+        .blinking-red {
+            animation: blink-glow 1s ease-in-out infinite;
+        }
+
+        /* Main container styling */
+        .danger-container {
+            border-color: #ff0000;
+            box-shadow: 0 0 15px #ff0000, inset 0 0 15px #ff0000;
+            animation: blink-glow 2s ease-in-out infinite;
+        }
+        
+        /* Body styles for the danger mode */
+        .danger-mode {
+            animation: background-pulse 3s infinite;
+        }
+
+        /* Scanline overlay */
+        .scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .scanline-overlay::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 255, 13, 0.1);
+            animation: scanline 8s linear infinite;
+        }
+
+
+        /* Status colors and animations */
+        .status-operational { color: #22c55e; } /* green-500 */
+        .status-critical, .status-leaked { animation: blink-glow 1s ease-in-out infinite; }
+        .status-at-risk { color: #f97316; } /* orange-500 */
+        .status-degraded, .status-monitored { color: #eab308; } /* yellow-500 */
+
+    </style>
+</head>
+<body class="danger-mode text-green-400 flex items-center justify-center h-screen overflow-hidden">
+    <div class="scanline-overlay"></div>
+    <!-- Main container -->
+    <div class="text-center p-6 md:p-8 border-2 rounded-lg bg-black/50 max-w-5xl w-full mx-4 danger-container">
+        
+        <!-- Main warning message section -->
+        <div class="mb-6">
+            <h1 class="text-4xl md:text-6xl lg:text-7xl text-yellow-400 mb-4 blinking-red">
+                [ RECOVERY MODE ]
+            </h1>
+            <p class="text-xl md:text-2xl lg:text-3xl mb-4 text-gray-300">
+                A SEVERE DDOS ATTACK IS ONGOING.
+            </p>
+            <p class="text-xl md:text-2xl lg:text-3xl text-gray-300">
+                SYSTEM INTEGRITY COMPROMISED. DATABASE 
+                <span class="blinking-red font-bold">[ CRITICAL ]</span>
+            </p>
+        </div>
+        
+        <!-- Scrolling Log Entries -->
+        <div class="h-24 overflow-hidden relative mb-6">
+             <div class="text-left text-lg md:text-xl text-yellow-400 absolute top-0 animate-scroll">
+                <p>> Attempting to isolate attack vector...</p>
+                <p class="text-red-500">> FIREWALL BREACHED: Zone 4</p>
+                <p>> Security protocols bypassed.</p>
+                <p>> Initiating emergency data lockdown...</p>
+                <p class="text-red-500">> Multiple authentication failures detected.</p>
+                <p>> Forced system override engaged.</p>
+                <p>> Rerouting traffic through auxiliary nodes...</p>
+                 <p class="text-red-500">> CORE SHUTDOWN IMMINENT.</p>
+            </div>
+        </div>
+
+
+        <!-- External Service Status Section -->
+        <div class="border-t-2 border-red-500 pt-4 mb-6">
+            <h2 class="text-2xl md:text-3xl text-yellow-400 mb-4">[ SYSTEM STATUS MATRIX ]</h2>
+            <div class="text-left text-lg md:text-xl max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+                <!-- Column 1 -->
+                <div>
+                    <div class="flex justify-between items-center"><span>Network Infrastructure</span><span class="status-critical font-bold">[CRITICAL]</span></div>
+                    <div class="flex justify-between items-center"><span>API Gateway</span><span class="status-critical font-bold">[CRITICAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Realtime Database</span><span class="status-critical font-bold">[CRITICAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Zyricco Authentication</span><span class="status-critical font-bold">[CRITICAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Payment Processing</span><span class="status-leaked font-bold">[LEAKED]</span></div>
+                    <div class="flex justify-between items-center"><span>User Credentials</span><span class="status-at-risk font-bold">[AT RISK]</span></div>
+                    <div class="flex justify-between items-center"><span>User Session Management</span><span class="status-at-risk font-bold">[AT RISK]</span></div>
+                    <div class="flex justify-between items-center"><span>Cloud storage</span><span class="status-degraded font-bold">[DEGRADED]</span></div>
+                </div>
+                <!-- Column 2 -->
+                <div>
+                    <div class="flex justify-between items-center"><span>Backup & Recovery</span><span class="status-degraded font-bold">[DEGRADED]</span></div>
+                    <div class="flex justify-between items-center"><span>User Privacy</span><span class="status-monitored font-bold">[MONITORED]</span></div>
+                    <div class="flex justify-between items-center"><span>System-wide Encryption</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Zyricco Hosting</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Content Delivery Network</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Cloud Functions</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Internal DNS</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                    <div class="flex justify-between items-center"><span>Email Services</span><span class="status-operational font-bold">[OPERATIONAL]</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Urgent Security Bulletin -->
+        <div class="border-t-2 border-red-500 pt-4">
+             <h2 class="text-2xl md:text-3xl text-yellow-400 mb-2">[ URGENT SECURITY BULLETIN ]</h2>
+             <p class="text-lg md:text-xl text-gray-300">
+                ATTENTION: Threat actors have breached credential storage. Some user credentials have been <span class="blinking-red font-bold">[PARTIALLY LEAKED]</span>.
+             </p>
+             <p class="text-lg md:text-xl text-gray-300 mt-2">
+                If you use the same password for your email account, CHANGE IT IMMEDIATELY to mitigate risk.
+             </p>
+        </div>
+
+    </div>
+    <script>
+        // JS to create a continuous scrolling effect for the log
+        const log = document.querySelector('.animate-scroll');
+        let scrollPos = 0;
+        function scrollLog() {
+            scrollPos -= 1;
+            log.style.transform = `translateY(${scrollPos}px)`;
+            if (scrollPos < -log.scrollHeight / 2) {
+                scrollPos = 0;
+            }
+            requestAnimationFrame(scrollLog);
+        }
+        requestAnimationFrame(scrollLog);
+    </script>
+</body>
+</html>
