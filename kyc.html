@@ -3,582 +3,1482 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZYRICCO IDENTITY VERIFICATION</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Zyricco | Special Users Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // Import Realtime Database specific functions, including 'push' for creating unique IDs
+        import { getDatabase, ref, set, onValue, get, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
-        /* CSS Variables for Dual Theme - Refined for Realism */
-        :root {
-            /* Dark Theme Defaults */
-            --body-bg-start: #1c1c24; /* Dark slate */
-            --body-bg-end: #0f0f15;   /* Even darker slate */
-            --form-bg: #282833;      /* Slightly lighter dark charcoal */
-            --text-primary: #e0e0e0; /* Off-white */
-            --text-secondary: #c0c0c0; /* Soft gray */
-            --text-muted: #888899;   /* Muted light gray */
-            --border-color: #404050; /* Subtle dark gray border */
-            --input-bg: #1c1c24;     /* Deep, dark input field */
-            --input-border: #303040; /* Slightly lighter input border */
-            --placeholder-color: #808090; /* Muted placeholder */
-            --focus-ring-color: #3b82f6; /* Keep blue accent */
-            --button-bg-start: #3b82f6;
-            --button-bg-end: #2563eb;
-            --button-shadow: rgba(0, 0, 0, 0.5); /* Stronger but still soft for dark */
-            --modal-bg: #282833;
-            --modal-overlay-bg: rgba(0,0,0,0.8);
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+            authDomain: "swiftgain.firebaseapp.com",
+            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app", // Ensure this is your Realtime Database URL
+            projectId: "swiftgain",
+            storageBucket: "swiftgain.firebasestorage.app",
+            messagingSenderId: "751911092919",
+            appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+        };
+
+        // Use the Canvas environment's appId if available, otherwise fallback to projectId from config
+        const appId = typeof __app_id !== 'undefined' ? __app_id : firebaseConfig.projectId;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const rtdb = getDatabase(app); // Initialize Realtime Database
+
+        let userId = null; // Store the user ID
+        let currentUserRole = 'basic'; // Default role
+
+        // Function to fetch and observe simulated counts from Realtime Database
+        async function fetchAndObserveSimulatedCounts() {
+            if (!userId) {
+                console.log("Waiting for user authentication before fetching and observing counts.");
+                return;
+            }
+
+            // Path for public data in Realtime Database: artifacts/{appId}/public/data/app_metrics/simulated_counts
+            const countsRef = ref(rtdb, `artifacts/${appId}/public/data/app_metrics/simulated_counts`);
+
+            try {
+                // Set up a real-time listener for the simulated_counts node
+                onValue(countsRef, async (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.val(); // Get the data value
+                        const zyricoCount = data.zyricoCount || 0;
+                        const gainxCount = data.gainxCount || 0;
+
+                        document.getElementById('zyricoCountDisplay').textContent = zyricoCount.toLocaleString();
+                        document.getElementById('gainxCountDisplay').textContent = gainxCount.toLocaleString();
+                        console.log("Simulated counts updated from Realtime Database:", { zyricoCount, gainxCount });
+                    } else {
+                        // If node doesn't exist, create it with initial random counts
+                        await updateSimulatedCountsInRealtimeDB(); // This will create the node
+                        console.log("Simulated counts node created with initial random counts.");
+                    }
+                }, (error) => {
+                    console.error("Error listening to simulated counts:", error);
+                    window.showMessage(`Error fetching simulated counts: ${error.message}`, 'error');
+                });
+            } catch (error) {
+                console.error("Error setting up simulated counts listener:", error);
+                window.showMessage(`Error setting up simulated counts listener: ${error.message}`, 'error');
+            }
         }
 
-        .light-theme {
-            /* Light Theme Overrides */
-            --body-bg-start: #f5f7fa; /* Very light blue-gray */
-            --body-bg-end: #ffffff;   /* Pure white */
-            --form-bg: #ffffff;      /* Clean white */
-            --text-primary: #2d3748; /* Dark charcoal */
-            --text-secondary: #4a5568; /* Medium-dark gray */
-            --text-muted: #718096;   /* Medium gray */
-            --border-color: #e2e8f0; /* Very light border */
-            --input-bg: #f8fafc;     /* Off-white input */
-            --input-border: #cbd5e0; /* Light gray input border */
-            --placeholder-color: #a0aec0; /* Standard gray placeholder */
-            --focus-ring-color: #2563eb; /* Keep blue accent */
-            --button-bg-start: #3b82f6;
-            --button-bg-end: #2563eb;
-            --button-shadow: rgba(0, 0, 0, 0.15); /* Lighter, subtle shadow for light */
-            --modal-bg: #ffffff;
-            --modal-overlay-bg: rgba(0,0,0,0.4);
+        // Function to generate random number within a range
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // Function to update simulated counts in Realtime Database by a small amount
+        window.updateSimulatedCountsInRealtimeDB = async () => {
+            if (!userId) {
+                console.warn("Attempted to update simulated counts before authentication or without userId.");
+                return;
+            }
+            try {
+                const countsRef = ref(rtdb, `artifacts/${appId}/public/data/app_metrics/simulated_counts`);
+
+                // Get current values to adjust them
+                const snapshot = await get(countsRef);
+                let currentZyricoCount = 1700; // Default if not found
+                let currentGainXCount = 500;  // Default if not found
+
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    currentZyricoCount = data.zyricoCount || currentZyricoCount;
+                    currentGainXCount = data.gainxCount || currentGainXCount;
+                }
+
+                // Adjust by a small random amount (+/- 1 to 5)
+                const zyricoDelta = getRandomInt(-5, 5);
+                const gainxDelta = getRandomInt(-5, 5);
+
+                let newZyricoCount = currentZyricoCount + zyricoDelta;
+                let newGainXCount = currentGainXCount + gainxDelta;
+
+                // Ensure counts stay within their original ranges
+                newZyricoCount = Math.max(1478, Math.min(newZyricoCount, 2183));
+                newGainXCount = Math.max(317, Math.min(newGainXCount, 837));
+
+                await set(countsRef, {
+                    zyricoCount: newZyricoCount,
+                    gainxCount: newGainXCount
+                });
+
+                console.log("Simulated counts updated in Realtime Database.");
+            } catch (error) {
+                console.error("Error updating simulated counts in Realtime Database:", error);
+                window.showMessage(`Error updating counts: ${error.message}`, 'error');
+            }
+        };
+
+        // Function to load affiliate users into the table and select dropdown from Realtime Database
+        async function loadAffiliateData(currentUserId) {
+            const downlineAffiliatesTableBody = document.getElementById('downlineAffiliatesTableBody');
+            const affiliateSelector = document.getElementById('affiliateSelector');
+            downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-2 text-center text-[var(--text-color-secondary)]">Loading affiliates...</td></tr>'; // Loading state
+            affiliateSelector.innerHTML = '<option value="">-- Loading affiliates --</option>'; // Loading state
+
+            try {
+                const affiliatesRef = ref(rtdb, 'affiliate');
+                const snapshot = await get(affiliatesRef); // Fetch all affiliates once
+                const allAffiliates = snapshot.val() || {};
+
+                downlineAffiliatesTableBody.innerHTML = ''; // Clear loading state
+                affiliateSelector.innerHTML = '<option value="">-- Select an affiliate --</option>'; // Clear loading state
+
+                const affiliatedUsers = Object.keys(allAffiliates)
+                    .map(key => ({ id: key, ...allAffiliates[key] }))
+                    .filter(aff => aff.createdBy === currentUserId);
+
+                if (affiliatedUsers.length === 0) {
+                    downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-2 text-center text-[var(--text-color-secondary)]">No downline affiliates found.</td></tr>';
+                } else {
+                    affiliatedUsers.forEach(affiliate => {
+                        // Populate table
+                        const row = downlineAffiliatesTableBody.insertRow();
+                        row.classList.add('hover:bg-[var(--secondary-bg-color)]');
+                        row.innerHTML = `
+                            <td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-primary)]">${affiliate.id.substring(0, 8) + '...' || 'N/A'}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-${affiliate.isApproved ? 'green-500' : (affiliate.status === 'pending' ? 'yellow-500' : 'red-500')}">${affiliate.isApproved ? 'Active' : (affiliate.status === 'pending' ? 'Pending' : 'Inactive')}</td>
+                            <td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-secondary)]">${getRandomInt(10, 200)}</td> <td class="px-4 py-2 whitespace-nowrap text-[var(--accent-color)]">$${(Math.random() * 2000).toFixed(2)}</td> `;
+
+                        // Populate select dropdown
+                        const option = document.createElement('option');
+                        option.value = affiliate.id; // Use the Realtime DB key as value
+                        option.textContent = affiliate.fullName || affiliate.email;
+                        affiliateSelector.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading affiliate data from Realtime Database:", error);
+                downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-2 text-center text-red-500">Error loading affiliates.</td></tr>';
+                affiliateSelector.innerHTML = '<option value="">-- Error loading --</option>';
+                window.showMessage(`Error loading affiliate data: ${error.message}`, 'error');
+            }
+        }
+
+        // Function to load notifications from Realtime Database
+        async function loadNotifications() {
+            const notificationsContainer = document.querySelector('#notifications .space-y-3');
+            notificationsContainer.innerHTML = '<div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)] text-center text-[var(--text-color-secondary)]">Loading notifications...</div>'; // Loading state
+
+            try {
+                const notificationsRef = ref(rtdb, 'notifications');
+                const snapshot = await get(notificationsRef); // Fetch notifications once
+                const notificationsData = snapshot.val() || {};
+
+                notificationsContainer.innerHTML = ''; // Clear loading state
+
+                const notifications = Object.values(notificationsData).sort((a, b) => b.timestamp - a.timestamp);
+
+                if (notifications.length === 0) {
+                    notificationsContainer.innerHTML = '<div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)] text-center text-[var(--text-color-secondary)]">No new notifications.</div>';
+                } else {
+                    notifications.forEach(notif => {
+                        const date = new Date(notif.timestamp);
+                        const timeAgo = formatTimeAgo(date);
+                        const iconColor = notif.title.includes("Win") || notif.title.includes("APPROVED") ? 'text-green-500' : 'text-indigo-500';
+                        const iconPath = notif.title.includes("Win") || notif.title.includes("APPROVED") ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>` : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>`;
+
+                        const notificationHtml = `
+                            <div class="p-4 rounded-lg shadow-sm flex items-start bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                                <svg class="w-6 h-6 ${iconColor} mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg>
+                                <div>
+                                    <p class="font-medium text-[var(--text-color-primary)]">${notif.title}</p>
+                                    <p class="text-sm text-[var(--text-color-secondary)]">${notif.message.split('\n')[0]} <span class="text-xs opacity-75">${timeAgo}</span></p>
+                                </div>
+                            </div>
+                        `;
+                        notificationsContainer.insertAdjacentHTML('beforeend', notificationHtml);
+                    });
+                }
+            } catch (error) {
+                console.error("Error loading notifications from Realtime Database:", error);
+                notificationsContainer.innerHTML = '<div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)] text-center text-red-500">Error loading notifications.</div>';
+                window.showMessage(`Error loading notifications: ${error.message}`, 'error');
+            }
+        }
+
+        // Utility to format time ago
+        function formatTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return Math.floor(seconds) + " seconds ago";
+        }
+
+        // Function to load chat messages for the current user from Realtime Database (Live Chat)
+        async function loadChatMessages(currentUserId) {
+            const chatMessagesContainer = document.querySelector('.chat-messages');
+            chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-[var(--text-color-secondary)]"><em>Loading live chat messages...</em></p>'; // Loading state
+
+            try {
+                // Point to the new chatlog path
+                const chatlogRef = ref(rtdb, `userpaneldata/chatlog`);
+                onValue(chatlogRef, (snapshot) => {
+                    chatMessagesContainer.innerHTML = ''; // Clear existing messages
+                    const chatMessages = [];
+                    snapshot.forEach(childSnapshot => {
+                        chatMessages.push(childSnapshot.val());
+                    });
+
+                    if (chatMessages.length === 0) {
+                        chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-[var(--text-color-secondary)]"><em>No live chat history. Start a conversation!</em></p>';
+                        chatMessagesContainer.insertAdjacentHTML('beforeend', '<p class="text-sm text-[var(--accent-color)]"><strong>Host:</strong> Welcome! How can I assist you today?</p>');
+                    } else {
+                        chatMessages.sort((a, b) => a.timestamp - b.timestamp); // Sort by timestamp
+                        chatMessages.forEach(msg => {
+                            const senderClass = msg.senderType === 'admin' ? 'text-[var(--accent-color)]' : 'text-[var(--text-color-secondary)]';
+                            const senderName = msg.senderType === 'admin' ? 'Host' : 'You'; // Simplified for display
+                            const messageDate = new Date(msg.timestamp);
+                            const formattedTime = `${messageDate.toLocaleDateString()} ${messageDate.toLocaleTimeString()}`;
+                            const messageHtml = `
+                                <p class="text-sm mb-1 ${senderClass}">
+                                    <strong>${senderName}:</strong> ${msg.message} <span class="text-xs opacity-75 ml-2">(${formattedTime})</span>
+                                </p>
+                            `;
+                            chatMessagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+                        });
+                    }
+                    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                });
+            } catch (error) {
+                console.error("Error loading live chat messages:", error);
+                chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-red-500"><em>Error loading chat history.</em></p>';
+                window.showMessage(`Error loading chat history: ${error.message}`, 'error');
+            }
+        }
+
+        // Make rtdb and auth globally accessible for other scripts if needed (though generally better to pass them)
+        window.rtdb = rtdb;
+        window.auth = auth;
+        window.appId = appId;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const loginScreen = document.getElementById('loginScreen');
+            const mainPanel = document.getElementById('mainPanel');
+            const agreeButton = document.getElementById('agreeButton');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const showRegisterLink = document.getElementById('showRegister');
+            const showLoginLink = document.getElementById('showLogin');
+            const logoutButton = document.getElementById('logoutButton');
+            const createTicketModal = document.getElementById('createTicketModal');
+            const createTicketForm = document.getElementById('createTicketForm');
+            const cancelTicketButton = document.getElementById('cancelTicketButton');
+            const makeSupportTicketsButton = document.getElementById('makeSupportTicketsButton'); // Renamed for clarity
+
+
+            // Set initial display states (hidden by default)
+            mainPanel.style.display = 'none';
+            welcomeScreen.style.display = 'none';
+            loginScreen.style.display = 'none';
+            registerForm.style.display = 'none'; // Initially hide register form
+
+            // Function to display messages
+            window.showMessage = (message, type = 'success') => {
+                messageText.textContent = message;
+                messageBox.className = 'message-box text-sm'; // Reset classes
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-100');
+                } else if (type === 'error') {
+                    messageBox.classList.add('bg-red-100');
+                } else if (type === 'info') {
+                    messageBox.classList.add('bg-blue-100');
+                }
+                messageBox.style.display = 'block';
+                // Automatically hide message after 5 seconds
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 5000);
+            };
+
+            // Function to reset and show the welcome screen with original consent content
+            const showConsentScreen = (authMessage = null, authError = false) => {
+                const welcomeTitle = document.querySelector('#welcomeScreen h1');
+                const welcomePara = document.querySelector('#welcomeScreen p:first-of-type');
+                const welcomeBoldPara = document.querySelector('#welcomeScreen p.font-bold');
+                const welcomeAgreementHeader = document.querySelector('#welcomeScreen h3');
+                const welcomeAgreementList = document.querySelector('#welcomeScreen ul');
+                const welcomeAgreeButton = document.getElementById('agreeButton');
+
+                // Reset content to original consent message
+                welcomeTitle.textContent = "Welcome to the GainX Private User Panel";
+                welcomePara.innerHTML = `
+                    We are delighted to extend this exclusive invitation to you. You have been approved as our **Special User** based on your exceptional performance and invaluable contributions to the GainX ecosystem. This panel is meticulously designed to provide you with unparalleled access to advanced features, dedicated support, and unique opportunities.
+                `;
+                if (welcomeBoldPara) welcomeBoldPara.style.display = 'block';
+                if (welcomeAgreementHeader) welcomeAgreementHeader.style.display = 'block';
+                if (welcomeAgreementList) welcomeAgreementList.style.display = 'block';
+                if (welcomeAgreeButton) welcomeAgreeButton.style.display = 'inline-block';
+
+                if (authMessage) {
+                    welcomePara.innerHTML = (authError ? `<span class="text-red-400 font-bold">Error:</span> ` : `<span class="text-[var(--accent-color)] font-bold">Info:</span> `) + authMessage;
+                    if (welcomeBoldPara) welcomeBoldPara.style.display = 'none';
+                    if (welcomeAgreementHeader) welcomeAgreementHeader.style.display = 'none';
+                    if (welcomeAgreementList) welcomeAgreementList.style.display = 'none';
+                    if (welcomeAgreeButton) welcomeAgreeButton.style.display = 'none';
+                }
+
+                welcomeScreen.style.display = 'flex';
+                loginScreen.style.display = 'none';
+                mainPanel.style.display = 'none';
+            };
+
+            const showLoginScreen = (message = null, type = 'info') => {
+                loginScreen.style.display = 'flex';
+                welcomeScreen.style.display = 'none';
+                mainPanel.style.display = 'none';
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                if (message) {
+                    showMessage(message, type);
+                }
+            };
+
+            const showRegisterScreen = () => {
+                loginScreen.style.display = 'flex';
+                welcomeScreen.style.display = 'none';
+                mainPanel.style.display = 'none';
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            };
+
+
+            // Function to handle authentication and role checking logic
+            async function startAuthenticationAndRoleCheck() {
+                // This function is now mainly triggered after consent or on initial load with existing session
+                // The actual sign-in (email/password or anonymous) is handled by event listeners or onAuthStateChanged initial check.
+            }
+
+            // Centralized onAuthStateChanged listener for user state and role checking
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                    document.getElementById('displayUserId').textContent = `User ID: ${userId}`;
+                    console.log("User authenticated:", userId);
+
+                    // Fetch user role from Realtime Database
+                    const userRoleRef = ref(rtdb, `users/${userId}/role`);
+                    try {
+                        const snapshot = await get(userRoleRef);
+                        currentUserRole = snapshot.exists() ? snapshot.val() : 'basic'; // Default to basic if no role found
+                        console.log(`User role from Realtime Database: ${currentUserRole}`);
+
+                        // Update level display based on fetched role
+                        document.getElementById('displayUserRole').textContent = `Current Level: ${currentUserRole.toUpperCase()}`;
+
+                        if (currentUserRole === 'premium' || currentUserRole === 'admin') {
+                            if (sessionStorage.getItem('agreedToTerms') === 'true') {
+                                welcomeScreen.style.display = 'none';
+                                loginScreen.style.display = 'none';
+                                mainPanel.style.display = 'block';
+                                // Start periodic count updates only for authorized users
+                                if (!window.simulationInterval) { // Prevent multiple intervals
+                                    window.simulationInterval = setInterval(updateSimulatedCountsInRealtimeDB, 3000);
+                                }
+                                fetchAndObserveSimulatedCounts(); // Start observing counts from Realtime Database
+                                loadAffiliateData(userId); // Load dynamic affiliate data
+                                loadNotifications(); // Load dynamic notifications
+                                loadChatMessages(userId); // Load dynamic chat messages
+                            } else {
+                                // User authenticated and authorized, but hasn't agreed to terms yet
+                                showConsentScreen();
+                            }
+                        } else {
+                            // Access Denied scenario for unauthorized roles
+                            showConsentScreen(`Your account (${currentUserRole.toUpperCase()} role) does not have the required permissions to access the Private User Panel. Only 'Premium' or 'Admin' users are permitted. Please contact support.`, true);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching user role from Realtime Database:", error);
+                        showConsentScreen(`Error checking user role: ${error.message}. Please try again or contact support.`, true);
+                    }
+                } else {
+                    // User not authenticated scenario (e.g., token expired, signed out, no token)
+                    userId = null;
+                    document.getElementById('displayUserId').textContent = 'User ID: N/A (Not authenticated)';
+                    document.getElementById('displayUserRole').textContent = 'Current Level: N/A';
+                    console.log("User not authenticated.");
+                    // If no user, show login screen unless they are currently viewing the consent screen after a fresh login.
+                    // This logic ensures if they've not agreed, they see the consent screen. Otherwise, they see login.
+                    if (sessionStorage.getItem('agreedToTerms') !== 'true') {
+                        showConsentScreen(); // If not agreed, show consent
+                    } else {
+                        showLoginScreen(); // If agreed but not logged in, show login
+                    }
+                }
+            });
+
+            // Handle "I Agree" button click (on initial consent screen)
+            agreeButton.addEventListener('click', () => {
+                sessionStorage.setItem('agreedToTerms', 'true');
+                // The onAuthStateChanged listener will now handle showing the main panel based on role
+                // No direct display of mainPanel here, let onAuthStateChanged manage it.
+                // Temporarily hide consent screen while auth state is re-evaluated.
+                welcomeScreen.style.display = 'none';
+            });
+
+            // Login Form Submission
+            loginForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const email = loginForm.email.value;
+                const password = loginForm.password.value;
+
+                try {
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showMessage('Login successful! Redirecting...', 'success');
+                    // onAuthStateChanged will handle UI update
+                } catch (error) {
+                    console.error("Login failed:", error);
+                    let errorMessage = "Login failed. Please check your credentials.";
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                        errorMessage = "Invalid email or password.";
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = "Invalid email format.";
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = "Network error. Please check your internet connection.";
+                    }
+                    showMessage(`Error: ${errorMessage}`, 'error');
+                }
+            });
+
+            // Register Form Submission
+            registerForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const email = registerForm.newEmail.value;
+                const password = registerForm.newPassword.value;
+
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const newUser = userCredential.user;
+
+                    // Set default role for new users in Realtime Database
+                    // Path: users/{uid}/role
+                    await set(ref(rtdb, `users/${newUser.uid}/role`), 'basic'); // Default new users to 'basic' role
+                    console.log(`New user registered with ID: ${newUser.uid} and role 'basic'`);
+
+                    showMessage('Registration successful! You can now log in. Your default role is "basic".', 'success');
+                    showLoginScreen('Registration successful! Please log in.');
+                    registerForm.reset();
+                } catch (error) {
+                    console.error("Registration failed:", error);
+                    let errorMessage = "Registration failed. Please try again.";
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage = "Email address is already in use.";
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = "Password is too weak (min 6 characters).";
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = "Invalid email address.";
+                    }
+                    showMessage(`Error: ${errorMessage}`, 'error');
+                }
+            });
+
+            // Show Register form link
+            showRegisterLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                showRegisterScreen();
+            });
+
+            // Show Login form link
+            showLoginLink.addEventListener('click', (event) => {
+                event.preventDefault();
+                showLoginScreen();
+            });
+
+            // Logout button handler
+            logoutButton.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    sessionStorage.removeItem('agreedToTerms'); // Clear agreement on logout
+                    showMessage('Logged out successfully.', 'info');
+                    // onAuthStateChanged will handle redirecting to loginScreen
+                } catch (error) {
+                    console.error("Logout failed:", error);
+                    showMessage(`Logout failed: ${error.message}`, 'error');
+                }
+            });
+
+            // Event listener for opening the create ticket modal
+            if (makeSupportTicketsButton) {
+                makeSupportTicketsButton.addEventListener('click', () => {
+                    if (currentUserRole !== 'premium' && currentUserRole !== 'admin') {
+                        showMessage('You are not allowed to access this area. [Permission: Denied]', 'error');
+                        return;
+                    }
+                    createTicketModal.style.display = 'flex'; // Show the modal
+                    // You'll need a function here to populate the dropdown for tickets
+                    // For example: populateTicketAffiliateDropdown(userId);
+                });
+            }
+
+            // Event listener for closing the create ticket modal
+            if (cancelTicketButton) {
+                cancelTicketButton.addEventListener('click', () => {
+                    createTicketModal.style.display = 'none'; // Hide the modal
+                    createTicketForm.reset(); // Clear the form
+                    showMessage('Ticket creation cancelled.', 'info');
+                });
+            }
+
+            // Handle create ticket form submission
+            if (createTicketForm) {
+                createTicketForm.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                    if (currentUserRole !== 'premium' && currentUserRole !== 'admin') {
+                        showMessage('You are not allowed to create tickets. [Permission: Denied]', 'error');
+                        return;
+                    }
+
+                    const selectedAffiliateId = createTicketForm.ticketAffiliate.value;
+                    const category = createTicketForm.ticketCategory.value;
+                    const subject = createTicketForm.ticketSubject.value;
+                    const description = createTicketForm.ticketDescription.value;
+
+                    if (!selectedAffiliateId || !category || !subject || !description) {
+                        showMessage('Please fill all ticket fields.', 'error');
+                        return;
+                    }
+
+                    try {
+                        // Push new ticket to /userpaneldata/afftickets
+                        const affTicketsRef = ref(rtdb, `userpaneldata/afftickets`);
+                        const newTicketRef = push(affTicketsRef); // Use push for unique IDs
+                        await set(newTicketRef, {
+                            relatedAffiliateId: selectedAffiliateId,
+                            createdByUserId: userId,
+                            category: category,
+                            subject: subject,
+                            description: description,
+                            status: 'Open',
+                            createdAt: Date.now(),
+                            lastReplyBy: 'user',
+                            replies: [{
+                                message: description,
+                                senderId: userId,
+                                senderType: 'user',
+                                timestamp: Date.now()
+                            }]
+                        });
+
+                        showMessage('Support ticket created successfully!', 'success');
+                        createTicketForm.reset();
+                        createTicketModal.style.display = 'none';
+                    } catch (error) {
+                        console.error("Error creating ticket:", error);
+                        showMessage(`Error creating ticket: ${error.message}`, 'error');
+                    }
+                });
+            }
+
+            // Function to populate the affiliate dropdown in the ticket modal
+            async function populateTicketAffiliateDropdown(currentUserId) {
+                const ticketAffiliateSelect = document.getElementById('ticketAffiliate');
+                ticketAffiliateSelect.innerHTML = '<option value="">-- Loading affiliates --</option>'; // Loading state
+                try {
+                    const affiliatesRef = ref(rtdb, 'affiliate');
+                    const snapshot = await get(affiliatesRef);
+                    const allAffiliates = snapshot.val() || {};
+                    ticketAffiliateSelect.innerHTML = '<option value="">-- Select an affiliate --</option>'; // Clear loading state
+
+                    const affiliatedUsers = Object.keys(allAffiliates)
+                        .map(key => ({ id: key, ...allAffiliates[key] }))
+                        .filter(aff => aff.createdBy === currentUserId);
+
+                    if (affiliatedUsers.length === 0) {
+                        ticketAffiliateSelect.innerHTML = '<option value="">-- No downline affiliates found --</option>';
+                    } else {
+                        affiliatedUsers.forEach(affiliate => {
+                            const option = document.createElement('option');
+                            option.value = affiliate.id;
+                            option.textContent = affiliate.fullName || affiliate.email;
+                            ticketAffiliateSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error populating ticket affiliate dropdown:", error);
+                    ticketAffiliateSelect.innerHTML = '<option value="">-- Error loading affiliates --</option>';
+                    window.showMessage(`Error loading affiliates for ticket: ${error.message}`, 'error');
+                }
+            }
+
+
+            // Initial check on load (after DOM is ready)
+            // This will trigger the onAuthStateChanged listener which then decides which screen to show.
+            // If the user has already agreed to terms, it will bypass the consent screen and directly
+            // check authentication state and role.
+            if (sessionStorage.getItem('agreedToTerms') === 'true') {
+                // If user previously agreed, hide consent screen initially
+                welcomeScreen.style.display = 'none';
+                // Let onAuthStateChanged handle showing main panel or login
+            } else {
+                // If user hasn't agreed, show the welcome (consent) screen first
+                showConsentScreen();
+            }
+
+            // Event listener for tab clicks
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove 'active' class from all buttons and hide all content
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    // Add 'active' class to the clicked button
+                    button.classList.add('active');
+
+                    // Show the corresponding content
+                    const targetTab = button.dataset.tab;
+                    document.getElementById(targetTab).classList.add('active');
+                    messageBox.style.display = 'none'; // Hide any previous messages
+                    // Re-render data for specific tabs if needed
+                    if (targetTab === 'affiliateUnderUser') {
+                        loadAffiliateData(userId);
+                    } else if (targetTab === 'notifications') {
+                        loadNotifications();
+                    } else if (targetTab === 'liveChat') {
+                        loadChatMessages(userId);
+                    }
+                });
+            });
+
+            // Form submission handlers (example for client-side validation/logging)
+            const changePasswordForm = document.getElementById('changePasswordForm');
+            if (changePasswordForm) {
+                changePasswordForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent actual form submission
+
+                    const oldPass = document.getElementById('oldPassword').value;
+                    const newPass = document.getElementById('newPassword').value;
+                    const repeatPass = document.getElementById('repeatNewPassword').value;
+
+                    if (newPass !== repeatPass) {
+                        showMessage('New password and repeat password do not match!', 'error');
+                        return;
+                    }
+
+                    if (oldPass === newPass) {
+                        showMessage('New password cannot be the same as the old password!', 'error');
+                        return;
+                    }
+
+                    if (newPass.length < 8) {
+                        showMessage('New password must be at least 8 characters long!', 'error');
+                        return;
+                    }
+
+                    // In a real application, you would send this data to a server
+                    console.log('Change Password Request:', { oldPass, newPass });
+                    showMessage('Password change request submitted successfully!', 'success');
+                    changePasswordForm.reset(); // Clear form fields
+                });
+            }
+
+            const changeEmailForm = document.getElementById('changeEmailForm');
+            if (changeEmailForm) {
+                changeEmailForm.addEventListener('submit', (event) => {
+                    event.preventDefault(); // Prevent actual form submission
+
+                    const newEmail = document.getElementById('newEmail').value;
+                    // Basic email validation
+                    if (!newEmail || !newEmail.includes('@') || !newEmail.includes('.')) {
+                        showMessage('Please enter a valid email address.', 'error');
+                        return;
+                    }
+
+                    // In a real application, send this request to your admin panel API
+                    console.log('Change Email Request to Admin:', { newEmail });
+                    showMessage(`Email change request for "${newEmail}" sent to Admin Panel.`, 'success');
+                    changeEmailForm.reset(); // Clear form fields
+                });
+            }
+        });
+    </script>
+    <style>
+        /* Zyricco Theme Variables */
+        :root {
+            --primary-bg-color: #1a1a1a; /* Very dark grey, almost black */
+            --secondary-bg-color: #2c2c2c; /* Dark grey */
+            --card-bg-color: #333333; /* Slightly lighter grey for cards */
+            --text-color-primary: #f0f0f0; /* Light grey for primary text */
+            --text-color-secondary: #b0b0b0; /* Medium grey for secondary text */
+            --accent-color: #00aaff; /* A vibrant blue for accents and CTAs */
+            --accent-color-hover: #0088cc;
+            --border-color: #444444;
+            --font-primary: 'Montserrat', sans-serif;
+            --font-secondary: 'Roboto', sans-serif;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--body-bg-start) 0%, var(--body-bg-end) 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
+            font-family: var(--font-secondary);
+            background-color: var(--primary-bg-color);
+            color: var(--text-color-primary);
+            line-height: 1.6;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 1.5rem;
-            transition: background-color 0.5s ease; /* Smooth transition for theme change */
-        }
-        
-        /* Theme toggle button */
-        #themeToggle {
-            position: absolute;
-            top: 1.5rem;
-            right: 1.5rem;
-            background-color: var(--form-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow on button */
-        }
-        #themeToggle:hover {
-            background-color: var(--border-color);
-        }
-        .light-theme #themeToggle {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling for long content */
         }
 
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg-color);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
 
-        /* Custom styles for better aesthetics */
-        .form-container {
-            background-color: var(--form-bg);
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px var(--button-shadow);
-            padding: 2.5rem 3rem;
-            max-width: 50rem;
-            width: 100%;
-            transition: background-color 0.5s ease, box-shadow 0.5s ease;
-        }
-        .form-section-title {
-            @apply text-2xl font-bold mb-6 pb-3 border-b-2 border-blue-600;
-            color: var(--text-primary);
-        }
-        .input-field {
-            background-color: var(--input-bg);
-            border-color: var(--input-border);
-            color: var(--text-primary);
-            @apply w-full p-3.5 rounded-lg focus:outline-none focus:ring-3 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300 ease-in-out;
-        }
-        .input-field::placeholder {
-            color: var(--placeholder-color);
-        }
-        .label-text {
-            @apply block text-sm font-medium mb-1.5;
-            color: var(--text-secondary);
-        }
-        .file-upload-label {
-            background-color: var(--input-bg);
-            border-color: var(--input-border);
-            color: var(--text-secondary);
-            @apply block w-full p-4 border-2 border-dashed rounded-lg text-center cursor-pointer hover:border-blue-500 hover:text-blue-400 transition-all duration-300 ease-in-out;
-            @apply flex flex-col items-center justify-center;
-        }
-        .file-upload-label svg {
-            color: var(--focus-ring-color); /* Apply blue accent to icon */
-        }
-        .file-upload-input:focus + .file-upload-label {
-            @apply ring-3 ring-blue-500 border-blue-500;
-        }
-        .file-upload-input:hover + .file-upload-label {
-            @apply border-blue-500;
-        }
-        .submit-button {
-            @apply w-full py-4 px-6 text-white font-semibold rounded-lg shadow-xl hover:bg-blue-700 focus:outline-none focus:ring-3 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-100;
-            background-image: linear-gradient(45deg, var(--button-bg-start) 0%, var(--button-bg-end) 100%);
-            border: none;
-            box-shadow: 0 10px 20px var(--button-shadow);
-        }
-        .light-theme .submit-button {
-             background-image: linear-gradient(45deg, var(--button-bg-start) 0%, var(--button-bg-end) 100%);
-             box-shadow: 0 10px 20px var(--button-shadow);
-        }
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Custom modal styles for dual theme */
-        .modal {
-            display: none;
+        /* Full-screen containers for login/welcome */
+        .full-screen-container {
             position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: var(--modal-overlay-bg);
+            background-color: var(--primary-bg-color); /* Dark background */
+            color: var(--text-color-primary);
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-        .modal-content {
-            background-color: var(--modal-bg);
-            color: var(--text-primary);
-            margin: auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 550px;
-            box-shadow: 0 10px 30px var(--button-shadow);
+            z-index: 1000; /* Ensure it's on top */
+            padding: 20px;
+            box-sizing: border-box;
             text-align: center;
-            animation: slideIn 0.3s ease-out;
+            overflow-y: auto; /* Allow scrolling if content is too long */
         }
-        .modal-close {
-            color: var(--text-muted);
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 32px;
-            font-weight: bold;
-            cursor: pointer;
+
+        .auth-content {
+            max-width: 450px; /* Slightly smaller for auth forms */
+            background-color: var(--secondary-bg-color);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.5s ease-out;
         }
-        .modal-close:hover,
-        .modal-close:focus {
-            color: var(--text-primary);
+
+        .welcome-content {
+            max-width: 700px;
+            background-color: var(--secondary-bg-color);
+            padding: 3rem;
+            border-radius: 1rem;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            animation: fadeIn 0.5s ease-out;
+        }
+        .welcome-content h1, .auth-content h1 {
+            font-family: var(--font-primary);
+            color: var(--accent-color);
+            font-size: 2.5rem; /* Adjust as needed */
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+        }
+        .welcome-content p, .auth-content p {
+            font-family: var(--font-secondary);
+            font-size: 1.1rem;
+            color: var(--text-color-secondary);
+            margin-bottom: 1rem;
+        }
+        .welcome-content h3 {
+            font-family: var(--font-primary);
+            color: var(--text-color-primary);
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .welcome-content ul {
+            list-style: disc;
+            list-style-position: inside;
+            text-align: left;
+            margin: 0 auto 2rem;
+            padding-left: 1rem;
+            max-width: 500px;
+            color: var(--text-color-secondary);
+        }
+        .welcome-content ul li {
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Main Panel Styling */
+        .main-panel {
+            background-color: var(--secondary-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem; /* rounded-xl for Tailwind */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            position: relative; /* For caution banner positioning */
+        }
+
+        /* Header Title */
+        .main-panel h1 {
+            font-family: var(--font-primary);
+            color: var(--accent-color); /* Changed to accent color for prominence */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Caution Banner */
+        .caution-banner {
+            background-color: rgba(255, 69, 0, 0.3); /* Orange-red with opacity */
+            border: 1px solid #FF4500;
+            color: #FFB3A6; /* Lighter red text */
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(255, 69, 0, 0.1);
+        }
+
+        /* Section Titles */
+        .tab-content h2 {
+            font-family: var(--font-primary);
+            color: var(--text-color-primary); /* Changed to primary text color */
+        }
+
+        /* Tab Buttons */
+        .tab-btn {
+            background-color: var(--card-bg-color);
+            color: var(--text-color-primary);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+            font-family: var(--font-secondary);
+            border-radius: 0.75rem; /* Rounded-xl for consistency */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+        }
+        .tab-btn:hover {
+            background-color: var(--border-color); /* Slightly lighter on hover */
+            color: var(--accent-color);
+            transform: translateY(-1px); /* Slight lift on hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 170, 255, 0.3); /* Stronger accent-colored shadow */
+            border-color: var(--accent-color);
+            transform: translateY(-2px); /* More pronounced lift when active */
+        }
+
+        /* Hidden content styling */
+        .tab-content {
+            display: none;
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color-secondary); /* Default text color for content */
+            border-radius: 0.75rem; /* Rounded-xl for consistency */
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Control Styling (Inputs & Textareas) */
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        textarea,
+        select { /* Added select to general input styling */
+            background-color: var(--primary-bg-color); /* Darker background for inputs */
+            color: var(--text-color-primary); /* Light text in inputs */
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            line-height: 1.5rem;
+            padding: 0.5rem 1rem; /* Added padding for better visual */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        textarea:focus,
+        select:focus { /* Added select to focus styling */
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2); /* Accent color glow */
+        }
+        ::placeholder {
+            color: var(--text-color-secondary); /* Placeholder text color */
+            opacity: 0.7;
+        }
+        label {
+            color: var(--text-color-primary); /* Label text color */
+        }
+
+
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #fff;
+            padding: 12px 25px; /* Matched cta-button padding */
+            font-size: 1em; /* Matched cta-button font size */
+            font-weight: 600; /* Matched cta-button font weight */
             text-decoration: none;
+            border-radius: 5px; /* Matched cta-button border-radius */
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             cursor: pointer;
+            border: none; /* Ensure no default button border */
         }
+        .btn-primary:hover {
+            background-color: var(--accent-color-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: transparent; /* Changed to transparent for a subtle look */
+            color: var(--accent-color); /* Accent color text */
+            padding: 10px 20px; /* Slightly less padding than primary */
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            border: 2px solid var(--accent-color); /* Border in accent color */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .btn-secondary:hover {
+            background-color: var(--accent-color); /* Fill with accent color on hover */
+            color: #fff; /* White text on hover */
+        }
+
+        /* Message Box Styling */
+        .message-box {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color-primary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .message-box.bg-green-100 { /* For success messages */
+            background-color: rgba(50, 205, 50, 0.2); /* Lime Green with opacity */
+            border-color: #32CD32;
+            color: #C0FFEE; /* Lighter green text */
+        }
+        .message-box.bg-red-100 { /* For error messages */
+            background-color: rgba(255, 69, 0, 0.2); /* Orange Red with opacity */
+            border-color: #FF4500;
+            color: #FFB3A6; /* Lighter red text */
+        }
+        .message-box.bg-blue-100 { /* For info messages */
+            background-color: rgba(0, 170, 255, 0.2); /* Accent color with opacity */
+            border-color: var(--accent-color);
+            color: var(--text-color-primary);
+        }
+        .message-box button {
+            color: var(--text-color-secondary); /* Close button color */
+        }
+        .message-box button:hover {
+            color: var(--text-color-primary);
+        }
+
+        /* Specific section styling */
+        .chat-interface {
+            background-color: var(--primary-bg-color); /* Darker background for chat window */
+            border: 1px solid var(--border-color);
+        }
+        .chat-messages {
+            background-color: var(--secondary-bg-color); /* Even darker for message area */
+            border: 1px solid var(--border-color);
+            color: var(--text-color-secondary);
+        }
+        .chat-messages .text-indigo-700 { /* Host message color */
+            color: var(--accent-color);
+        }
+
+        .highlight-item, .bg-white.p-4.rounded-lg.shadow-sm.border.border-gray-200 { /* Inner cards/containers */
+            background-color: var(--primary-bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        .highlight-item h4 {
+            color: var(--accent-color);
+        }
+
+        .prose h3 {
+            color: var(--text-color-primary); /* Headings in T&C */
+        }
+        .prose p, .prose ul li {
+            color: var(--text-color-secondary); /* Text in T&C */
+        }
+        .prose a {
+            color: var(--accent-color);
+        }
+
+        /* Progress Bar */
+        .w-full.bg-gray-200.rounded-full.h-2\.5 {
+            background-color: var(--border-color); /* Background of progress bar */
+        }
+        .bg-indigo-600.h-2\.5.rounded-full {
+            background-color: var(--accent-color); /* Filled part of progress bar */
+        }
+
+        /* Notification Icons */
+        .text-indigo-500 { color: var(--accent-color); }
+        .text-green-500 { color: #32CD32; } /* Consistent green for success */
+        .text-red-500 { color: #FF4500; } /* Consistent red for error */
+
+        /* Responsive adjustments for overall panel and welcome screen */
+        @media (max-width: 768px) {
+            .main-panel {
+                padding: 1.5rem; /* Adjust padding on smaller screens */
+            }
+            .main-panel h1 {
+                font-size: 2rem;
+            }
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.875rem;
+            }
+            .tab-content h2 {
+                font-size: 1.5rem;
+            }
+            .welcome-content {
+                padding: 2rem;
+            }
+            .welcome-content h1 {
+                font-size: 1.8rem;
+            }
+            .welcome-content p {
+                font-size: 1rem;
+            }
+            .welcome-content h3 {
+                font-size: 1.2rem;
+            }
+            .auth-content {
+                padding: 1.5rem;
+            }
+            .auth-content h1 {
+                font-size: 2rem;
+            }
+        }
+
+        /* Blinking animation for dots */
+        @keyframes blink-green {
+            0%, 100% { background-color: #32CD32; opacity: 1; } /* Lime green, fully visible */
+            50% { background-color: #228B22; opacity: 0.5; } /* Darker green, semi-transparent */
+        }
+
+        .blinking-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+            vertical-align: middle;
+            animation: blink-green 1.5s infinite ease-in-out;
+        }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <!-- Theme Toggle Button -->
-    <button id="themeToggle" class="flex items-center gap-2">
-        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
-        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M3 12h1m15.325-4.275l-.707-.707M4.372 19.372l-.707-.707M18.95 18.95l-.707-.707M5.05 5.05l-.707-.707M12 18a6 6 0 100-12 6 6 0 000 12z" />
-        </svg>
-        <span id="themeText">Dark Theme</span>
-    </button>
-
-    <div class="form-container">
-        <h1 class="text-3xl sm:text-4xl font-extrabold text-center mb-2" style="color: var(--text-primary);">ZYRICCO IDENTITY VERIFICATION</h1>
-        <p class="text-center text-xl" style="color: var(--text-muted);">by ZYRICCO INSPECTION</p>
-
-        <form id="kycForm" class="space-y-8" onsubmit="handleFormSubmit(event)">
-            <!-- Personal Information Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Personal Information</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label for="fullName" class="label-text">Full Name</label>
-                        <input type="text" id="fullName" name="fullName" placeholder="As per ID document" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="dob" class="label-text">Date of Birth</label>
-                        <input type="date" id="dob" name="dob" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="nationality" class="label-text">Nationality</label>
-                        <select id="nationality" name="nationality" class="input-field" required>
-                            <option value="">Select Nationality</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="AU">Australia</option>
-                            <option value="DE">Germany</option>
-                            <option value="IN">India</option>
-                            <option value="JP">Japan</option>
-                            <!-- Add more nationalities as needed -->
+    <div id="createTicketModal" class="full-screen-container" style="display: none;">
+        <div class="auth-content"> <h2 class="text-2xl font-semibold mb-4 text-center">Create Support Ticket</h2>
+            <form id="createTicketForm" class="space-y-4">
+                <div>
+                    <label for="ticketAffiliate" class="block text-sm font-medium mb-1 text-left">Relates to Affiliate:</label>
+                    <select id="ticketAffiliate" class="w-full px-4 py-2" required>
+                        <option value="">-- Select an affiliate --</option>
                         </select>
-                    </div>
-                    <div>
-                        <label for="placeOfBirth" class="label-text">Place of Birth</label>
-                        <input type="text" id="placeOfBirth" name="placeOfBirth" placeholder="City, Country" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="gender" class="label-text">Gender</label>
-                        <select id="gender" name="gender" class="input-field" required>
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="maritalStatus" class="label-text">Marital Status</label>
-                        <select id="maritalStatus" name="maritalStatus" class="input-field" required>
-                            <option value="">Select Marital Status</option>
-                            <option value="single">Single</option>
-                            <option value="married">Married</option>
-                            <option value="divorced">Divorced</option>
-                            <option value="widowed">Widowed</option>
-                        </select>
-                    </div>
                 </div>
-            </div>
-
-            <!-- Address Information Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Current Residential Address</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div class="sm:col-span-2">
-                        <label for="streetAddress" class="label-text">Street Address</label>
-                        <input type="text" id="streetAddress" name="streetAddress" placeholder="House/Flat No., Street Name" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="city" class="label-text">City</label>
-                        <input type="text" id="city" name="city" placeholder="City" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="stateProvince" class="label-text">State / Province</label>
-                        <input type="text" id="stateProvince" name="stateProvince" placeholder="State or Province" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="postalCode" class="label-text">Postal Code</label>
-                        <input type="text" id="postalCode" name="postalCode" placeholder="Postal Code" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="country" class="label-text">Country</label>
-                        <select id="country" name="country" class="input-field" required>
-                            <option value="">Select Country</option>
-                            <option value="US">United States</option>
-                            <option value="CA">Canada</option>
-                            <option value="GB">United Kingdom</option>
-                            <option value="AU">Australia</option>
-                            <option value="DE">Germany</option>
-                            <option value="IN">India</option>
-                            <option value="JP">Japan</option>
-                            <!-- Add more countries as needed -->
-                        </select>
-                    </div>
+                <div>
+                    <label for="ticketCategory" class="block text-sm font-medium mb-1 text-left">Category:</label>
+                    <select id="ticketCategory" class="w-full px-4 py-2" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="General Inquiry">General Inquiry</option>
+                        <option value="Affiliate Commission">Affiliate Commission</option>
+                        <option value="Technical Issue">Technical Issue</option>
+                        <option value="Account Access">Account Access</option>
+                        <option value="Withdrawals">Withdrawals</option>
+                    </select>
                 </div>
-            </div>
-
-            <!-- Identification Document Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Identification Document</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label for="docType" class="label-text">Document Type</label>
-                        <select id="docType" name="docType" class="input-field" required>
-                            <option value="">Select Document Type</option>
-                            <option value="passport">Passport</option>
-                            <option value="national_id">National ID Card</option>
-                            <option value="driver_license">Driver's License</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="docNumber" class="label-text">Document Number</label>
-                        <input type="text" id="docNumber" name="docNumber" placeholder="e.g., A123B456C" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="issuingAuthority" class="label-text">Issuing Authority</label>
-                        <input type="text" id="issuingAuthority" name="issuingAuthority" placeholder="e.g., Passport Office" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="issueDate" class="label-text">Date of Issue</label>
-                        <input type="date" id="issueDate" name="issueDate" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="expiryDate" class="label-text">Date of Expiry</label>
-                        <input type="date" id="expiryDate" name="expiryDate" class="input-field" required>
-                    </div>
+                <div>
+                    <label for="ticketSubject" class="block text-sm font-medium mb-1 text-left">Subject:</label>
+                    <input type="text" id="ticketSubject" name="ticketSubject" required class="w-full px-4 py-2">
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
-                    <div>
-                        <label for="idFront" class="label-text">Upload ID Document (Front)</label>
-                        <input type="file" id="idFront" name="idFront" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('idFront', 'idFrontName')" required>
-                        <label for="idFront" class="file-upload-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                            <span id="idFrontName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
-                            <span class="text-xs" style="color: var(--text-muted);">Max file size: 5MB (JPG, PNG, PDF)</span>
-                        </label>
-                    </div>
-                    <div>
-                        <label for="idBack" class="label-text">Upload ID Document (Back)</label>
-                        <input type="file" id="idBack" name="idBack" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('idBack', 'idBackName')" required>
-                        <label for="idBack" class="file-upload-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                            <span id="idBackName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
-                            <span class="text-xs" style="color: var(--text-muted);">Max file size: 5MB (JPG, PNG, PDF)</span>
-                        </label>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="proofOfAddress" class="label-text">Upload Proof of Address (e.g., Utility Bill, Bank Statement)</label>
-                        <input type="file" id="proofOfAddress" name="proofOfAddress" accept="image/*,.pdf" class="hidden file-upload-input" onchange="updateFileName('proofOfAddress', 'proofOfAddressName')" required>
-                        <label for="proofOfAddress" class="file-upload-label">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                            </svg>
-                            <span id="proofOfAddressName" class="block font-semibold text-lg" style="color: var(--text-primary);">Drag & Drop or Browse</span>
-                            <span class="text-xs" style="color: var(--text-muted);">Dated within the last 3 months. Max file size: 5MB (JPG, PNG, PDF)</span>
-                        </label>
-                    </div>
+                <div>
+                    <label for="ticketDescription" class="block text-sm font-medium mb-1 text-left">Description:</label>
+                    <textarea id="ticketDescription" name="ticketDescription" rows="5" required class="w-full px-4 py-2"></textarea>
                 </div>
-            </div>
-
-            <!-- Source of Funds/Wealth Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Source of Funds/Wealth</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label for="occupation" class="label-text">Occupation</label>
-                        <input type="text" id="occupation" name="occupation" placeholder="e.g., Engineer, Teacher" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="employerName" class="label-text">Employer Name (if applicable)</label>
-                        <input type="text" id="employerName" name="employerName" placeholder="Company Name" class="input-field">
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="incomeRange" class="label-text">Annual Income Range</label>
-                        <select id="incomeRange" name="incomeRange" class="input-field" required>
-                            <option value="">Select Income Range</option>
-                            <option value="0-25k">Less than $25,000</option>
-                            <option value="25k-50k">$25,000 - $50,000</option>
-                            <option value="50k-100k">$50,000 - $100,000</option>
-                            <option value="100k-250k">$100,000 - $250,000</option>
-                            <option value="250k+">More than $250,000</option>
-                        </select>
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label for="sourceOfFunds" class="label-text">Primary Source of Funds/Wealth</label>
-                        <input type="text" id="sourceOfFunds" name="sourceOfFunds" placeholder="e.g., Salary, Savings, Inheritance" class="input-field" required>
-                    </div>
+                <div class="flex justify-between gap-4">
+                    <button type="button" id="cancelTicketButton" class="btn-secondary flex-grow">Cancel</button>
+                    <button type="submit" class="btn-primary flex-grow">Submit Ticket</button>
                 </div>
-            </div>
-
-            <!-- Contact Information Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Contact Information</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                        <label for="email" class="label-text">Email Address</label>
-                        <input type="email" id="email" name="email" placeholder="you@example.com" class="input-field" required>
-                    </div>
-                    <div>
-                        <label for="phoneNumber" class="label-text">Phone Number</label>
-                        <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="+1234567890" class="input-field" required>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Declarations Section -->
-            <div class="space-y-6">
-                <h2 class="form-section-title">Declarations</h2>
-                <div class="space-y-4">
-                    <div class="flex items-start">
-                        <input type="checkbox" id="fatca" name="fatca" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
-                        <label for="fatca" class="ml-3 text-base" style="color: var(--text-secondary);">I am NOT a U.S. person for FATCA purposes.</label>
-                    </div>
-                    <div class="flex items-start">
-                        <input type="checkbox" id="crs" name="crs" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
-                        <label for="crs" class="ml-3 text-base" style="color: var(--text-secondary);">I confirm my tax residency details are accurate for CRS reporting.</label>
-                    </div>
-                    <div class="flex items-start">
-                        <input type="checkbox" id="pep" name="pep" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1">
-                        <label for="pep" class="ml-3 text-base" style="color: var(--text-secondary);">I declare that I am NOT a Politically Exposed Person (PEP) or a close associate/family member of one.</label>
-                    </div>
-                    <div class="flex items-start">
-                        <input type="checkbox" id="terms" name="terms" class="h-5 w-5 text-blue-600 border-gray-500 rounded focus:ring-blue-500 mt-1" required>
-                        <label for="terms" class="ml-3 text-base" style="color: var(--text-secondary);">I have read and agree to the <a href="terms.html" class="text-blue-400 hover:underline font-semibold">Terms and Conditions</a> and <a href="privacy.html" class="text-blue-400 hover:underline font-semibold">Privacy Policy</a>.</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="pt-8">
-                <button type="submit" id="submitButton" class="submit-button">
-                    <span id="buttonText">Submit Application</span>
-                    <div id="loadingSpinner" class="loading-spinner hidden mx-auto"></div>
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Custom Modal for Messages -->
-    <div id="kycModal" class="modal">
-        <div class="modal-content relative">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <p id="modalMessage" class="text-lg font-medium mb-6" style="color: var(--text-primary);"></p>
-            <button onclick="closeModal()" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200" style="background-color: var(--button-bg-start); color: white;">Close</button>
+            </form>
         </div>
     </div>
 
-    <script>
-        const themeToggle = document.getElementById('themeToggle');
-        const moonIcon = document.getElementById('moonIcon');
-        const sunIcon = document.getElementById('sunIcon');
-        const themeText = document.getElementById('themeText');
-        const body = document.body;
+    <div id="loginScreen" class="full-screen-container">
+        <div class="auth-content">
+            <h1 class="text-3xl font-extrabold mb-6">GainX User Login</h1>
 
-        // Function to set theme
-        function setTheme(theme) {
-            if (theme === 'light') {
-                body.classList.add('light-theme');
-                moonIcon.classList.add('hidden');
-                sunIcon.classList.remove('hidden');
-                themeText.textContent = 'Light Theme';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.classList.remove('light-theme');
-                moonIcon.classList.remove('hidden');
-                sunIcon.classList.add('hidden');
-                themeText.textContent = 'Dark Theme';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="loginEmail" class="block text-sm font-medium mb-1 text-left">Email</label>
+                    <input type="email" id="loginEmail" name="email" required class="w-full">
+                </div>
+                <div>
+                    <label for="loginPassword" class="block text-sm font-medium mb-1 text-left">Password</label>
+                    <input type="password" id="loginPassword" name="password" required class="w-full">
+                </div>
+                <button type="submit" class="btn-primary w-full">Login</button>
+                <p class="text-sm text-center text-[var(--text-color-secondary)] mt-4">
+                    Don't have an account? <a href="#" id="showRegister" class="text-[var(--accent-color)] hover:underline">Register here</a>
+                </p>
+            </form>
 
-        // Check for saved theme preference on load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark if no preference
-            setTheme(savedTheme);
-        });
+            <form id="registerForm" class="space-y-4" style="display:none;">
+                <h2 class="text-2xl font-semibold mb-4 text-left">Register New Account</h2>
+                <div>
+                    <label for="registerEmail" class="block text-sm font-medium mb-1 text-left">Email</label>
+                    <input type="email" id="registerEmail" name="newEmail" required class="w-full">
+                </div>
+                <div>
+                    <label for="registerPassword" class="block text-sm font-medium mb-1 text-left">Password</label>
+                    <input type="password" id="registerPassword" name="newPassword" required class="w-full">
+                </div>
+                <button type="submit" class="btn-primary w-full">Register</button>
+                <p class="text-sm text-center text-[var(--text-color-secondary)] mt-4">
+                    Already have an account? <a href="#" id="showLogin" class="text-[var(--accent-color)] hover:underline">Login here</a>
+                </p>
+            </form>
+        </div>
+    </div>
 
-        // Toggle theme on button click
-        themeToggle.addEventListener('click', () => {
-            if (body.classList.contains('light-theme')) {
-                setTheme('dark');
-            } else {
-                setTheme('light');
-            }
-        });
+    <div id="welcomeScreen" class="full-screen-container">
+        <div class="welcome-content">
+            <h1>Welcome to the <span class="text-[var(--accent-color)]">GainX Private User Panel</span></h1>
+            <p>
+                We are delighted to extend this exclusive invitation to you. You have been approved as our **Special User** based on your exceptional performance and invaluable contributions to the GainX ecosystem. This panel is meticulously designed to provide you with unparalleled access to advanced features, dedicated support, and unique opportunities.
+            </p>
+            <p class="font-bold text-lg text-[var(--accent-color)] mt-6">
+                Please review the essential terms and conditions before proceeding.
+            </p>
+            <h3>User Agreement & Disclaimers:</h3>
+            <ul class="text-justify">
+                <li>By proceeding, you acknowledge and agree to abide by all our **Terms and Conditions, Privacy Policy, and Anti-Money Laundering (AML) policies.**</li>
+                <li>Any **misuse** of the panel's features, attempts at **exploiting bugs or vulnerabilities**, or engaging in **unethical activities** will result in immediate and irreversible consequences.</li>
+                <li>**Accidental transactions** or **fraudulent attempts** originating from your account are solely your responsibility.</li>
+                <li>The company reserves the absolute right to **ban accounts, block IP addresses, and initiate legal actions** without prior warning or explanation, should any violation of our policies or illicit activity be detected.</li>
+                <li>Your continued access is contingent upon your adherence to these guidelines, ensuring a secure and equitable environment for all.</li>
+            </ul>
+            <button id="agreeButton" class="btn-primary mt-6 px-8 py-3 text-xl">I Agree & Proceed</button>
+        </div>
+    </div>
 
-        // Function to update file name in the label
-        function updateFileName(inputId, spanId) {
-            const input = document.getElementById(inputId);
-            const span = document.getElementById(spanId);
-            if (input.files.length > 0) {
-                span.textContent = input.files[0].name;
-            } else {
-                span.textContent = 'Drag & Drop or Browse'; // Reset text
-            }
-        }
+    <div id="mainPanel" class="main-panel p-6 md:p-8 rounded-xl w-full max-w-4xl" style="display: none;">
+        <div class="absolute top-4 right-4">
+            <button id="logoutButton" class="btn-secondary px-4 py-2 text-sm">Logout</button>
+        </div>
 
-        // Function to handle form submission
-        async function handleFormSubmit(event) {
-            event.preventDefault(); // Prevent default form submission
+        <div class="caution-banner">
+            <p class="font-bold">
+                CAUTION: Some actions on this panel are NON-REVERSIBLE. We will NOT take any responsibility for any losses or mistakes incurred.
+            </p>
+        </div>
+        <h1 class="text-3xl font-extrabold mb-6 text-center">Special Users Panel</h1>
 
-            const submitButton = document.getElementById('submitButton');
-            const buttonText = document.getElementById('buttonText');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const kycModal = document.getElementById('kycModal');
-            const modalMessage = document.getElementById('modalMessage');
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-sm text-center mb-4 p-2 rounded-lg bg-[var(--card-bg-color)] border border-[var(--border-color)]">
+            <span id="displayUserId" class="font-medium text-[var(--text-color-secondary)]">User ID: Loading...</span>
+            <span id="displayUserRole" class="text-md font-medium text-[var(--accent-color)]">Current Level: Loading...</span>
+        </div>
 
-            // Show loading state
-            buttonText.classList.add('hidden');
-            loadingSpinner.classList.remove('hidden');
-            submitButton.disabled = true;
+        <div id="messageBox" class="message-box text-sm">
+            <span id="messageText"></span>
+            <button onclick="document.getElementById('messageBox').style.display='none'" class="float-right font-bold ml-2">X</button>
+        </div>
 
-            // Simulate API call
-            try {
-                // Gather form data
-                const formData = new FormData(event.target);
-                const data = {};
-                for (const [key, value] of formData.entries()) {
-                    if (key.includes('File') || key.includes('idBack') || key.includes('proofOfAddress')) {
-                        // For file inputs, just store the file name for display purposes,
-                        // in a real app you'd handle file uploads differently (e.g., to a server)
-                        data[key] = value.name;
-                    } else {
-                        data[key] = value;
-                    }
-                }
-                console.log('Form Data:', data);
+        <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+            <button class="tab-btn active px-4 py-2 font-medium transition-all duration-200" data-tab="changePassword">Change Password</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="changeEmail">Change Email</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="customDomain">Custom Domain</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="affiliateUnderUser">Affiliate Under User</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="manageAffiliate">Manage Affiliate</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="liveChat">Live Chat</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="promotionPage">Promotion Page</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="notifications">Notifications</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="termsAndConditions">Terms & Conditions</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="totalUsersCount">Total Users</button>
+            <button class="tab-btn px-4 py-2 font-medium transition-all duration-200" data-tab="specialServices">Special Services</button>
+        </div>
 
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
+        <div id="changePassword" class="tab-content active p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Change Password</h2>
+            <form id="changePasswordForm" class="space-y-4">
+                <div>
+                    <label for="oldPassword" class="block text-sm font-medium mb-1">Old Password</label>
+                    <input type="password" id="oldPassword" name="oldPassword" required class="w-full">
+                </div>
+                <div>
+                    <label for="newPassword" class="block text-sm font-medium mb-1">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required class="w-full">
+                </div>
+                <div>
+                    <label for="repeatNewPassword" class="block text-sm font-medium mb-1">Repeat New Password</label>
+                    <input type="password" id="repeatNewPassword" name="repeatNewPassword" required class="w-full">
+                </div>
+                <button type="submit" class="btn-primary">Change Password</button>
+            </form>
+        </div>
 
-                // Success message
-                modalMessage.textContent = "KYC application submitted successfully! We will review your details shortly.";
-                kycModal.style.display = 'flex';
+        <div id="changeEmail" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Change Email Address</h2>
+            <form id="changeEmailForm" class="space-y-4">
+                <div>
+                    <label for="newEmail" class="block text-sm font-medium mb-1">New Email Address</label>
+                    <input type="email" id="newEmail" name="newEmail" required class="w-full">
+                </div>
+                <p class="text-sm mt-2 text-[var(--text-color-secondary)]">Request will be sent to the Admin Panel for approval.</p>
+                <button type="submit" class="btn-primary">Request Email Change</button>
+            </form>
+        </div>
 
-                // You would typically send this data to a backend server here
-                // Example: fetch('/api/kyc-submit', { method: 'POST', body: formData });
+        <div id="customDomain" class="tab-content p-6 rounded-lg shadow-sm text-center">
+            <h2 class="text-2xl font-semibold mb-4">Manage Custom Domain</h2>
+            <p class="mb-4 text-[var(--text-color-secondary)]">You Don't Have Any Custom Domain Assigned.</p>
+            <button class="btn-secondary" onclick="showMessage('You are not allowed to access this area. [Permission: Denied]', 'error')">Request Custom Domain</button>
+        </div>
 
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                // Error message
-                modalMessage.textContent = "There was an error submitting your KYC application. Please try again.";
-                kycModal.style.display = 'flex';
-            } finally {
-                // Hide loading state
-                buttonText.classList.remove('hidden');
-                loadingSpinner.classList.add('hidden');
-                submitButton.disabled = false;
-            }
-        }
+        <div id="affiliateUnderUser" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Affiliate Details</h2>
+            <div class="space-y-4">
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Current Plan: <span class="font-semibold text-[var(--accent-color)]">Standard Affiliate</span></h3>
+                    <p class="text-[var(--text-color-secondary)]"><strong>Commission Rate:</strong> 15% on all eligible sales.</p>
+                </div>
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Special Tasks for Promos:</h3>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-color-secondary)]">
+                        <li>Achieve 50 new sign-ups this month for a 5% bonus.</li>
+                        <li>Promote our new product line on social media.</li>
+                        <li>Participate in the upcoming webinar for an exclusive offer.</li>
+                    </ul>
+                </div>
 
-        // Function to close the modal
-        function closeModal() {
-            document.getElementById('kycModal').style.display = 'none';
-        }
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-4">Your Downline Affiliates</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-[var(--border-color)]">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color-secondary)] uppercase tracking-wider">Affiliate ID</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color-secondary)] uppercase tracking-wider">Status</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color-secondary)] uppercase tracking-wider">Referred Users</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-[var(--text-color-secondary)] uppercase tracking-wider">Total Earnings</th>
+                                </tr>
+                            </thead>
+                            <tbody id="downlineAffiliatesTableBody" class="divide-y divide-[var(--border-color)]">
+                                <tr><td colspan="4" class="px-4 py-2 text-center text-[var(--text-color-secondary)]">Loading affiliates...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        // Close modal if user clicks outside of it
-        window.onclick = function(event) {
-            const kycModal = document.getElementById('kycModal');
-            if (event.target == kycModal) {
-                kycModal.style.display = 'none';
-            }
-        }
-    </script>
+        <div id="manageAffiliate" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Manage Affiliate Account</h2>
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <p class="font-medium text-[var(--text-color-primary)]">Change Plan:</p>
+                    <button class="btn-secondary" onclick="showMessage('You are not allowed to access this area. [Permission: Denied]', 'error')">Request Plan Change (Admin Panel)</button>
+                </div>
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">View Affiliate Account Details:</h3>
+                    <div class="flex items-center gap-4 mb-4">
+                        <label for="affiliateSelector" class="text-sm font-medium text-[var(--text-color-primary)]">Select Affiliate:</label>
+                        <select id="affiliateSelector" class="flex-grow max-w-xs">
+                            <option value="">-- Select an affiliate --</option>
+                            </select>
+                    </div>
+                    <button class="btn-primary" onclick="showMessage('You are not allowed to access this area. [Permission: Denied]', 'error')">View Details</button>
+                </div>
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Support Tickets</h3>
+                    <p class="mb-3 text-[var(--text-color-secondary)]">Create and manage support tickets for your downline affiliates.</p>
+                    <button id="makeSupportTicketsButton" class="btn-primary">Make Support Tickets</button>
+                </div>
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Boost/Top-up User</h3>
+                    <p class="mb-3 text-[var(--text-color-secondary)]">Provide a boost or top-up for your affiliated users' accounts.</p>
+                    <button class="btn-primary" onclick="showMessage('You are not allowed to access this area. [Permission: Denied]', 'error')">Boost/Top-up User</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="liveChat" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Live Chat with Host</h2>
+            <p class="mb-4 text-[var(--text-color-secondary)]">This live chat feature provides a direct, real-time communication channel with our host for immediate assistance and inquiries.</p>
+            <div class="chat-interface p-4 rounded-lg shadow-sm min-h-[200px] flex flex-col justify-between">
+                <div class="chat-messages flex-grow overflow-y-auto mb-4 p-2 rounded-lg">
+                    </div>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Type your message..." class="flex-grow px-4 py-2">
+                    <button class="btn-primary" onclick="showMessage('You are not allowed to send messages. [Permission: Denied]', 'error')">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="promotionPage" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Promotion Page</h2>
+            <div class="space-y-6">
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Affiliate Promotions</h3>
+                    <p class="mb-3 text-[var(--text-color-secondary)]">Discover the latest promotions available for your affiliates to leverage.</p>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-color-secondary)]">
+                        <li>Holiday Season Bonus: Get an extra 10% commission on sales from Dec 1 - Dec 31.</li>
+                        <li>New User Referral Campaign: Refer 10 new users and get a $50 bonus.</li>
+                        <li>Participate in the upcoming webinar for an exclusive offer.</li>
+                    </ul>
+                </div>
+
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Available Claims</h3>
+                    <p class="mb-3 text-[var(--text-color-secondary)]">Here are the claims you can make based on your performance.</p>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-color-secondary)]">
+                        <li>Claim your $100 Q1 performance bonus.</li>
+                        <li>Claim your 50 free credits for reaching the gold tier.</li>
+                    </ul>
+                    <button class="btn-primary mt-4" onclick="showMessage('You are not allowed to claim this. [Permission: Denied]', 'error')">Claim Bonus</button>
+                </div>
+
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Tasks (Progress Bar-Based)</h3>
+                    <p class="mb-3 text-[var(--text-color-secondary)]">Complete these tasks to unlock rewards. Limited tasks available.</p>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-sm mb-1 text-[var(--text-color-secondary)]">Onboard 5 new users (3/5 complete)</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 60%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm mb-1 text-[var(--text-color-secondary)]">Generate 100 website visitors (75/100 complete)</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 75%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary mt-4" onclick="showMessage('You are not allowed to manage tasks. [Permission: Denied]', 'error')">Manage Tasks</button>
+                </div>
+
+                <div class="p-4 rounded-lg shadow-sm bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
+                    <h3 class="text-lg font-medium mb-2">Special Promos</h3>
+                    <p class="text-[var(--text-color-secondary)]">Exclusive promotions for high-performing users.</p>
+                    <ul class="list-disc list-inside space-y-1 text-[var(--text-color-secondary)]">
+                        <li>Early access to beta features.</li>
+                        <li>Dedicated account manager for top 1% affiliates.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Notifications</h2>
+            <p class="mb-4 text-[var(--text-color-secondary)]">Notifications sent from the Admin Panel will appear here.</p>
+            <div class="space-y-3">
+                </div>
+        </div>
+
+        <div id="termsAndConditions" class="tab-content p-6 rounded-lg shadow-sm max-h-[500px] overflow-y-auto">
+            <h2 class="text-2xl font-semibold mb-4">Terms and Conditions</h2>
+            <div class="prose max-w-none">
+                <p class="text-[var(--text-color-secondary)]">Welcome to our Special Users Panel. These Terms and Conditions outline the rules and regulations for the use of our services.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">1. Acceptance of Terms</h3>
+                <p class="text-[var(--text-color-secondary)]">By accessing or using the Special Users Panel, you agree to be bound by these Terms and Conditions and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">2. User Account</h3>
+                <p class="text-[var(--text-color-secondary)]">You are responsible for maintaining the confidentiality of your account and password and for restricting access to your computer. You agree to accept responsibility for all activities that occur under your account or password.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">3. Affiliate Program</h3>
+                <p class="text-[var(--text-color-secondary)]">Our affiliate program allows users to earn commissions by referring new customers. Specific commission rates, plans, and tasks will be outlined within the Affiliate section of the panel. All commissions are subject to verification and may be adjusted or withheld in cases of fraud or non-compliance with our policies.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">4. Custom Domains</h3>
+                <p class="text-[var(--text-color-secondary)]">Users may request custom domain assignments, which are subject to admin approval and availability. We reserve the right to deny any custom domain request at our discretion.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">5. Live Chat and Support</p>
+                <p class="text-[var(--text-color-secondary)]">The live chat feature is provided for direct communication with our host/admin. Support tickets can be submitted for specific issues related to your account or affiliates. We aim to respond to all inquiries in a timely manner.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">6. Promotions and Tasks</h3>
+                <p class="text-[var(--text-color-secondary)]">Promotions and tasks are offered periodically and are subject to specific terms and conditions detailed within the Promotion Page. Completion of tasks may be rewarded with bonuses or claims as specified. All rewards are non-transferable.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">7. Privacy Policy</p>
+                <p class="text-[var(--text-color-secondary)]">Your privacy is important to us. Our Privacy Policy, which is incorporated into these Terms by reference, describes how we collect, use, and disclose your personal information. Please review it carefully.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">8. Changes to Terms</h3>
+                <p class="text-[var(--text-color-secondary)]">We reserve the right to revise these Terms and Conditions at any time without notice. By using this website, you are agreeing to be bound by the then-current version of these Terms and Conditions.</p>
+                <h3 class="text-xl font-semibold mt-4 mb-2">9. Governing Law</h3>
+                <p class="text-[var(--text-color-secondary)]">These terms and conditions are governed by and construed in accordance with the laws of [Your Jurisdiction] and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location.</p>
+                <p class="mt-6 text-sm text-gray-500">Last updated: June 12, 2025</p>
+            </div>
+        </div>
+
+        <div id="totalUsersCount" class="tab-content p-6 rounded-lg shadow-sm text-center">
+            <h2 class="text-2xl font-semibold mb-4">Total Users Count</h2>
+            <p class="mb-4 text-xl text-[var(--text-color-secondary)]">Current Engaged Users:</p>
+            <div class="flex flex-col md:flex-row justify-center gap-6 mb-4">
+                <div class="flex items-center bg-[var(--card-bg-color)] p-4 rounded-lg border border-[var(--border-color)]" style="min-width: 280px;">
+                    <span class="text-xl font-semibold text-[var(--text-color-primary)] mr-2">ZYRICO Services:</span>
+                    <p id="zyricoCountDisplay" class="text-4xl font-bold text-[var(--accent-color)]">Loading...</p>
+                    <span class="blinking-dot"></span>
+                </div>
+                <div class="flex items-center bg-[var(--card-bg-color)] p-4 rounded-lg border border-[var(--border-color)]" style="min-width: 200px;">
+                    <span class="text-xl font-semibold text-[var(--text-color-primary)] mr-2">GainX:</span>
+                    <p id="gainxCountDisplay" class="text-4xl font-bold text-[var(--accent-color)]">Loading...</p>
+                    <span class="blinking-dot"></span>
+                </div>
+            </div>
+            <p class="text-sm mt-2 text-[var(--text-color-secondary)]"><em>(Counts update dynamically from Realtime Database)</em></p>
+        </div>
+
+        <div id="specialServices" class="tab-content p-6 rounded-lg shadow-sm">
+            <h2 class="text-2xl font-semibold mb-4">Special Services Access</h2>
+            <p class="mb-4 text-[var(--text-color-secondary)]">Access exclusive services tailored for our special users.</p>
+            <ul class="list-disc list-inside space-y-2 text-[var(--text-color-secondary)]">
+                <li><span class="font-medium text-[var(--accent-color)]">Credit Line Access:</span> Secure flexible credit lines to scale your operations.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Exclusive International User Meetups:</span> Participate in private global gatherings for elite networking.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Premium API Access:</span> Gain enhanced access to our platform's API for advanced integrations and custom solutions.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Dedicated Technical Support:</span> Receive prioritized, one-on-one support from our expert technical team.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Advanced Analytics & Reporting:</span> Access comprehensive performance metrics and bespoke reports for deeper insights.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Exclusive Content Library:</span> A curated collection of premium resources, strategic guides, and training materials.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Early Feature Previews:</span> Be among the first to test and provide feedback on new features before public release.</li>
+                <li><span class="font-medium text-[var(--accent-color)]">Personalized Coaching Sessions:</span> Benefit from one-on-one strategic coaching sessions with our industry experts.</li>
+            </ul>
+        </div>
+
+    </div>
 </body>
 </html>
