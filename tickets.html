@@ -240,7 +240,7 @@
         <p id="no-tickets-message" class="text-gray-500 p-4 text-center">Loading tickets...</p>
         </div>
     </div>
-    
+
     <div class="text-center mt-8">
       <a href="index.html" class="inline-flex items-center btn btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
@@ -248,7 +248,7 @@
         </svg>
         Back to Wallet
       </a>
-        <a href="help.html" class="ml-4 inline-flex items-center btn btn-secondary">
+       <a href="help.html" class="ml-4 inline-flex items-center btn btn-secondary">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
         </svg>
@@ -383,7 +383,7 @@
             }
         });
     } else {
-       if (authStatusEl) authStatusEl.textContent = 'Authentication service unavailable.';
+        if (authStatusEl) authStatusEl.textContent = 'Authentication service unavailable.';
     }
 
     // --- Generic Message Modal Functions ---
@@ -409,14 +409,14 @@
             const isHidden = createTicketFormEl.classList.toggle('hidden');
             if (isHidden) {
                 formToggleIconEl.textContent = '+';
-                formToggleTextEl.textContent = 'New Support Request'; 
+                formToggleTextEl.textContent = 'New Support Request';
             } else {
                 formToggleIconEl.textContent = '-';
-                formToggleTextEl.textContent = 'Cancel'; 
+                formToggleTextEl.textContent = 'Cancel';
             }
         });
     }
-    
+
     // --- Format Timestamp ---
     function formatFirebaseTimestamp(timestamp) {
         if (!timestamp) return 'N/A';
@@ -432,29 +432,32 @@
     if (createTicketFormEl) {
         createTicketFormEl.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUserId) {
+                showGenericMessage("You must be logged in to create a ticket.", true);
+                return;
+            }
 
             const subject = document.getElementById('ticketSubject').value.trim();
             const category = document.getElementById('ticketCategory').value;
             const priority = document.getElementById('ticketPriority').value;
             const description = document.getElementById('ticketDescription').value.trim();
-            
-            // Secret mode 1: Redirect to private manage page
-            if (subject === "/mngprvmode" && category === "Account Access" && priority === "High" && description === "approvemngmode") {
-                window.location.href = 'privatemanage.html';
-                return; 
-            }
-            
-            // Secret mode 2: Show notice
-            if (subject === "/chckprv" && category === "Account Access" && priority === "High" && description === "/chckprv") {
-                showGenericMessage("PRVMode-Beta Enabled", false);
-                createTicketFormEl.reset();
-                return; 
-            }
 
-            if (!currentUserId) {
-                showGenericMessage("You must be logged in to create a ticket.", true);
-                return;
+            // =================================================================
+            // == MODIFICATION START: Check for special command              ==
+            // =================================================================
+            if (
+                subject === '/openspmenu' &&
+                category === 'Account Access' &&
+                priority === 'High' &&
+                description.startsWith('/openspmenu')
+            ) {
+                // If conditions are met, redirect to the VIP panel
+                window.location.href = 'vipuserpanel.html';
+                return; // Stop the function here to prevent ticket creation
             }
+            // =================================================================
+            // == MODIFICATION END                                           ==
+            // =================================================================
 
             if (!subject || !description) {
                 showGenericMessage("Subject and Description are required.", true);
@@ -470,12 +473,12 @@
                 const newTicketData = {
                     userId: currentUserId,
                     userEmail: currentUserEmail || 'N/A',
-                    ticketIdShort: newTicketRef.key.slice(-6).toUpperCase(), 
+                    ticketIdShort: newTicketRef.key.slice(-6).toUpperCase(),
                     subject: subject,
                     category: category,
                     priority: priority,
-                    description: description, 
-                    status: "Open", 
+                    description: description,
+                    status: "Open",
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     lastReplyBy: "user",
@@ -490,13 +493,12 @@
                     ]
                 };
                 await set(newTicketRef, newTicketData);
-                // Updated success message below
                 showGenericMessage("Your support ticket has been successfully created. Our team will review your request, and you can typically expect an update or resolution within 24 to 48 business hours.", false);
                 createTicketFormEl.reset();
-                createTicketFormEl.classList.add('hidden'); 
+                createTicketFormEl.classList.add('hidden');
                 formToggleIconEl.textContent = '+';
-                formToggleTextEl.textContent = 'New Support Request'; 
-                loadUserTickets(); 
+                formToggleTextEl.textContent = 'New Support Request';
+                loadUserTickets();
             } catch (error) {
                 console.error("Error creating ticket:", error);
                 showGenericMessage("Failed to create ticket: " + error.message, true);
@@ -514,16 +516,16 @@
         const ticketsQuery = query(ref(database, 'tickets'), orderByChild('userId'), equalTo(currentUserId));
         onValue(ticketsQuery, (snapshot) => {
             if (myTicketsListEl && noTicketsMessageEl) {
-                myTicketsListEl.innerHTML = ''; 
+                myTicketsListEl.innerHTML = '';
                 if (snapshot.exists()) {
                     noTicketsMessageEl.style.display = 'none';
                     let tickets = [];
                     snapshot.forEach(childSnapshot => {
                         tickets.push({ id: childSnapshot.key, ...childSnapshot.val() });
                     });
-                    
+
                     tickets.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-                    
+
                     tickets.forEach(ticket => displayTicketInList(ticket));
                 } else {
                     noTicketsMessageEl.textContent = 'No support tickets found.';
@@ -585,7 +587,7 @@
                         const messageDiv = document.createElement('div');
                         messageDiv.classList.add('message-bubble');
                         const senderName = reply.senderType === 'user' ? (reply.senderEmail || 'You') : 'Support Team';
-                        
+
                         messageDiv.innerHTML = `
                             <p class="font-medium text-sm">${senderName}</p>
                             <p>${reply.message}</p>
@@ -598,8 +600,8 @@
                         }
                         ticketMessagesContainerEl.appendChild(messageDiv);
                     });
-                } else if (ticket.description) { 
-                     const messageDiv = document.createElement('div');
+                } else if (ticket.description) {
+                    const messageDiv = document.createElement('div');
                         messageDiv.classList.add('message-bubble', 'message-user');
                         messageDiv.innerHTML = `
                             <p class="font-medium text-sm">${ticket.userEmail || 'You'}</p>
@@ -616,10 +618,10 @@
                     closeTicketByUserBtnEl.style.display = "none";
                     submitReplyBtnEl.disabled = false;
                 } else if (ticket.status === "Resolved") {
-                    replyFormContainerEl.style.display = "block"; 
+                    replyFormContainerEl.style.display = "block";
                     closeTicketByUserBtnEl.style.display = "inline-block";
-                    submitReplyBtnEl.disabled = false; 
-                } else { 
+                    submitReplyBtnEl.disabled = false;
+                } else {
                     replyFormContainerEl.style.display = "none";
                     closeTicketByUserBtnEl.style.display = "none";
                 }
@@ -640,10 +642,10 @@
             ticketDetailModalEl.style.display = "none";
             currentlyViewedTicketId = null;
             currentlyViewedTicketStatus = null;
-            ticketReplyMessageEl.value = ''; 
+            ticketReplyMessageEl.value = '';
         }
     }
-    window.addEventListener('click', (event) => { 
+    window.addEventListener('click', (event) => {
         if (event.target == ticketDetailModalEl) {
             ticketDetailModalEl.style.display = "none";
             currentlyViewedTicketId = null;
@@ -669,7 +671,7 @@
                 const ticketRef = ref(database, `tickets/${currentlyViewedTicketId}`);
                 const snapshot = await get(ticketRef);
                 if (!snapshot.exists()) throw new Error("Ticket not found for replying.");
-                
+
                 const ticketData = snapshot.val();
                 const replies = ticketData.replies || [];
                 replies.push({
@@ -685,16 +687,16 @@
                     updatedAt: serverTimestamp(),
                     lastReplyBy: "user"
                 };
-                
+
                 if (ticketData.status === "Open") {
-                    updates.status = "In Progress"; 
+                    updates.status = "In Progress";
                 }
 
 
                 await update(ticketRef, updates);
-                ticketReplyMessageEl.value = ''; 
+                ticketReplyMessageEl.value = '';
                 showGenericMessage("Reply sent.", false);
-                
+
                 await openTicketDetailModal(currentlyViewedTicketId);
 
             } catch (error) {
@@ -706,7 +708,7 @@
             }
         });
     }
-    
+
     // --- Close Ticket by User ---
     if (closeTicketByUserBtnEl) {
         closeTicketByUserBtnEl.addEventListener('click', async () => {
@@ -714,7 +716,7 @@
                 showGenericMessage("This ticket cannot be closed by you at this time.", true);
                 return;
             }
-            
+
             const userConfirmation = window.confirm("Are you sure you want to close this ticket? This action cannot be undone by you.");
             if (!userConfirmation) return;
 
@@ -729,7 +731,7 @@
                 });
                 showGenericMessage("Ticket closed successfully.", false);
                 ticketDetailModalEl.style.display = "none";
-                loadUserTickets(); 
+                loadUserTickets();
             } catch (error) {
                 console.error("Error closing ticket:", error);
                 showGenericMessage("Failed to close ticket: " + error.message, true);
