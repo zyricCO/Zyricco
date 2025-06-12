@@ -29,12 +29,11 @@
 
         let userId = null;
         let currentUserRole = 'novice';
-        let maxTopupAmount = 1000; // Default value, will be fetched from admin config
+        let maxTopupAmount = 1000;
 
         // Global references to modals
         let viewStatusModal, noticeModal, boostTopupModal, loadingOverlay;
 
-        // Function to show a generic notice modal
         function showNotice(title, message) {
             document.getElementById('noticeModalTitle').textContent = title;
             document.getElementById('noticeModalText').textContent = message;
@@ -42,436 +41,224 @@
         }
 
         // --- CORE PANEL FUNCTIONS ---
-
-        // 1. Send Live Chat Message to Admin Panel
         async function sendChatMessage() {
-            if (!userId) {
-                showMessage('You must be logged in to chat.', 'error');
-                return;
-            }
+            if (!userId) { showMessage('You must be logged in to chat.', 'error'); return; }
             const chatInput = document.getElementById('chatInput');
             const message = chatInput.value.trim();
-
-            if (message === '') {
-                showMessage('Message cannot be empty.', 'error');
-                return;
-            }
-
-            const messageData = {
-                message: message,
-                timestamp: Date.now(),
-                senderId: userId,
-                senderType: 'user',
-                isRead: false
-            };
-
+            if (message === '') { showMessage('Message cannot be empty.', 'error'); return; }
+            const messageData = { message: message, timestamp: Date.now(), senderId: userId, senderType: 'user', isRead: false };
             try {
                 const messagesRef = ref(rtdb, `chats/${userId}/messages`);
                 await push(messagesRef, messageData);
-                chatInput.value = ''; // Clear input field on success
+                chatInput.value = '';
             } catch (error) {
                 console.error("Error sending chat message:", error);
                 showMessage(`Failed to send message: ${error.message}`, 'error');
             }
         }
-
-        // 2. View Affiliate Account Status
         async function viewAffiliateDetails() {
             const affiliateId = document.getElementById('mainAffiliateSelector').value;
-            if (!affiliateId) {
-                showMessage('Please select an affiliate account first.', 'error');
-                return;
-            }
-
+            if (!affiliateId) { showMessage('Please select an affiliate account first.', 'error'); return; }
             try {
                 const affiliateRef = ref(rtdb, `affiliate/${affiliateId}`);
                 const snapshot = await get(affiliateRef);
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    const status = data.status || 'Not Set';
-                    const affiliateName = data.fullName || data.email || `ID: ${affiliateId.substring(0,8)}...`;
-
-                    document.getElementById('statusModalAffiliateName').textContent = affiliateName;
-                    document.getElementById('statusModalCurrentStatus').textContent = status;
+                    document.getElementById('statusModalAffiliateName').textContent = data.fullName || data.email || `ID: ${affiliateId.substring(0,8)}...`;
+                    document.getElementById('statusModalCurrentStatus').textContent = data.status || 'Not Set';
                     viewStatusModal.style.display = 'flex';
-
-                } else {
-                    showMessage('Affiliate data not found.', 'error');
-                }
+                } else { showMessage('Affiliate data not found.', 'error'); }
             } catch (error) {
                 console.error("Error fetching affiliate status:", error);
                 showMessage(`Error fetching details: ${error.message}`, 'error');
             }
         }
-
-        // 3. Request Plan Change
         async function requestPlanChange() {
             const affiliateId = document.getElementById('mainAffiliateSelector').value;
-             if (!affiliateId) {
-                showMessage('Please select an affiliate to request a plan change for.', 'error');
-                return;
-            }
+            if (!affiliateId) { showMessage('Please select an affiliate to request a plan change for.', 'error'); return; }
             try {
                 const noticeRef = ref(rtdb, 'admin/config/planChangeNotice');
                 const snapshot = await get(noticeRef);
                 const noticeMessage = snapshot.exists() ? snapshot.val() : "Your request has been submitted for review.";
-
                 const requestsRef = ref(rtdb, 'admin/requests/planChange');
-                await push(requestsRef, {
-                    requestedBy: userId,
-                    affiliateId: affiliateId,
-                    timestamp: Date.now(),
-                    status: 'pending'
-                });
-
+                await push(requestsRef, { requestedBy: userId, affiliateId: affiliateId, timestamp: Date.now(), status: 'pending' });
                 showNotice('Plan Change Request', noticeMessage);
-
             } catch (error) {
                 console.error("Error requesting plan change:", error);
                 showMessage(`Request failed: ${error.message}`, 'error');
             }
         }
-
-        // 4. Show Boost/Top-up Modal
         async function showBoostTopupModal() {
             try {
-                 const maxAmountRef = ref(rtdb, 'admin/config/maxTopupAmount');
-                 const snapshot = await get(maxAmountRef);
-                 if(snapshot.exists()){
-                        maxTopupAmount = snapshot.val();
-                 }
-            } catch(error) {
-                console.log("Could not fetch max top-up amount, using default.", error);
-            }
+                const maxAmountRef = ref(rtdb, 'admin/config/maxTopupAmount');
+                const snapshot = await get(maxAmountRef);
+                if (snapshot.exists()) { maxTopupAmount = snapshot.val(); }
+            } catch (error) { console.log("Could not fetch max top-up amount, using default.", error); }
             document.getElementById('boostMaxAmount').textContent = maxTopupAmount.toLocaleString();
             boostTopupModal.style.display = 'flex';
         }
-
-        // 5. Submit the Boost/Top-up request
         async function submitBoostTopup(event) {
             event.preventDefault();
             const affiliateId = document.getElementById('boostAffiliateSelector').value;
             const amountInput = document.getElementById('boostAmount');
             const amount = parseInt(amountInput.value, 10);
-
-            if (!affiliateId) {
-                showMessage('Please select an affiliate to top-up.', 'error');
-                return;
-            }
-            if (isNaN(amount) || amount <= 0) {
-                showMessage('Please enter a valid, positive amount.', 'error');
-                return;
-            }
-            if (amount > maxTopupAmount) {
-                showMessage(`Amount cannot exceed the maximum of ${maxTopupAmount.toLocaleString()}.`, 'error');
-                return;
-            }
-
+            if (!affiliateId) { showMessage('Please select an affiliate to top-up.', 'error'); return; }
+            if (isNaN(amount) || amount <= 0) { showMessage('Please enter a valid, positive amount.', 'error'); return; }
+            if (amount > maxTopupAmount) { showMessage(`Amount cannot exceed the maximum of ${maxTopupAmount.toLocaleString()}.`, 'error'); return; }
             try {
                 const requestsRef = ref(rtdb, 'admin/requests/topup');
-                await push(requestsRef, {
-                    requestedBy: userId,
-                    affiliateId: affiliateId,
-                    amount: amount,
-                    timestamp: Date.now(),
-                    status: 'pending'
-                });
-
+                await push(requestsRef, { requestedBy: userId, affiliateId: affiliateId, amount: amount, timestamp: Date.now(), status: 'pending' });
                 boostTopupModal.style.display = 'none';
-                event.target.reset(); // Reset form
+                event.target.reset();
                 showMessage('Top-up request submitted successfully!', 'success');
-
             } catch (error) {
                 console.error("Error submitting top-up request:", error);
                 showMessage(`Request failed: ${error.message}`, 'error');
             }
         }
-
-        // 6. Load Custom Domain Info (Admin-controllable)
         async function loadCustomDomainInfo(currentUserId) {
             const container = document.getElementById('customDomainContent');
             container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
             try {
                 const domainRef = ref(rtdb, `users/${currentUserId}/features/customDomainInfo`);
                 const snapshot = await get(domainRef);
-                if (snapshot.exists() && snapshot.val()) {
-                    container.innerHTML = snapshot.val();
-                } else {
-                    container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Custom Domain feature is not configured for your account.</p>`;
-                }
+                if (snapshot.exists() && snapshot.val()) { container.innerHTML = snapshot.val(); } 
+                else { container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Custom Domain feature is not configured for your account.</p>`; }
             } catch (error) {
                 console.error("Error loading custom domain info:", error);
                 container.innerHTML = `<p class="text-center text-red-500">Error loading content.</p>`;
             }
         }
-
-        // 7. Load Promotions
         async function loadPromotions(currentUserId) {
             const container = document.getElementById('promotionsContent');
             container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
             try {
                 const userPromoRef = ref(rtdb, `admin/user_content/promotions/${currentUserId}`);
                 const userPromoSnap = await get(userPromoRef);
-
-                if (userPromoSnap.exists() && userPromoSnap.val()) {
-                    container.innerHTML = userPromoSnap.val();
-                    return;
-                }
-
+                if (userPromoSnap.exists() && userPromoSnap.val()) { container.innerHTML = userPromoSnap.val(); return; }
                 const quotesRef = ref(rtdb, 'admin/content/promotion_quotes');
                 const snapshot = await get(quotesRef);
-
                 if (snapshot.exists()) {
                     const quotes = [];
-                    snapshot.forEach(childSnapshot => {
-                        quotes.push(childSnapshot.val().text);
-                    });
-
+                    snapshot.forEach(childSnapshot => { quotes.push(childSnapshot.val().text); });
                     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-
-                    container.innerHTML = `
-                        <div class="text-center p-6 border border-dashed border-[var(--border-color)] rounded-lg">
-                            <p class="text-2xl italic text-white">"${randomQuote}"</p>
-                        </div>
-                    `;
-                } else {
-                    container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No promotions available right now.</p>`;
-                }
+                    container.innerHTML = `<div class="text-center p-6 border border-dashed border-[var(--border-color)] rounded-lg"><p class="text-2xl italic text-white">"${randomQuote}"</p></div>`;
+                } else { container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No promotions available right now.</p>`; }
             } catch (error) {
                 console.error("Error loading promotions:", error);
                 container.innerHTML = `<p class="text-center text-red-500">Error loading promotions.</p>`;
             }
         }
-
-        // 8. Load Special Services (Admin-controllable Products)
         async function loadSpecialServices(currentUserId) {
             const container = document.getElementById('specialServicesContent');
             container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)] col-span-2">Loading...</p>`;
-
             const serviceDefinitions = {
                 vaultx: { name: "Vaultx", description: "A highly secure, encrypted digital vault for storing sensitive information and digital assets with multi-factor authentication." },
                 creditx: { name: "Creditx", description: "Access a credit line for your marketing campaigns. Get pre-approved funds to scale operations with flexible repayment terms." },
                 personal_host: { name: "Personal Host", description: "A dedicated, high-performance hosting environment for your landing pages. Enjoy optimized speeds and enhanced security." },
                 experts_consultation: { name: "Experts Consultation", description: "Schedule one-on-one consultations with our marketing experts. Get personalized advice to maximize your profitability." }
             };
-
             try {
                 const servicesRef = ref(rtdb, `admin/user_services/${currentUserId}`);
                 const snapshot = await get(servicesRef);
                 const enabledServices = snapshot.val() || {};
                 container.innerHTML = '';
-
                 Object.keys(serviceDefinitions).forEach(key => {
                     const service = serviceDefinitions[key];
                     const isEnabled = enabledServices[key] === true;
                     const statusClass = isEnabled ? 'text-green-400' : 'text-yellow-500';
                     const statusText = isEnabled ? 'Enabled' : 'Not Available';
                     const cardOpacity = isEnabled ? 'opacity-100' : 'opacity-60';
-
-                    const serviceHtml = `
-                        <div class="p-6 rounded-lg bg-[var(--primary-bg-color)] border border-[var(--border-color)] flex flex-col transition-opacity duration-300 ${cardOpacity}">
-                            <div class="flex-grow">
-                                <h3 class="text-xl font-bold text-white mb-2">${service.name}</h3>
-                                <p class="text-[var(--text-color-secondary)] text-sm mb-4">${service.description}</p>
-                            </div>
-                            <div class="mt-auto text-right">
-                                <span class="text-sm font-semibold py-1 px-3 rounded-full bg-[var(--secondary-bg-color)] ${statusClass}">
-                                    ${statusText}
-                                </span>
-                            </div>
-                        </div>
-                    `;
+                    const serviceHtml = `<div class="p-6 rounded-lg bg-[var(--primary-bg-color)] border border-[var(--border-color)] flex flex-col transition-opacity duration-300 ${cardOpacity}"><div class="flex-grow"><h3 class="text-xl font-bold text-white mb-2">${service.name}</h3><p class="text-[var(--text-color-secondary)] text-sm mb-4">${service.description}</p></div><div class="mt-auto text-right"><span class="text-sm font-semibold py-1 px-3 rounded-full bg-[var(--secondary-bg-color)] ${statusClass}">${statusText}</span></div></div>`;
                     container.insertAdjacentHTML('beforeend', serviceHtml);
                 });
-
             } catch (error) {
                 console.error("Error loading special services:", error);
                 container.innerHTML = `<p class="text-center text-red-500 col-span-2">Error loading services.</p>`;
             }
         }
-
-        // 9. Load Terms and Conditions
         async function loadTermsAndConditions() {
-            const container = document.getElementById('termsContent');
-            container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
-            try {
-                const termsRef = ref(rtdb, `admin/content/termsAndConditions`);
-                const snapshot = await get(termsRef);
-                if (snapshot.exists() && snapshot.val()) {
-                    container.innerHTML = snapshot.val();
-                } else {
-                    container.innerHTML = `
-                        <h3 class="font-bold text-lg text-white mb-2">User Agreement & Disclaimers</h3>
-                        <p class="mb-4">By accessing this panel, you acknowledge and agree to the following terms and conditions. Failure to comply may result in immediate and permanent suspension of your account and legal action.</p>
-                        <h4 class="font-semibold text-white mt-4 mb-2">1. Anti-Money Laundering (AML) Policy</h4>
-                        <p class="mb-2 text-sm">This platform strictly prohibits any and all activities related to money laundering or the financing of terrorist activities. We are committed to full compliance with all applicable laws and regulations regarding AML. You agree to provide any and all information we may require to verify your identity and the nature of your transactions.</p>
-                        <h4 class="font-semibold text-white mt-4 mb-2">2. Company's Rights</h4>
-                        <p class="mb-2 text-sm">We reserve the absolute right, at our sole discretion, to:</p>
-                        <ul class="list-disc list-inside text-sm space-y-1 pl-4">
-                          <li>Block, suspend, or terminate your account at any time, for any reason, without prior notice or liability.</li>
-                          <li>Implement IP address bans against any user or range of IPs deemed to be malicious or in violation of our terms.</li>
-                          <li>Investigate any suspicious activity and report it to the relevant law enforcement agencies.</li>
-                          <li>Pursue legal action against any user who engages in fraudulent, illegal, or harmful activities on our platform.</li>
-                        </ul>
-                        <h4 class="font-semibold text-white mt-4 mb-2">3. User Responsibilities</h4>
-                         <ul class="list-disc list-inside text-sm space-y-1 pl-4">
-                          <li>You are solely responsible for all activities that occur under your account.</li>
-                            <li>You agree not to misuse this panel, including but not limited to, attempting to gain unauthorized access, disrupting service, or exploiting vulnerabilities.</li>
-                            <li>You confirm that all funds used on this platform are from legitimate sources and are not the proceeds of crime.</li>
-                         </ul>
-                        <h4 class="font-semibold text-white mt-4 mb-2">4. Disclaimer of Liability</h4>
-                        <p class="text-sm">This service is provided "as is" without any warranties. We are not liable for any financial losses or damages incurred from the use of this panel.</p>
-                    `;
-                }
-            } catch (error) {
-                console.error("Error loading terms:", error);
-                container.innerHTML = `<p class="text-center text-red-500">Could not load Terms & Conditions.</p>`;
-            }
+             const container = document.getElementById('termsContent');
+             container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
+             try {
+                 const termsRef = ref(rtdb, `admin/content/termsAndConditions`);
+                 const snapshot = await get(termsRef);
+                 if (snapshot.exists() && snapshot.val()) { container.innerHTML = snapshot.val(); } 
+                 else { container.innerHTML = `<h3 class="font-bold text-lg text-white mb-2">User Agreement & Disclaimers</h3><p class="mb-4">By accessing this panel, you acknowledge and agree to the following terms and conditions. Failure to comply may result in immediate and permanent suspension of your account and legal action.</p><h4 class="font-semibold text-white mt-4 mb-2">1. Anti-Money Laundering (AML) Policy</h4><p class="mb-2 text-sm">This platform strictly prohibits any and all activities related to money laundering or the financing of terrorist activities. We are committed to full compliance with all applicable laws and regulations regarding AML. You agree to provide any and all information we may require to verify your identity and the nature of your transactions.</p><h4 class="font-semibold text-white mt-4 mb-2">2. Company's Rights</h4><p class="mb-2 text-sm">We reserve the absolute right, at our sole discretion, to:</p><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>Block, suspend, or terminate your account at any time, for any reason, without prior notice or liability.</li><li>Implement IP address bans against any user or range of IPs deemed to be malicious or in violation of our terms.</li><li>Investigate any suspicious activity and report it to the relevant law enforcement agencies.</li><li>Pursue legal action against any user who engages in fraudulent, illegal, or harmful activities on our platform.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">3. User Responsibilities</h4><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>You are solely responsible for all activities that occur under your account.</li><li>You agree not to misuse this panel, including but not limited to, attempting to gain unauthorized access, disrupting service, or exploiting vulnerabilities.</li><li>You confirm that all funds used on this platform are from legitimate sources and are not the proceeds of crime.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">4. Disclaimer of Liability</h4><p class="text-sm">This service is provided "as is" without any warranties. We are not liable for any financial losses or damages incurred from the use of this panel.</p>`;}
+             } catch (error) { console.error("Error loading terms:", error); container.innerHTML = `<p class="text-center text-red-500">Could not load Terms & Conditions.</p>`; }
         }
-
-        // 10. Claim Reward for a completed task
         async function claimReward(taskId) {
             if (!userId || !taskId) return;
-        
             const claimButton = document.getElementById(`claim-btn-${taskId}`);
-            if (claimButton) {
-                claimButton.disabled = true;
-                claimButton.textContent = 'Claiming...';
-            }
-        
+            if (claimButton) { claimButton.disabled = true; claimButton.textContent = 'Claiming...'; }
             const taskRef = ref(rtdb, `admin/tasks/${userId}/${taskId}`);
             try {
                 await update(taskRef, { claimed: true });
                 showMessage('Reward successfully claimed!', 'success');
-                loadTasks(userId); // Reload tasks to reflect the change
+                loadTasks(userId);
             } catch (error) {
                 console.error("Error claiming reward:", error);
                 showMessage(`Failed to claim reward: ${error.message}`, 'error');
-                 if (claimButton) {
-                    claimButton.disabled = false;
-                    claimButton.textContent = 'Claim Now';
-                }
+                if (claimButton) { claimButton.disabled = false; claimButton.textContent = 'Claim Now'; }
             }
         }
-        
-        // 11. Load User-Specific Tasks with Countdown and Rewards
         async function loadTasks(currentUserId) {
             const container = document.getElementById('taskListContainer');
             const progressContainer = document.getElementById('taskProgressContainer');
             container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading tasks...</p>`;
             progressContainer.innerHTML = '';
-
             try {
                 const tasksRef = ref(rtdb, `admin/tasks/${currentUserId}`);
                 const snapshot = await get(tasksRef);
-
                 if (snapshot.exists()) {
                     const tasks = snapshot.val();
                     container.innerHTML = '';
                     const taskIds = Object.keys(tasks);
                     let completedCount = 0;
-
-                    if (taskIds.length === 0) {
-                        container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No tasks assigned to you yet.</p>`;
-                        return;
-                    }
-                    
+                    if (taskIds.length === 0) { container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No tasks assigned to you yet.</p>`; return; }
                     taskIds.forEach(taskId => {
                         const task = tasks[taskId];
                         if (task.completed) completedCount++;
-
                         let statusOrActionHtml = '';
                         const rewardHtml = task.reward ? `<span class="font-bold text-[var(--accent-color)] mr-4">+${task.reward} Reward</span>` : '';
-
                         if (task.completed) {
-                            if (task.claimed) {
-                                statusOrActionHtml = `<span class="text-sm font-semibold py-1 px-3 rounded-full bg-green-600 text-white">Claimed</span>`;
-                            } else if (task.reward && task.reward > 0) {
-                                statusOrActionHtml = `<button id="claim-btn-${taskId}" onclick="claimReward('${taskId}')" class="btn-primary text-sm py-1 px-3">Claim Now</button>`;
-                            } else {
-                                statusOrActionHtml = `<span class="text-sm text-gray-500">Completed</span>`;
-                            }
-                        } else {
-                            statusOrActionHtml = `<span id="countdown-${taskId}" class="text-sm font-mono text-right text-[var(--accent-color)]"></span>`;
-                        }
-
-                        const taskHtml = `
-                            <div class="task-item flex items-center p-4 rounded-lg bg-[var(--primary-bg-color)] border border-[var(--border-color)] transition-all duration-300 ${task.completed ? 'opacity-70' : ''}">
-                                <input type="checkbox" id="${taskId}" class="h-5 w-5 rounded bg-transparent border-2 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
-                                    ${task.completed ? 'checked' : ''} disabled>
-                                <label for="${taskId}" class="ml-4 text-md flex-grow ${task.completed ? 'line-through text-[var(--text-color-secondary)]' : 'text-[var(--text-color-primary)]'}">
-                                    ${task.text}
-                                </label>
-                                <div class="ml-auto flex items-center gap-4">
-                                     ${rewardHtml}
-                                     ${statusOrActionHtml}
-                                </div>
-                            </div>
-                        `;
+                            if (task.claimed) { statusOrActionHtml = `<span class="text-sm font-semibold py-1 px-3 rounded-full bg-green-600 text-white">Claimed</span>`; } 
+                            else if (task.reward && task.reward > 0) { statusOrActionHtml = `<button id="claim-btn-${taskId}" onclick="claimReward('${taskId}')" class="btn-primary text-sm py-1 px-3">Claim Now</button>`; } 
+                            else { statusOrActionHtml = `<span class="text-sm text-gray-500">Completed</span>`; }
+                        } else { statusOrActionHtml = `<span id="countdown-${taskId}" class="text-sm font-mono text-right text-[var(--accent-color)]"></span>`; }
+                        const taskHtml = `<div class="task-item flex items-center p-4 rounded-lg bg-[var(--primary-bg-color)] border border-[var(--border-color)] transition-all duration-300 ${task.completed ? 'opacity-70' : ''}"><input type="checkbox" id="${taskId}" class="h-5 w-5 rounded bg-transparent border-2 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]" ${task.completed ? 'checked' : ''} disabled><label for="${taskId}" class="ml-4 text-md flex-grow ${task.completed ? 'line-through text-[var(--text-color-secondary)]' : 'text-[var(--text-color-primary)]'}">${task.text}</label><div class="ml-auto flex items-center gap-4">${rewardHtml}${statusOrActionHtml}</div></div>`;
                         container.insertAdjacentHTML('beforeend', taskHtml);
-                        
-                        // Countdown logic - only for non-completed tasks
                         if (!task.completed) {
-                            const dueDate = task.dueDate || (Date.now() + 3 * 24 * 60 * 60 * 1000); // Default 3 days if not set
+                            const dueDate = task.dueDate || (Date.now() + 3 * 24 * 60 * 60 * 1000);
                             const countdownElement = document.getElementById(`countdown-${taskId}`);
-                            
                             const intervalId = setInterval(() => {
-                                const now = new Date().getTime();
-                                const distance = dueDate - now;
-                                
-                                if (distance < 0) {
-                                    clearInterval(intervalId);
-                                    countdownElement.textContent = "Expired";
-                                    countdownElement.classList.add("text-red-500");
-                                    return;
-                                }
-                                
+                                const distance = dueDate - new Date().getTime();
+                                if (distance < 0) { clearInterval(intervalId); countdownElement.textContent = "Expired"; countdownElement.classList.add("text-red-500"); return; }
                                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                                
                                 countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
                             }, 1000);
                         }
                     });
-
                     const progressPercentage = Math.round((completedCount / taskIds.length) * 100);
-                    progressContainer.innerHTML = `
-                        <span class="text-lg font-semibold text-[var(--accent-color)]">${progressPercentage}%</span>
-                        <p class="text-xs text-[var(--text-color-secondary)]">Completed ${completedCount} of ${taskIds.length}</p>
-                    `;
-
-                } else {
-                    container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No tasks assigned to you yet.</p>`;
-                }
-            } catch (error) {
-                console.error("Error loading tasks:", error);
-                container.innerHTML = `<p class="text-center text-red-500">Could not load tasks.</p>`;
-            }
+                    progressContainer.innerHTML = `<span class="text-lg font-semibold text-[var(--accent-color)]">${progressPercentage}%</span><p class="text-xs text-[var(--text-color-secondary)]">Completed ${completedCount} of ${taskIds.length}</p>`;
+                } else { container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">No tasks assigned to you yet.</p>`; }
+            } catch (error) { console.error("Error loading tasks:", error); container.innerHTML = `<p class="text-center text-red-500">Could not load tasks.</p>`; }
         }
-        
-        // --- DATA LOADING & UTILITIES ---
-
         async function loadAffiliateData(currentUserId) {
             const downlineAffiliatesTableBody = document.getElementById('downlineAffiliatesTableBody');
             const affiliateSelectors = document.querySelectorAll('.affiliate-selector');
-
             downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-2 text-center text-[var(--text-color-secondary)]">Loading...</td></tr>';
             affiliateSelectors.forEach(selector => selector.innerHTML = '<option value="">-- Loading... --</option>');
-
             try {
                 const affiliatesRef = ref(rtdb, 'affiliate');
                 const snapshot = await get(affiliatesRef);
                 const allAffiliates = snapshot.val() || {};
-
                 downlineAffiliatesTableBody.innerHTML = '';
                 affiliateSelectors.forEach(selector => selector.innerHTML = '<option value="">-- Select an affiliate --</option>');
-
-                const affiliatedUsers = Object.keys(allAffiliates)
-                    .map(key => ({ id: key, ...allAffiliates[key] }))
-                    .filter(aff => aff.createdBy === currentUserId);
-
+                const affiliatedUsers = Object.keys(allAffiliates).map(key => ({ id: key, ...allAffiliates[key] })).filter(aff => aff.createdBy === currentUserId);
                 if (affiliatedUsers.length === 0) {
                     downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-2 text-center text-[var(--text-color-secondary)]">No downline affiliates found.</td></tr>';
                     affiliateSelectors.forEach(selector => selector.innerHTML = '<option value="">-- No affiliates found --</option>');
@@ -479,12 +266,7 @@
                     affiliatedUsers.forEach(affiliate => {
                         const row = downlineAffiliatesTableBody.insertRow();
                         row.classList.add('hover:bg-[var(--secondary-bg-color)]');
-                        row.innerHTML = `
-                            <td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-primary)]">${affiliate.id.substring(0, 8)}...</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-${affiliate.isApproved ? 'green-500' : (affiliate.status === 'pending' ? 'yellow-500' : 'red-500')}">${affiliate.status || 'N/A'}</td>
-                            <td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-secondary)]">${affiliate.subAccounts || 0}</td>
-                        `;
-
+                        row.innerHTML = `<td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-primary)]">${affiliate.id.substring(0, 8)}...</td><td class="px-4 py-2 whitespace-nowrap text-${affiliate.isApproved ? 'green-500' : (affiliate.status === 'pending' ? 'yellow-500' : 'red-500')}">${affiliate.status || 'N/A'}</td><td class="px-4 py-2 whitespace-nowrap text-[var(--text-color-secondary)]">${affiliate.subAccounts || 0}</td>`;
                         const optionText = affiliate.fullName || affiliate.email || `ID: ${affiliate.id.substring(0,8)}...`;
                         affiliateSelectors.forEach(selector => {
                             const option = document.createElement('option');
@@ -494,55 +276,28 @@
                         });
                     });
                 }
-            } catch (error) {
-                console.error("Error loading affiliate data:", error);
-                downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="3" class="px-4 py-2 text-center text-red-500">Error loading affiliates.</td></tr>';
-                affiliateSelectors.forEach(selector => selector.innerHTML = '<option value="">-- Error --</option>');
-            }
+            } catch (error) { console.error("Error loading affiliate data:", error); downlineAffiliatesTableBody.innerHTML = '<tr><td colspan="3" class="px-4 py-2 text-center text-red-500">Error loading affiliates.</td></tr>'; affiliateSelectors.forEach(selector => selector.innerHTML = '<option value="">-- Error --</option>'); }
         }
-
         async function loadChatMessages(currentUserId) {
             const chatMessagesContainer = document.querySelector('.chat-messages');
             chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-[var(--text-color-secondary)]"><em>Loading...</em></p>';
-
             try {
                 const chatRef = ref(rtdb, `chats/${currentUserId}/messages`);
                 onValue(chatRef, (snapshot) => {
                     chatMessagesContainer.innerHTML = '';
-                    if (!snapshot.exists()) {
-                        chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-[var(--text-color-secondary)]"><em>No chat history.</em></p>';
-                        return;
-                    }
-
+                    if (!snapshot.exists()) { chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-[var(--text-color-secondary)]"><em>No chat history.</em></p>'; return; }
                     const chatMessages = [];
-                    snapshot.forEach(childSnapshot => {
-                        chatMessages.push(childSnapshot.val());
-                    });
-
-                    chatMessages.sort((a, b) => a.timestamp - b.timestamp);
-                    chatMessages.forEach(msg => {
+                    snapshot.forEach(childSnapshot => { chatMessages.push(childSnapshot.val()); });
+                    chatMessages.sort((a, b) => a.timestamp - b.timestamp).forEach(msg => {
                         const isUser = msg.senderId === userId;
-                        const messageBubble = isUser
-                            ? 'bg-[var(--accent-color)] text-white ml-auto'
-                            : 'bg-[var(--primary-bg-color)] text-[var(--text-color-primary)] mr-auto';
-
-                        const messageHtml = `
-                            <div class="mb-2 ${isUser ? 'text-right' : 'text-left'}">
-                                <div class="inline-block rounded-lg px-3 py-2 max-w-sm ${messageBubble}">
-                                    <p class="text-sm">${msg.message}</p>
-                                </div>
-                            </div>
-                        `;
+                        const messageBubble = isUser ? 'bg-[var(--accent-color)] text-white ml-auto' : 'bg-[var(--primary-bg-color)] text-[var(--text-color-primary)] mr-auto';
+                        const messageHtml = `<div class="mb-2 ${isUser ? 'text-right' : 'text-left'}"><div class="inline-block rounded-lg px-3 py-2 max-w-sm ${messageBubble}"><p class="text-sm">${msg.message}</p></div></div>`;
                         chatMessagesContainer.insertAdjacentHTML('beforeend', messageHtml);
                     });
                     chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
                 }, { onlyOnce: false });
-            } catch (error) {
-                console.error("Error loading live chat messages:", error);
-                chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-red-500"><em>Error loading chat.</em></p>';
-            }
+            } catch (error) { console.error("Error loading live chat messages:", error); chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-red-500"><em>Error loading chat.</em></p>'; }
         }
-
         async function fetchAndObserveSimulatedCounts() {
             if (!userId) return;
             const countsRef = ref(rtdb, `artifacts/${appId}/public/data/app_metrics/simulated_counts`);
@@ -554,7 +309,6 @@
                 }
             });
         }
-
         async function loadNotifications() {
             const notificationsContainer = document.querySelector('#notifications .space-y-3');
             notificationsContainer.innerHTML = '<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>';
@@ -564,29 +318,17 @@
                 const notificationsData = snapshot.val() || {};
                 notificationsContainer.innerHTML = '';
                 const notifications = Object.values(notificationsData).sort((a, b) => b.timestamp - a.timestamp);
-                if (notifications.length === 0) {
-                    notificationsContainer.innerHTML = '<p class="text-center text-[var(--text-color-secondary)]">No new notifications.</p>';
-                } else {
+                if (notifications.length === 0) { notificationsContainer.innerHTML = '<p class="text-center text-[var(--text-color-secondary)]">No new notifications.</p>'; } 
+                else {
                     notifications.forEach(notif => {
-                        const date = new Date(notif.timestamp);
-                        const timeAgo = formatTimeAgo(date);
+                        const timeAgo = formatTimeAgo(new Date(notif.timestamp));
                         const iconColor = notif.title.includes("Win") || notif.title.includes("APPROVED") ? 'text-green-500' : 'text-indigo-500';
                         const iconPath = `<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"></path>`;
-
-                        const notificationHtml = `
-                            <div class="p-4 rounded-lg shadow-sm flex items-start bg-[var(--primary-bg-color)] border border-[var(--border-color)]">
-                                <svg class="w-6 h-6 ${iconColor} mr-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg>
-                                <div>
-                                    <p class="font-medium text-[var(--text-color-primary)]">${notif.title}</p>
-                                    <p class="text-sm text-[var(--text-color-secondary)]">${notif.message} <span class="text-xs opacity-75">${timeAgo}</span></p>
-                                </div>
-                            </div>`;
+                        const notificationHtml = `<div class="p-4 rounded-lg shadow-sm flex items-start bg-[var(--primary-bg-color)] border border-[var(--border-color)]"><svg class="w-6 h-6 ${iconColor} mr-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${iconPath}</svg><div><p class="font-medium text-[var(--text-color-primary)]">${notif.title}</p><p class="text-sm text-[var(--text-color-secondary)]">${notif.message} <span class="text-xs opacity-75">${timeAgo}</span></p></div></div>`;
                         notificationsContainer.insertAdjacentHTML('beforeend', notificationHtml);
                     });
                 }
-            } catch(error){
-                 notificationsContainer.innerHTML = '<p class="text-center text-red-500">Error loading notifications.</p>';
-            }
+            } catch(error){ notificationsContainer.innerHTML = '<p class="text-center text-red-500">Error loading notifications.</p>'; }
         }
         function formatTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
@@ -597,7 +339,6 @@
             interval = seconds / 60; if (interval > 1) return Math.floor(interval) + "min ago";
             return Math.floor(seconds) + "s ago";
         }
-
         window.showMessage = (message, type = 'info') => {
             const messageText = document.getElementById('messageText');
             const messageBox = document.getElementById('messageBox');
@@ -610,47 +351,84 @@
             setTimeout(() => { messageBox.style.display = 'none'; }, 5000);
         };
 
-        // --- INITIALIZATION & AUTH ---
+        const showLoginScreen = () => {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('mainPanel').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            loadingOverlay.style.display = 'none';
+        };
+        const showRegisterScreen = () => {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        };
+        const showConsentScreen = () => {
+            document.getElementById('welcomeScreen').style.display = 'flex';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainPanel').style.display = 'none';
+            loadingOverlay.style.display = 'none';
+        }
+        const showMainPanel = (user) => {
+            userId = user.uid;
+            document.getElementById('displayUserId').textContent = `User ID: ${userId.substring(0, 12)}...`;
+            document.getElementById('mainPanel').style.display = 'block';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').style.display = 'none';
+            fetchAndObserveSimulatedCounts();
+            loadAffiliateData(userId);
+            loadNotifications();
+            loadTasks(userId);
+            loadingOverlay.style.display = 'none';
+        }
 
+        function applyTabPermissions(permissions) {
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                const tabId = button.dataset.tab;
+                const perm = permissions[tabId];
+                button.removeAttribute('data-blocked');
+                button.removeAttribute('data-reason');
+                button.classList.remove('tab-blocked');
+                if (perm && perm.allowed === false) {
+                    button.setAttribute('data-blocked', 'true');
+                    button.setAttribute('data-reason', perm.reason);
+                    button.classList.add('tab-blocked');
+                }
+            });
+        }
+        
         document.addEventListener('DOMContentLoaded', () => {
             viewStatusModal = document.getElementById('viewStatusModal');
             noticeModal = document.getElementById('noticeModal');
             boostTopupModal = document.getElementById('boostTopupModal');
             loadingOverlay = document.getElementById('loadingOverlay');
-
-            // Make functions available to inline event handlers
             window.claimReward = claimReward;
 
             document.getElementById('agreeButton').addEventListener('click', () => {
                 sessionStorage.setItem('agreedToTerms', 'true');
                 document.getElementById('welcomeScreen').style.display = 'none';
-                onAuthStateChanged(auth, user => { if(user) showMainPanel(user); });
+                if(auth.currentUser) { onAuthStateChanged(auth, user => { if(user) showMainPanel(user); }); }
             });
 
             document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                try {
-                    await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value);
-                    showMessage('Login successful! Loading panel...', 'success');
-                } catch (error) {
-                    showMessage(`Login Failed: ${error.message}`, 'error');
-                }
+                try { await signInWithEmailAndPassword(auth, e.target.email.value, e.target.password.value); } 
+                catch (error) { showMessage(`Login Failed: ${error.message}`, 'error'); }
             });
 
             document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                 e.preventDefault();
-                 try {
-                         const cred = await createUserWithEmailAndPassword(auth, e.target.newEmail.value, e.target.newPassword.value);
-                         await set(ref(rtdb, `users/${cred.user.uid}`), { email: cred.user.email, role: 'novice' });
-                         showMessage('Registration successful! Please log in.', 'success');
-                         showLoginScreen();
-                 } catch(error){
-                         showMessage(`Registration Failed: ${error.message}`, 'error');
-                 }
+                e.preventDefault();
+                try {
+                    const cred = await createUserWithEmailAndPassword(auth, e.target.newEmail.value, e.target.newPassword.value);
+                    await set(ref(rtdb, `users/${cred.user.uid}`), { email: cred.user.email, role: 'novice' });
+                    showMessage('Registration successful! Please log in.', 'success');
+                    showLoginScreen();
+                } catch(error) { showMessage(`Registration Failed: ${error.message}`, 'error'); }
             });
 
-            document.getElementById('logoutButton').addEventListener('click', async () => {
-                await signOut(auth);
+            document.getElementById('logoutButton').addEventListener('click', () => {
+                signOut(auth);
                 sessionStorage.removeItem('agreedToTerms');
             });
 
@@ -672,13 +450,18 @@
             const tabContents = document.querySelectorAll('.tab-content');
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
+                    if (button.hasAttribute('data-blocked')) {
+                        const reason = button.getAttribute('data-reason');
+                        showNotice('Access Denied', reason);
+                        return; // Prevent switching tab
+                    }
+
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
                     button.classList.add('active');
                     const targetTab = document.getElementById(button.dataset.tab);
-                    targetTab.classList.add('active');
+                    if (targetTab) targetTab.classList.add('active');
 
-                    // Eagerly load data when tab is switched to
                     if(button.dataset.tab === 'liveChat') loadChatMessages(userId);
                     if(button.dataset.tab === 'notifications') loadNotifications();
                     if(button.dataset.tab === 'customDomain') loadCustomDomainInfo(userId);
@@ -693,59 +476,25 @@
             document.getElementById('showLogin').addEventListener('click', e => { e.preventDefault(); showLoginScreen(); });
         });
 
-        const showLoginScreen = () => {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('welcomeScreen').style.display = 'none';
-            document.getElementById('mainPanel').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-            loadingOverlay.style.display = 'none';
-        };
-
-        const showRegisterScreen = () => {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        };
-
-        const showConsentScreen = () => {
-            document.getElementById('welcomeScreen').style.display = 'flex';
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainPanel').style.display = 'none';
-            loadingOverlay.style.display = 'none';
-        }
-
-        const showMainPanel = (user) => {
-            userId = user.uid;
-            document.getElementById('displayUserId').textContent = `User ID: ${userId.substring(0, 12)}...`;
-            document.getElementById('mainPanel').style.display = 'block';
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('welcomeScreen').style.display = 'none';
-
-            fetchAndObserveSimulatedCounts();
-            loadAffiliateData(userId);
-            loadNotifications();
-            // Load tasks on initial panel view as well
-            loadTasks(userId);
-
-            loadingOverlay.style.display = 'none';
-        }
-
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userRef = ref(rtdb, `users/${user.uid}`);
                 const snapshot = await get(userRef);
-
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     currentUserRole = userData.role || 'novice';
+                    
+                    const permissionsRef = ref(rtdb, `admin/permissions/${user.uid}`);
+                    const permissionsSnapshot = await get(permissionsRef);
+                    applyTabPermissions(permissionsSnapshot.val() || {});
 
-                    const hasCustomDomain = userData.features?.hasCustomDomain === true;
                     const customDomainTab = document.getElementById('customDomainTabButton');
-                    customDomainTab.style.display = hasCustomDomain ? 'inline-block' : 'none';
-
+                    customDomainTab.style.display = 'inline-block'; // Always show it if it might be blocked
+                    if (!customDomainTab.hasAttribute('data-blocked') && !userData.features?.hasCustomDomain) {
+                        customDomainTab.style.display = 'none'; // Only hide if NOT blocked AND feature is disabled
+                    }
+                    
                     document.getElementById('displayUserRole').textContent = `Level: ${currentUserRole.toUpperCase()}`;
-
                     const authorizedRoles = ['standard', 'premium', 'admin'];
                     if (authorizedRoles.includes(currentUserRole)) {
                         if (sessionStorage.getItem('agreedToTerms') === 'true') {
@@ -758,15 +507,14 @@
                         await signOut(auth);
                     }
                 } else {
-                     showMessage('User data not found. Please contact support.', 'error');
-                     await signOut(auth);
+                    showMessage('User data not found. Please contact support.', 'error');
+                    await signOut(auth);
                 }
             } else {
                 userId = null;
                 showLoginScreen();
             }
         });
-
     </script>
     <style>
         :root {
@@ -805,10 +553,11 @@
         ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: var(--secondary-bg-color); } ::-webkit-scrollbar-thumb { background: #666; border-radius: 10px; } ::-webkit-scrollbar-thumb:hover { background: #888; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes blink-green { 0%, 100% { background-color: #32CD32; opacity: 1; } 50% { background-color: #228B22; opacity: 0.5; } }
-        /* Style for the Tasks checkbox */
         input[type="checkbox"] { -webkit-appearance: none; appearance: none; }
         input[type="checkbox"]:checked { background-color: var(--accent-color); border-color: var(--accent-color); }
         input[type="checkbox"]:checked::before { content: '✔'; display: block; text-align: center; color: white; font-size: 0.8rem; line-height: 1.1rem; }
+        .tab-blocked { opacity: 0.5; cursor: not-allowed !important; }
+        .tab-blocked:hover { transform: none !important; }
     </style>
 </head>
 <body>
