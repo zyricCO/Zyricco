@@ -33,6 +33,10 @@
 
         // Global references to modals
         let viewStatusModal, noticeModal, boostTopupModal, loadingOverlay, taskDetailModal;
+        
+        // Global references for simulation intervals
+        let gainxInterval, zyricoInterval;
+
 
         function showNotice(title, message) {
             document.getElementById('noticeModalTitle').textContent = title;
@@ -179,13 +183,13 @@
         }
         async function loadTermsAndConditions() {
              const container = document.getElementById('termsContent');
-              container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
-              try {
-                  const termsRef = ref(rtdb, `admin/content/termsAndConditions`);
-                  const snapshot = await get(termsRef);
-                  if (snapshot.exists() && snapshot.val()) { container.innerHTML = snapshot.val(); } 
-                  else { container.innerHTML = `<h3 class="font-bold text-lg text-white mb-2">User Agreement & Disclaimers</h3><p class="mb-4">By accessing this panel, you acknowledge and agree to the following terms and conditions. Failure to comply may result in immediate and permanent suspension of your account and legal action.</p><h4 class="font-semibold text-white mt-4 mb-2">1. Anti-Money Laundering (AML) Policy</h4><p class="mb-2 text-sm">This platform strictly prohibits any and all activities related to money laundering or the financing of terrorist activities. We are committed to full compliance with all applicable laws and regulations regarding AML. You agree to provide any and all information we may require to verify your identity and the nature of your transactions.</p><h4 class="font-semibold text-white mt-4 mb-2">2. Company's Rights</h4><p class="mb-2 text-sm">We reserve the absolute right, at our sole discretion, to:</p><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>Block, suspend, or terminate your account at any time, for any reason, without prior notice or liability.</li><li>Implement IP address bans against any user or range of IPs deemed to be malicious or in violation of our terms.</li><li>Investigate any suspicious activity and report it to the relevant law enforcement agencies.</li><li>Pursue legal action against any user who engages in fraudulent, illegal, or harmful activities on our platform.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">3. User Responsibilities</h4><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>You are solely responsible for all activities that occur under your account.</li><li>You agree not to misuse this panel, including but not limited to, attempting to gain unauthorized access, disrupting service, or exploiting vulnerabilities.</li><li>You confirm that all funds used on this platform are from legitimate sources and are not the proceeds of crime.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">4. Disclaimer of Liability</h4><p class="text-sm">This service is provided "as is" without any warranties. We are not liable for any financial losses or damages incurred from the use of this panel.</p>`;}
-              } catch (error) { console.error("Error loading terms:", error); container.innerHTML = `<p class="text-center text-red-500">Could not load Terms & Conditions.</p>`; }
+               container.innerHTML = `<p class="text-center text-[var(--text-color-secondary)]">Loading...</p>`;
+               try {
+                   const termsRef = ref(rtdb, `admin/content/termsAndConditions`);
+                   const snapshot = await get(termsRef);
+                   if (snapshot.exists() && snapshot.val()) { container.innerHTML = snapshot.val(); } 
+                   else { container.innerHTML = `<h3 class="font-bold text-lg text-white mb-2">User Agreement & Disclaimers</h3><p class="mb-4">By accessing this panel, you acknowledge and agree to the following terms and conditions. Failure to comply may result in immediate and permanent suspension of your account and legal action.</p><h4 class="font-semibold text-white mt-4 mb-2">1. Anti-Money Laundering (AML) Policy</h4><p class="mb-2 text-sm">This platform strictly prohibits any and all activities related to money laundering or the financing of terrorist activities. We are committed to full compliance with all applicable laws and regulations regarding AML. You agree to provide any and all information we may require to verify your identity and the nature of your transactions.</p><h4 class="font-semibold text-white mt-4 mb-2">2. Company's Rights</h4><p class="mb-2 text-sm">We reserve the absolute right, at our sole discretion, to:</p><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>Block, suspend, or terminate your account at any time, for any reason, without prior notice or liability.</li><li>Implement IP address bans against any user or range of IPs deemed to be malicious or in violation of our terms.</li><li>Investigate any suspicious activity and report it to the relevant law enforcement agencies.</li><li>Pursue legal action against any user who engages in fraudulent, illegal, or harmful activities on our platform.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">3. User Responsibilities</h4><ul class="list-disc list-inside text-sm space-y-1 pl-4"><li>You are solely responsible for all activities that occur under your account.</li><li>You agree not to misuse this panel, including but not limited to, attempting to gain unauthorized access, disrupting service, or exploiting vulnerabilities.</li><li>You confirm that all funds used on this platform are from legitimate sources and are not the proceeds of crime.</li></ul><h4 class="font-semibold text-white mt-4 mb-2">4. Disclaimer of Liability</h4><p class="text-sm">This service is provided "as is" without any warranties. We are not liable for any financial losses or damages incurred from the use of this panel.</p>`;}
+               } catch (error) { console.error("Error loading terms:", error); container.innerHTML = `<p class="text-center text-red-500">Could not load Terms & Conditions.</p>`; }
         }
         async function claimReward(taskId) {
             if (!userId || !taskId) return;
@@ -313,17 +317,39 @@
                 }, { onlyOnce: false });
             } catch (error) { console.error("Error loading live chat messages:", error); chatMessagesContainer.innerHTML = '<p class="text-sm mb-2 text-red-500"><em>Error loading chat.</em></p>'; }
         }
+        
         async function fetchAndObserveSimulatedCounts() {
             if (!userId) return;
             const countsRef = ref(rtdb, `artifacts/${appId}/public/data/app_metrics/simulated_counts`);
+
             onValue(countsRef, (snapshot) => {
                 if (snapshot.exists()) {
                     const data = snapshot.val();
-                    document.getElementById('zyricoCountDisplay').textContent = (data.zyricoCount || 0).toLocaleString();
-                    document.getElementById('gainxCountDisplay').textContent = (data.gainxCount || 0).toLocaleString();
+                    let gainxCount = data.gainxCount || 0;
+                    let zyricoCount = data.zyricoCount || 0;
+
+                    // Set initial values from DB
+                    document.getElementById('gainxCountDisplay').textContent = gainxCount.toLocaleString();
+                    document.getElementById('zyricoCountDisplay').textContent = zyricoCount.toLocaleString();
+
+                    // Clear any existing intervals to prevent them from stacking and accelerating
+                    if (gainxInterval) clearInterval(gainxInterval);
+                    if (zyricoInterval) clearInterval(zyricoInterval);
+
+                    // Start new simulation intervals to continuously increment the counts
+                    gainxInterval = setInterval(() => {
+                        gainxCount += Math.floor(Math.random() * 4) + 1; // Increment by a random number between 1 and 4
+                        document.getElementById('gainxCountDisplay').textContent = gainxCount.toLocaleString();
+                    }, 1800); // Update every 1.8 seconds
+
+                    zyricoInterval = setInterval(() => {
+                        zyricoCount += Math.floor(Math.random() * 6) + 1; // Increment by a random number between 1 and 6
+                        document.getElementById('zyricoCountDisplay').textContent = zyricoCount.toLocaleString();
+                    }, 2500); // Update every 2.5 seconds
                 }
             });
         }
+
         async function loadNotifications() {
             const notificationsContainer = document.querySelector('#notifications .space-y-3');
             notificationsContainer.innerHTML = '<p class="text-center text-gray-400">Loading...</p>';
