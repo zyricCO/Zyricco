@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getDatabase, ref, set, onValue, get, push, update } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
         // Your web app's Firebase configuration
@@ -396,15 +396,9 @@
             document.getElementById('loginScreen').style.display = 'flex';
             document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('mainPanel').style.display = 'none';
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
             loadingOverlay.style.display = 'none';
         };
-        const showRegisterScreen = () => {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        };
+
         const showConsentScreen = () => {
             document.getElementById('welcomeScreen').style.display = 'flex';
             document.getElementById('loginScreen').style.display = 'none';
@@ -459,16 +453,6 @@
                 catch (error) { showMessage(`Login Failed: ${error.message}`, 'error'); }
             });
 
-            document.getElementById('registerForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                try {
-                    const cred = await createUserWithEmailAndPassword(auth, e.target.newEmail.value, e.target.newPassword.value);
-                    await set(ref(rtdb, `users/${cred.user.uid}`), { email: cred.user.email, role: 'novice' });
-                    showMessage('Registration successful! Please log in.', 'success');
-                    showLoginScreen();
-                } catch(error) { showMessage(`Registration Failed: ${error.message}`, 'error'); }
-            });
-
             document.getElementById('logoutButton').addEventListener('click', () => {
                 signOut(auth);
                 sessionStorage.removeItem('agreedToTerms');
@@ -514,9 +498,6 @@
                     if(button.dataset.tab === 'tasks') loadTasks(userId);
                 });
             });
-
-            document.getElementById('showRegister').addEventListener('click', e => { e.preventDefault(); showRegisterScreen(); });
-            document.getElementById('showLogin').addEventListener('click', e => { e.preventDefault(); showLoginScreen(); });
         });
 
         onAuthStateChanged(auth, async (user) => {
@@ -856,7 +837,24 @@
         </div>
     </div>
 
-    <div id="loginScreen" class="full-screen-container" style="display: none;"><div class="auth-content"><h1 class="text-3xl font-extrabold mb-6 text-[var(--accent-color)]">GainX User Login</h1><div id="messageBox" class="message-box"> <span id="messageText"></span> </div><form id="loginForm" class="space-y-4"><div> <label for="loginEmail" class="block text-sm font-medium mb-1 text-left">Email</label> <input type="email" id="loginEmail" name="email" required> </div><div> <label for="loginPassword" class="block text-sm font-medium mb-1 text-left">Password</label> <input type="password" id="loginPassword" name="password" required> </div><button type="submit" class="btn-primary w-full">Login</button><p class="text-sm text-center text-[var(--text-color-secondary)] mt-4"> No account? <a href="#" id="showRegister" class="text-[var(--accent-color)] hover:underline">Register here</a> </p></form><form id="registerForm" class="space-y-4" style="display:none;"><h2 class="text-2xl font-semibold mb-4 text-left">Register New Account</h2><div><label for="registerEmail" class="block text-sm font-medium mb-1 text-left">Email</label><input type="email" id="registerEmail" name="newEmail" required></div><div><label for="registerPassword" class="block text-sm font-medium mb-1 text-left">Password (min. 6 characters)</label><input type="password" id="registerPassword" name="newPassword" required></div><button type="submit" class="btn-primary w-full">Register</button><p class="text-sm text-center text-[var(--text-color-secondary)] mt-4"> Have an account? <a href="#" id="showLogin" class="text-[var(--accent-color)] hover:underline">Login here</a> </p></form></div></div>
+    <div id="loginScreen" class="full-screen-container" style="display: none;">
+        <div class="auth-content">
+            <h1 class="text-3xl font-extrabold mb-6 text-[var(--accent-color)]">GainX User Login</h1>
+            <div id="messageBox" class="message-box"> <span id="messageText"></span> </div>
+            <form id="loginForm" class="space-y-4">
+                <div> 
+                    <label for="loginEmail" class="block text-sm font-medium mb-1 text-left">Email</label> 
+                    <input type="email" id="loginEmail" name="email" required> 
+                </div>
+                <div> 
+                    <label for="loginPassword" class="block text-sm font-medium mb-1 text-left">Password</label> 
+                    <input type="password" id="loginPassword" name="password" required> 
+                </div>
+                <button type="submit" class="btn-primary w-full">Login</button>
+            </form>
+            </div>
+    </div>
+
 
     <div id="welcomeScreen" class="full-screen-container" style="display: none;"><div class="welcome-content"><h1>Welcome to the <span class="text-[var(--accent-color)]">GainX Private User Panel</span></h1><p>This panel provides access to advanced features and dedicated support.</p><p class="font-bold text-lg text-[var(--accent-color)] mt-6">Please review the terms before proceeding.</p><h3>User Agreement & Disclaimers:</h3><ul class="text-sm text-left list-disc list-inside"><li>You agree to all our Terms, Privacy, and AML policies.</li><li>Misuse of this panel will result in an immediate ban.</li><li>You are responsible for all actions from your account.</li><li>We reserve the right to ban accounts without warning.</li></ul><button id="agreeButton" class="btn-primary mt-6 px-8 py-3 text-xl">I Agree & Proceed</button></div></div>
 
