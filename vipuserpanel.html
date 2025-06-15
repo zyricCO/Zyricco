@@ -519,7 +519,7 @@
                     }
                    
                     document.getElementById('displayUserRole').textContent = `Level: ${currentUserRole.toUpperCase()}`;
-                    const authorizedRoles = ['standard', 'premium', 'admin'];
+                    const authorizedRoles = ['premium', 'admin'];
                     if (authorizedRoles.includes(currentUserRole)) {
                         if (sessionStorage.getItem('agreedToTerms') === 'true') {
                             showMainPanel(user);
