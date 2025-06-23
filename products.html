@@ -54,14 +54,12 @@
             <div class="flex items-center">
                 <img src="logo.png" alt="Zyricco Logo" class="h-8 w-auto mr-2"> <h1 class="text-xl sm:text-2xl font-bold text-indigo-400">Zyricco</h1>
             </div>
-
             <nav class="hidden md:flex md:items-center space-x-4">
                 <a href="index.html" class="text-gray-300 hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">Home</a>
                 <a href="#" class="text-cyan-400 font-semibold px-3 py-2 rounded-md text-sm font-medium border-b-2 border-cyan-400">Products</a>
                 <a href="#" class="text-gray-300 hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">About Us</a>
                 <a href="#" class="text-gray-300 hover:text-indigo-400 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
             </nav>
-
             <div class="md:hidden flex items-center">
                 <button id="mobile-menu-button" class="text-gray-300 hover:text-indigo-400 focus:outline-none">
                     <svg id="menu-open-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,7 +71,6 @@
                 </button>
             </div>
         </div>
-
         <div id="mobile-menu" class="hidden md:hidden bg-gray-900">
             <a href="index.html" class="block text-gray-300 hover:text-indigo-400 hover:bg-gray-800 px-4 py-3 text-sm font-medium">Home</a>
             <a href="#" class="block text-cyan-400 font-semibold px-4 py-3 text-sm font-medium border-l-4 border-cyan-400 bg-gray-800">Products</a>
@@ -84,145 +81,112 @@
 
     <main class="container mx-auto px-6 py-12">
         <h2 class="text-4xl font-bold text-center text-gray-100 mb-12">Explore Our Products & Services</h2>
-
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
 
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card fta-bg">
-                <img src="https://placehold.co/600x400/000000/E0E7FF?text=FTA+Funded+Accounts" alt="FTA [Funded Accounts]" class="w-full h-56 object-cover" style="opacity: 0;">
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card fta-bg" data-product="fta" data-url="fta-access.html">
+                <img src="https://placehold.co/600x400/000000/E0E7FF?text=FTA" alt="FTA" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">FTA [Funded Accounts]</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Unlock your trading potential with our Funded Accounts program. Designed for talented traders, this service provides access to significant trading capital upon successful evaluation. Demonstrate your skills, manage risk effectively, and trade our firm's capital with competitive profit-sharing arrangements. Ideal for traders seeking to scale their operations without personal capital risk.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Unlock your trading potential with our Funded Accounts program. Demonstrate your skills to trade our firm's capital with competitive profit-sharing arrangements.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card atb-bg">
-                <img src="https://placehold.co/600x400/000000/D1FAE5?text=ATB+Plugin" alt="ATB - Automated Trading Bot" class="w-full h-56 object-cover" style="opacity: 0;">
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card atb-bg" data-product="atb" data-url="atb-access.html">
+                <img src="https://placehold.co/600x400/000000/D1FAE5?text=ATB" alt="ATB" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">ATB (Automated Trading Bot)</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Leverage the power of automation with our advanced Automated Trading Bot plug-in. Seamlessly integrate with popular trading platforms to execute your strategies 24/7, minimizing emotional trading and maximizing efficiency. Features include customizable parameters, risk management tools, and backtesting capabilities to refine your approach before live deployment.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Leverage the power of automation with our advanced Automated Trading Bot plug-in to execute your strategies 24/7, minimizing emotional trading.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                           <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
-
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card lux-bg">
-                <img src="https://placehold.co/600x400/000000/FEF3C7?text=LuxAI+Signals" alt="LuxAI Signals" class="w-full h-56 object-cover" style="opacity: 0;">
+            
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card lux-bg" data-product="luxai" data-url="luxai-access.html">
+                <img src="https://placehold.co/600x400/000000/FEF3C7?text=LuxAI" alt="LuxAI" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">LuxAI Signals</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Gain a competitive edge with our LuxAI Signals service. Our sophisticated algorithms analyze vast amounts of market data, identifying potential trading opportunities with high-probability setups. Receive timely signals, including entry points, stop-loss, and take-profit levels, directly to your preferred device, enabling informed and data-driven trading decisions.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Gain a competitive edge with our LuxAI Signals service. Our sophisticated algorithms analyze market data to identify high-probability trading opportunities.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card stratx-bg">
-                <img src="https://placehold.co/600x400/000000/A5B4FC?text=StratX+Strategies" alt="StratX - Advanced Trading Strategies" class="w-full h-56 object-cover" style="opacity: 0;">
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card stratx-bg" data-product="stratx" data-url="stratx-access.html">
+                <img src="https://placehold.co/600x400/000000/A5B4FC?text=StratX" alt="StratX" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">StratX (Advanced Trading Strategies)</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Explore sophisticated trading methodologies with StratX. This service offers in-depth insights and educational content on advanced trading strategies, covering diverse market conditions and asset classes. Designed for experienced traders looking to refine their techniques and gain a deeper understanding of market dynamics.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Explore sophisticated trading methodologies with StratX. This service offers in-depth insights and educational content for experienced traders.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card portax-bg">
-                <img src="https://placehold.co/600x400/000000/BFDBFE?text=PortaX+Management" alt="PortaX - Experts Account Management" class="w-full h-56 object-cover" style="opacity: 0;">
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card portax-bg" data-product="portax" data-url="portax-access.html">
+                <img src="https://placehold.co/600x400/000000/BFDBFE?text=PortaX" alt="PortaX" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">PortaX - Experts Account Management</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Delegate your portfolio management to seasoned professionals with PortaX. Our expert account managers provide personalized strategies tailored to your financial goals and risk appetite. Benefit from active monitoring, disciplined execution, and comprehensive reporting, allowing you to focus on your core activities while your investments are professionally managed.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Delegate your portfolio management to seasoned professionals with PortaX. We provide personalized strategies tailored to your financial goals.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card advis-bg">
-                <img src="https://placehold.co/600x400/000000/DDD6FE?text=Advisync+Advice" alt="Advisync - Advanced Financial Advice" class="w-full h-56 object-cover" style="opacity: 0;">
-                <div class="p-6 flex flex-col justify-between min-h-[300px]">
-                    <div>
-                        <h3 class="text-2xl font-semibold text-indigo-400 mb-2">Advisync - Advanced Financial Advice</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Navigate complex financial landscapes with Advisync. Our advanced financial advisory service offers comprehensive planning, investment guidance, and wealth management solutions. We leverage cutting-edge analytics and deep market expertise to provide clear, actionable advice, empowering you to make informed decisions and achieve long-term financial well-being.
-                        </p>
-                    </div>
-                    <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
-                        </div>
-                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out" disabled>
-                            Notify Me
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card gainx-bg">
-                <img src="https://placehold.co/600x400/000000/6EE7B7?text=GainX+AI+Profit" alt="GainX - AI Profit Integration" class="w-full h-56 object-cover" style="opacity: 0;">
+            <div class="bg-gray-900 rounded-lg shadow-lg overflow-hidden product-card gainx-bg" data-product="gainx" data-url="gainx.html">
+                <img src="https://placehold.co/600x400/000000/6EE7B7?text=GainX" alt="GainX" class="w-full h-56 object-cover" style="opacity: 0;">
                 <div class="p-6 flex flex-col justify-between min-h-[300px]">
                     <div>
                         <h3 class="text-2xl font-semibold text-indigo-400 mb-2">GainX - AI Profit Integration</h3>
-                        <p class="text-gray-400 text-sm mb-4">
-                            Achieve short-term constant profit potential through our cutting-edge AI integration. GainX analyzes market trends with unparalleled speed and accuracy, identifying and executing on fleeting opportunities. This service is designed for those seeking consistent returns powered by intelligent automation.
-                        </p>
+                        <p class="text-gray-400 text-sm mb-4">Achieve short-term constant profit potential through our cutting-edge AI integration. This service is for those seeking consistent returns.</p>
                     </div>
                     <div>
-                        <div class="flex justify-end items-center mb-4 mt-2">
-                            <span class="text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
+                        <div class="flex justify-end items-center mb-4 mt-2 product-status">
+                            <span class="status-unavailable text-xs text-red-400 font-semibold bg-red-900 bg-opacity-75 px-2 py-1 rounded-full">Currently Unavailable</span>
+                            <span class="status-active hidden text-xs text-green-400 font-semibold bg-green-900 bg-opacity-75 px-2 py-1 rounded-full">Active Subscription</span>
                         </div>
-                        <button id="gainx-access-button" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-50">
-                            Access Now
-                        </button>
+                        <button class="w-full bg-gray-700 hover:bg-gray-600 text-gray-100 font-semibold py-3 px-4 rounded-lg cursor-not-allowed transition duration-300 ease-in-out notify-button">Notify Me</button>
+                        <button class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-300 ease-in-out hidden access-button">Access Now</button>
                     </div>
                 </div>
             </div>
@@ -245,9 +209,9 @@
         const firebaseConfig = {
             apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
             authDomain: "swiftgain.firebaseapp.com",
-            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app", // This is used now
+            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "swiftgain",
-            storageBucket: "swiftgain.firebasestorage.app", // Double check this: usually swiftgain.appspot.com
+            storageBucket: "swiftgain.appspot.com",
             messagingSenderId: "751911092919",
             appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
         };
@@ -270,74 +234,72 @@
             });
         }
 
-        // GainX Button Logic with Firebase Realtime Database
-        const gainXButton = document.getElementById('gainx-access-button');
+        // --- NEW --- Function to update UI based on user roles
+        const updateUserProductView = (userRoles) => {
+            const productCards = document.querySelectorAll('.product-card');
 
-        if (gainXButton) {
-            gainXButton.addEventListener('click', async () => {
-                const user = firebase.auth().currentUser;
+            productCards.forEach(card => {
+                const productName = card.dataset.product;
+                const accessUrl = card.dataset.url;
 
-                if (user) {
-                    gainXButton.textContent = 'Verifying...';
-                    gainXButton.disabled = true;
+                const statusDiv = card.querySelector('.product-status');
+                const statusUnavailable = statusDiv.querySelector('.status-unavailable');
+                const statusActive = statusDiv.querySelector('.status-active');
+                
+                const notifyButton = card.querySelector('.notify-button');
+                const accessButton = card.querySelector('.access-button');
 
-                    try {
-                        // Get a reference to the Firebase Realtime Database
-                        const db = firebase.database(); // Make sure firebase-database-compat.js is included
-                        const userRoleRef = db.ref('users/' + user.uid + '/role');
+                // Check if the user has a role for this specific product
+                if (userRoles && userRoles[productName]) {
+                    // User has access
+                    statusUnavailable.classList.add('hidden');
+                    statusActive.classList.remove('hidden');
 
-                        const snapshot = await userRoleRef.once('value');
-                        const userRole = snapshot.val(); // This will be 'standard', 'premium', etc., or null if not set
+                    notifyButton.classList.add('hidden');
+                    accessButton.classList.remove('hidden');
+                    accessButton.disabled = false;
+                    
+                    accessButton.addEventListener('click', () => {
+                        window.location.href = accessUrl;
+                    });
 
-                        console.log('User role from Realtime Database:', userRole); // For debugging
-
-                        if (!userRole) {
-                            alert('Role not found for your account in the database. Please contact support.');
-                            // No explicit button reset here, finally block will handle it
-                            return; // Exit if no role
-                        }
-
-                        switch (userRole) {
-                            case 'standard':
-                                window.location.href = 'gainx.html';
-                                break;
-                            case 'premium':
-                                window.location.href = 'pregainx.html';
-                                break;
-                            case 'admin':
-                                if (confirm("Access Premium version (pregainx.html)? \n(OK for Premium, Cancel for Standard)")) {
-                                    window.location.href = 'pregainx.html';
-                                } else {
-                                    window.location.href = 'gainx.html';
-                                }
-                                break;
-                            case 'novice': // <-- ADDED THIS CASE
-                                window.location.href = 'selectplans.html';
-                                break;
-                            default:
-                                alert('Unknown user role: ' + userRole + '. Redirecting to standard page.');
-                                window.location.href = 'gainx.html';
-                                break;
-                        }
-                    } catch (error) {
-                        console.error("Error fetching user role from Realtime Database:", error);
-                        alert("Could not verify your user role. Please try again or contact support.");
-                    } finally {
-                        // This block executes whether an error occurred or not (unless a redirect fully stopped script execution).
-                        // If the button is still disabled, it means a redirect likely didn't happen or an error occurred before redirection.
-                        if (gainXButton.disabled) {
-                           gainXButton.textContent = 'Access Now';
-                           gainXButton.disabled = false;
-                        }
-                    }
                 } else {
-                    alert('You need to be logged in to access this product. Please sign in.');
-                    // Optionally, redirect to a login page if desired:
-                    // window.location.href = 'login.html';
+                    // User does not have access, show default state
+                    statusUnavailable.classList.remove('hidden');
+                    statusActive.classList.add('hidden');
+
+                    notifyButton.classList.remove('hidden');
+                    accessButton.classList.add('hidden');
                 }
             });
-        }
-    </script>
+        };
 
+        // --- MODIFIED --- Firebase Auth State Change Listener
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                // User is logged in, fetch their roles
+                try {
+                    const db = firebase.database();
+                    // Assumes roles are stored under users/uid/roles as an object
+                    const userRolesRef = db.ref('users/' + user.uid + '/roles');
+                    const snapshot = await userRolesRef.once('value');
+                    const userRoles = snapshot.val(); // e.g., { gainx: true, fta: true }
+
+                    console.log('User roles found:', userRoles); // For debugging
+                    updateUserProductView(userRoles);
+
+                } catch (error) {
+                    console.error("Error fetching user roles:", error);
+                    // If there's an error, treat as if user has no roles
+                    updateUserProductView(null);
+                }
+            } else {
+                // User is not logged in, all products are unavailable
+                console.log('No user is logged in.');
+                updateUserProductView(null);
+            }
+        });
+
+    </script>
 </body>
 </html>
