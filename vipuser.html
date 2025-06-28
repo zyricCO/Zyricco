@@ -94,14 +94,12 @@
                     <div class="flex flex-col items-center">
                         <img id="user-avatar" src="https://placehold.co/100x100/1f2937/ffffff?text=V" alt="User Avatar" class="w-24 h-24 rounded-full mb-4 border-4 border-blue-500">
                         <h2 class="text-3xl font-bold text-white" id="user-name">Loading...</h2>
-                        <p class="text-md text-gray-400" id="user-email"></p>
-                        <span class="mt-2 bg-blue-900 text-blue-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">VIP since: <span id="vip-since"></span></span>
+                        <p class="text-md text-gray-400 mt-2" id="user-email"></p>
                     </div>
                     <div class="mt-8 border-t border-gray-700 pt-6">
                         <h3 class="text-xl font-semibold text-white mb-4">Account Details</h3>
                         <ul class="text-gray-300 space-y-3">
                             <li class="flex justify-between"><span>Membership ID:</span> <span class="font-medium text-white" id="membership-id"></span></li>
-                            <li class="flex justify-between"><span>Account Manager:</span> <span class="font-medium text-white" id="account-manager"></span></li>
                             <li class="flex justify-between"><span>Last Login:</span> <span class="font-medium text-white" id="last-login"></span></li>
                         </ul>
                     </div>
@@ -251,9 +249,7 @@
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             const userEmail = document.getElementById('user-email');
-            const vipSince = document.getElementById('vip-since');
             const membershipId = document.getElementById('membership-id');
-            const accountManager = document.getElementById('account-manager');
             const lastLogin = document.getElementById('last-login');
             
             const notificationList = document.getElementById('notification-list');
@@ -326,9 +322,7 @@
                         userAvatar.src = user.avatarUrl || 'https://placehold.co/100x100/1f2937/ffffff?text=U';
                         userName.textContent = user.name || 'N/A';
                         userEmail.textContent = user.email || 'N/A';
-                        vipSince.textContent = user.vipSince || 'N/A';
                         membershipId.textContent = user.membershipId || 'N/A';
-                        accountManager.textContent = user.accountManager || 'N/A';
                         lastLogin.textContent = user.lastLogin || 'N/A';
                     } else {
                         seedInitialData(); // Seed data if the user record doesn't exist.
@@ -458,9 +452,7 @@
                             name: "New VIP Member",
                             email: "user@example.com",
                             avatarUrl: "https://placehold.co/100x100/1f2937/ffffff?text=U",
-                            vipSince: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
                             membershipId: `VIP${Math.floor(10000 + Math.random() * 90000)}`,
-                            accountManager: "System",
                             lastLogin: "Just now"
                         });
                         set(vipDataRef, {
