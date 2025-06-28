@@ -31,7 +31,7 @@
             width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-            background: #1f2937; /* gray-800 */
+            background: #111827; /* gray-900 */
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
             background: #4b5563; /* gray-600 */
@@ -54,9 +54,17 @@
 </head>
 <body class="bg-black text-gray-300 antialiased">
 
-    <div class="min-h-screen flex">
+    <div class="relative min-h-screen md:flex">
+        <!-- Mobile Header -->
+        <div class="bg-gray-900 text-gray-100 flex justify-between md:hidden sticky top-0 z-20">
+            <a href="#" class="block p-4 text-white font-bold">VIP Portal</a>
+            <button id="hamburger-btn" class="p-4 focus:outline-none focus:bg-gray-700">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
         <!-- Sidebar Navigation -->
-        <nav class="w-64 bg-gray-900 p-4 flex flex-col shrink-0">
+        <nav id="sidebar" class="w-64 bg-gray-900 p-4 flex flex-col shrink-0 fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition-transform duration-200 ease-in-out z-30">
             <div class="text-white text-2xl font-bold mb-10 pl-2">VIP Portal</div>
             <ul class="space-y-2">
                 <li><a href="#" id="nav-dashboard" class="nav-link active flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"><i class="fas fa-user-circle w-8 text-center"></i>Dashboard</a></li>
@@ -71,13 +79,14 @@
                 </li>
             </ul>
             <div class="mt-auto pl-2">
+                 <p class="text-sm text-gray-500" id="user-id-display">UID: Loading...</p>
                 <p class="font-semibold text-white" id="header-username">Loading...</p>
                 <p class="text-sm text-gray-400">VIP Member</p>
             </div>
         </nav>
         
         <!-- Main Content -->
-        <main class="flex-1 bg-black p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+        <main class="flex-1 md:ml-64 bg-black p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
 
             <!-- Panel: Dashboard -->
             <div id="panel-dashboard" class="content-panel">
@@ -101,7 +110,7 @@
 
             <!-- Panel: Service Requests -->
             <div id="panel-requests" class="content-panel hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
                         <h3 class="text-2xl font-bold text-white mb-4">New Service Request</h3>
                         <form id="service-request-form">
@@ -190,7 +199,8 @@
     <script type="module">
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -205,22 +215,39 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Simulated user auth (replace with actual Firebase Auth in a real app)
-        const userId = "user123"; 
+        // --- App Initialization ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // User is signed in.
+                console.log("Authenticated user found:", user.uid);
+                initializeAppLogic(user.uid);
+            } else {
+                // User is signed out. Sign in anonymously.
+                console.log("No user found. Signing in anonymously.");
+                signInAnonymously(auth).catch(error => {
+                    console.error("Anonymous sign-in failed:", error);
+                    showModal("Authentication failed. Please refresh the page.");
+                });
+            }
+        });
 
-        document.addEventListener('DOMContentLoaded', function() {
+        // This function holds the main application logic.
+        // It's called after we have a confirmed userId.
+        function initializeAppLogic(userId) {
             
             // --- DATABASE REFERENCES ---
             const userRef = ref(db, 'users/' + userId);
             const vipDataRef = ref(db, 'VIP/' + userId);
             const notificationsRef = child(vipDataRef, 'notifications');
-            const requestsRef = child(vipDataRef, 'requests'); // Corrected typo here
+            const requestsRef = child(vipDataRef, 'requests');
             const chatRef = child(vipDataRef, 'chat');
             
             // --- DOM ELEMENTS ---
             const headerUsername = document.getElementById('header-username');
+            const userIdDisplay = document.getElementById('user-id-display');
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             const userEmail = document.getElementById('user-email');
@@ -244,11 +271,20 @@
             const modalMessage = document.getElementById('modal-message');
             const modalCloseBtn = document.getElementById('modal-close-btn');
 
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const sidebar = document.getElementById('sidebar');
+
             // --- NAVIGATION SETUP ---
             const navLinks = document.querySelectorAll('.nav-link');
             const contentPanels = document.querySelectorAll('.content-panel');
 
             function setupNavigation() {
+                // Hamburger menu toggle
+                hamburgerBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full');
+                });
+
+                // Main navigation links
                 navLinks.forEach(link => {
                     link.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -258,14 +294,14 @@
                         link.classList.add('active');
 
                         contentPanels.forEach(panel => {
-                            if (panel.id === targetPanelId) {
-                                panel.classList.remove('hidden');
-                            } else {
-                                panel.classList.add('hidden');
-                            }
+                            panel.classList.toggle('hidden', panel.id !== targetPanelId);
                         });
 
-                        // If navigating to notifications, mark them as read
+                        // Close sidebar on mobile after clicking a link
+                        if (!sidebar.classList.contains('-translate-x-full')) {
+                           sidebar.classList.add('-translate-x-full');
+                        }
+
                         if(targetPanelId === 'panel-notifications') {
                             markNotificationsAsRead();
                         }
@@ -275,18 +311,17 @@
 
             // --- FUNCTIONS ---
 
-            // Modal message handler
             function showModal(message) {
                 modalMessage.textContent = message;
                 modal.classList.remove('hidden');
             }
             modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
 
-            // Load User Data from Firebase
             function loadUserData() {
                 onValue(userRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const user = snapshot.val();
+                        userIdDisplay.textContent = `UID: ${userId.substring(0, 8)}...`;
                         headerUsername.textContent = user.name || 'N/A';
                         userAvatar.src = user.avatarUrl || 'https://placehold.co/100x100/1f2937/ffffff?text=U';
                         userName.textContent = user.name || 'N/A';
@@ -296,30 +331,23 @@
                         accountManager.textContent = user.accountManager || 'N/A';
                         lastLogin.textContent = user.lastLogin || 'N/A';
                     } else {
-                        showModal("Could not load user profile.");
+                        seedInitialData(); // Seed data if the user record doesn't exist.
                     }
                 });
             }
 
-            // Load Notifications from Firebase
             function loadNotifications() {
                 onValue(notificationsRef, (snapshot) => {
                     notificationList.innerHTML = '';
                     let hasUnread = false;
-                    if (!snapshot.exists() || snapshot.val() === null) {
+                    if (!snapshot.exists()) {
                         notificationList.innerHTML = `<p class="text-gray-400 text-center py-8">No new notifications.</p>`;
                     } else {
                         const notifications = snapshot.val();
-                        Object.values(notifications).reverse().forEach(notif => { // Show newest first
+                        Object.values(notifications).reverse().forEach(notif => {
                             const notifElement = document.createElement('div');
                             notifElement.className = `flex items-start p-4 rounded-lg transition-colors ${notif.unread ? 'bg-blue-900/50' : 'bg-gray-900/50'}`;
-                            notifElement.innerHTML = `
-                                <i class="fas ${notif.icon || 'fa-info-circle'} text-blue-400 mt-1 mr-4 text-lg"></i>
-                                <div>
-                                    <p class="text-sm text-gray-200">${notif.text}</p>
-                                    <p class="text-xs text-gray-500 mt-1">${new Date(notif.timestamp).toLocaleString()}</p>
-                                </div>
-                            `;
+                            notifElement.innerHTML = `<i class="fas ${notif.icon || 'fa-info-circle'} text-blue-400 mt-1 mr-4 text-lg"></i><div><p class="text-sm text-gray-200">${notif.text}</p><p class="text-xs text-gray-500 mt-1">${new Date(notif.timestamp).toLocaleString()}</p></div>`;
                             notificationList.appendChild(notifElement);
                             if (notif.unread) hasUnread = true;
                         });
@@ -333,23 +361,21 @@
                     if (snapshot.exists()) {
                         const updates = {};
                         snapshot.forEach((childSnapshot) => {
-                            updates[childSnapshot.key + '/unread'] = false;
+                            if (childSnapshot.val().unread) {
+                                updates[childSnapshot.key + '/unread'] = false;
+                            }
                         });
-                        set(ref(db, 'VIP/' + userId + '/notifications'), { ...snapshot.val(), ...updates });
+                        if (Object.keys(updates).length > 0) {
+                            set(ref(db, `VIP/${userId}/notifications`), { ...snapshot.val(), ...updates });
+                        }
                     }
                 });
             }
 
-            // Clear Notifications in Firebase
             clearNotificationsBtn.addEventListener('click', () => {
-                remove(notificationsRef).then(() => {
-                    showModal("All notifications cleared.");
-                }).catch(error => {
-                    showModal("Could not clear notifications.");
-                });
+                remove(notificationsRef).then(() => showModal("All notifications cleared.")).catch(() => showModal("Could not clear notifications."));
             });
 
-            // Load Service Request History from Firebase
             function loadRequestHistory() {
                  onValue(requestsRef, (snapshot) => {
                     requestHistoryBody.innerHTML = '';
@@ -357,7 +383,7 @@
                         requestHistoryBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500">No requests found.</td></tr>`;
                     } else {
                         const requests = snapshot.val();
-                        Object.keys(requests).reverse().forEach(key => { // Show newest first
+                        Object.keys(requests).reverse().forEach(key => {
                             const req = requests[key];
                             const row = document.createElement('tr');
                             let statusClass = '';
@@ -367,23 +393,15 @@
                                 case 'cancelled': statusClass = 'bg-red-800 text-red-200'; break;
                                 default: statusClass = 'bg-gray-700 text-gray-300';
                             }
-                            row.innerHTML = `
-                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-300">${key.substring(key.length - 6)}</td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">${req.service}</td>
-                                <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${req.status}</span>
-                                </td>
-                            `;
+                            row.innerHTML = `<td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-300">${key.substring(key.length - 6)}</td><td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">${req.service}</td><td class="px-4 py-3 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${req.status}</span></td>`;
                             requestHistoryBody.appendChild(row);
                         });
                     }
                 });
             }
 
-            // Handle Service Request Submission to Firebase
             serviceRequestForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const serviceType = document.getElementById('service-type').value;
                 const serviceDetails = document.getElementById('service-details').value;
                 if (!serviceDetails.trim()) {
                     showModal("Please provide details for your service request.");
@@ -391,19 +409,16 @@
                 }
                 const newRequestRef = push(requestsRef);
                 set(newRequestRef, {
-                    service: serviceType,
+                    service: document.getElementById('service-type').value,
                     details: serviceDetails,
                     status: 'In Progress',
                     timestamp: serverTimestamp()
                 }).then(() => {
                     showModal(`Your request (ID: ${newRequestRef.key.substring(newRequestRef.key.length - 6)}) has been submitted.`);
                     serviceRequestForm.reset();
-                }).catch((error) => {
-                    showModal("Failed to submit your request.");
-                });
+                }).catch(() => showModal("Failed to submit your request."));
             });
 
-            // Load and handle chat messages
             function loadChatMessages() {
                 onValue(chatRef, (snapshot) => {
                     chatWindow.innerHTML = '';
@@ -426,7 +441,6 @@
                 chatWindow.scrollTop = chatWindow.scrollHeight;
             }
 
-            // Handle Chat Submission to Firebase
             chatForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const messageText = chatInput.value.trim();
@@ -436,37 +450,35 @@
                 }
             });
             
-            // Seed initial data if the user doesn't exist yet
             function seedInitialData() {
                  get(userRef).then((snapshot) => {
                     if (!snapshot.exists()) {
+                        console.log("Seeding initial data for new user:", userId);
                         set(userRef, {
-                            name: "Alex Thompson",
-                            email: "alex.t@vip-services.com",
-                            avatarUrl: "https://placehold.co/100x100/1f2937/ffffff?text=AT",
-                            vipSince: "March 2019",
-                            membershipId: "VIP98765",
-                            accountManager: "Sarah Connor",
-                            lastLogin: "Online"
+                            name: "New VIP Member",
+                            email: "user@example.com",
+                            avatarUrl: "https://placehold.co/100x100/1f2937/ffffff?text=U",
+                            vipSince: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+                            membershipId: `VIP${Math.floor(10000 + Math.random() * 90000)}`,
+                            accountManager: "System",
+                            lastLogin: "Just now"
                         });
                         set(vipDataRef, {
                             notifications: { notif1: { icon: 'fa-gift', text: 'Welcome to the new VIP Portal!', timestamp: serverTimestamp(), unread: true } },
-                            requests: { req1: { service: 'Account Setup', status: 'Completed', timestamp: serverTimestamp() } },
                             chat: { msg1: { sender: 'agent', text: 'Hello! Welcome to VIP Support. How can I assist you today?', timestamp: serverTimestamp() } }
                         });
-                        showModal("Welcome! We've set up your new dashboard with some examples.");
+                        showModal("Welcome! We've set up your new dashboard.");
                     }
                  });
             }
 
             // --- INITIAL LOAD ---
             setupNavigation();
-            seedInitialData(); // Check if we need to create the user profile
             loadUserData();
             loadNotifications();
             loadRequestHistory();
             loadChatMessages();
-        });
+        }
     </script>
 </body>
 </html>
