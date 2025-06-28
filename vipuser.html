@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP User Dashboard - Black Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" xintegrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chat-bubble {
+            max-width: 80%;
+        }
+        .chat-bubble-user {
+            background-color: #2563eb; /* blue-600 */
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+        .chat-bubble-agent {
+            background-color: #4b5563; /* gray-600 */
+            color: #d1d5db; /* gray-300 */
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+        }
+        /* Custom scrollbar for webkit browsers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+        .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        /* Remove ugly default styles */
+        input, select, textarea {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body class="bg-black text-gray-300 antialiased">
+
+    <div class="min-h-screen flex">
+        <!-- Sidebar Navigation -->
+        <nav class="w-64 bg-gray-900 p-4 flex flex-col shrink-0">
+            <div class="text-white text-2xl font-bold mb-10 pl-2">VIP Portal</div>
+            <ul class="space-y-2">
+                <li><a href="#" id="nav-dashboard" class="nav-link active flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"><i class="fas fa-user-circle w-8 text-center"></i>Dashboard</a></li>
+                <li><a href="#" id="nav-requests" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"><i class="fas fa-concierge-bell w-8 text-center"></i>Service Requests</a></li>
+                <li><a href="#" id="nav-chat" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200"><i class="fas fa-headset w-8 text-center"></i>Live Chat</a></li>
+                <li>
+                    <a href="#" id="nav-notifications" class="nav-link flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors duration-200">
+                        <i class="fas fa-bell w-8 text-center"></i>
+                        Notifications
+                        <span id="notification-dot-menu" class="ml-auto h-3 w-3 bg-red-500 rounded-full hidden"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="mt-auto pl-2">
+                <p class="font-semibold text-white" id="header-username">Loading...</p>
+                <p class="text-sm text-gray-400">VIP Member</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="flex-1 bg-black p-4 md:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+
+            <!-- Panel: Dashboard -->
+            <div id="panel-dashboard" class="content-panel">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex flex-col items-center">
+                        <img id="user-avatar" src="https://placehold.co/100x100/1f2937/ffffff?text=V" alt="User Avatar" class="w-24 h-24 rounded-full mb-4 border-4 border-blue-500">
+                        <h2 class="text-3xl font-bold text-white" id="user-name">Loading...</h2>
+                        <p class="text-md text-gray-400" id="user-email"></p>
+                        <span class="mt-2 bg-blue-900 text-blue-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">VIP since: <span id="vip-since"></span></span>
+                    </div>
+                    <div class="mt-8 border-t border-gray-700 pt-6">
+                        <h3 class="text-xl font-semibold text-white mb-4">Account Details</h3>
+                        <ul class="text-gray-300 space-y-3">
+                            <li class="flex justify-between"><span>Membership ID:</span> <span class="font-medium text-white" id="membership-id"></span></li>
+                            <li class="flex justify-between"><span>Account Manager:</span> <span class="font-medium text-white" id="account-manager"></span></li>
+                            <li class="flex justify-between"><span>Last Login:</span> <span class="font-medium text-white" id="last-login"></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel: Service Requests -->
+            <div id="panel-requests" class="content-panel hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-white mb-4">New Service Request</h3>
+                        <form id="service-request-form">
+                            <div class="mb-4">
+                                <label for="service-type" class="block text-sm font-medium text-gray-300 mb-1">Service Type</label>
+                                <select id="service-type" name="service-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-gray-700 border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-white">
+                                    <option>Booking Inquiry</option>
+                                    <option>Technical Support</option>
+                                    <option>Account Query</option>
+                                    <option>General Feedback</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="service-details" class="block text-sm font-medium text-gray-300 mb-1">Details</label>
+                                <textarea id="service-details" name="service-details" rows="4" class="mt-1 block w-full shadow-sm sm:text-sm bg-gray-700 border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white" placeholder="Please describe your request..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300">Submit Request</button>
+                        </form>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                         <h3 class="text-2xl font-bold text-white mb-4">Request History</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-700">
+                                <thead class="bg-gray-900">
+                                    <tr>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Ticket ID</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Service</th>
+                                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="request-history-body" class="bg-gray-800 divide-y divide-gray-700">
+                                    <tr><td colspan="3" class="text-center py-4 text-gray-500">Loading history...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel: Live Chat -->
+             <div id="panel-chat" class="content-panel hidden h-full">
+                 <div class="bg-gray-800 rounded-xl shadow-lg flex flex-col h-full max-h-[85vh]">
+                    <h3 class="text-2xl font-bold text-white p-6 border-b border-gray-700 shrink-0">Live Chat Support</h3>
+                    <div id="chat-window" class="flex-1 p-6 space-y-4 overflow-y-auto custom-scrollbar flex flex-col">
+                         <p class="text-gray-400 text-center">Connecting to chat...</p>
+                    </div>
+                    <div class="p-4 border-t border-gray-700 bg-gray-900">
+                        <form id="chat-form" class="flex items-center space-x-3">
+                            <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off" class="flex-1 block w-full shadow-sm sm:text-sm bg-gray-700 border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 text-white" disabled>
+                            <button type="submit" class="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel: Notifications -->
+            <div id="panel-notifications" class="content-panel hidden">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-white">Notifications</h3>
+                        <button id="clear-notifications" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-lg transition duration-300 text-sm">
+                            Clear All
+                        </button>
+                    </div>
+                    <div id="notification-list" class="space-y-4">
+                       <p class="text-gray-400 text-center">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <!-- Modal for showing messages -->
+        <div id="message-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center max-w-sm mx-auto border border-gray-700">
+                <p id="modal-message" class="text-lg mb-6 text-white"></p>
+                <button id="modal-close-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-8 rounded-lg">Close</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC9yCEe4a9KC0Ph64gMkrDn_Cfah0TxlMw",
+            authDomain: "swiftgain.firebaseapp.com",
+            databaseURL: "https://swiftgain-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "swiftgain",
+            storageBucket: "swiftgain.appspot.com",
+            messagingSenderId: "751911092919",
+            appId: "1:751911092919:web:bd0ab90ca8b4432f0d4332"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Simulated user auth (replace with actual Firebase Auth in a real app)
+        const userId = "user123"; 
+
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- DATABASE REFERENCES ---
+            const userRef = ref(db, 'users/' + userId);
+            const vipDataRef = ref(db, 'VIP/' + userId);
+            const notificationsRef = child(vipDataRef, 'notifications');
+            const requestsRef = child(vipDataRef, 'requests'); // Corrected typo here
+            const chatRef = child(vipDataRef, 'chat');
+            
+            // --- DOM ELEMENTS ---
+            const headerUsername = document.getElementById('header-username');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const userEmail = document.getElementById('user-email');
+            const vipSince = document.getElementById('vip-since');
+            const membershipId = document.getElementById('membership-id');
+            const accountManager = document.getElementById('account-manager');
+            const lastLogin = document.getElementById('last-login');
+            
+            const notificationList = document.getElementById('notification-list');
+            const notificationDotMenu = document.getElementById('notification-dot-menu');
+            const clearNotificationsBtn = document.getElementById('clear-notifications');
+            
+            const serviceRequestForm = document.getElementById('service-request-form');
+            const requestHistoryBody = document.getElementById('request-history-body');
+
+            const chatWindow = document.getElementById('chat-window');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+
+            const modal = document.getElementById('message-modal');
+            const modalMessage = document.getElementById('modal-message');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            // --- NAVIGATION SETUP ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentPanels = document.querySelectorAll('.content-panel');
+
+            function setupNavigation() {
+                navLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const targetPanelId = 'panel-' + link.id.split('-')[1];
+
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        link.classList.add('active');
+
+                        contentPanels.forEach(panel => {
+                            if (panel.id === targetPanelId) {
+                                panel.classList.remove('hidden');
+                            } else {
+                                panel.classList.add('hidden');
+                            }
+                        });
+
+                        // If navigating to notifications, mark them as read
+                        if(targetPanelId === 'panel-notifications') {
+                            markNotificationsAsRead();
+                        }
+                    });
+                });
+            }
+
+            // --- FUNCTIONS ---
+
+            // Modal message handler
+            function showModal(message) {
+                modalMessage.textContent = message;
+                modal.classList.remove('hidden');
+            }
+            modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+            // Load User Data from Firebase
+            function loadUserData() {
+                onValue(userRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        const user = snapshot.val();
+                        headerUsername.textContent = user.name || 'N/A';
+                        userAvatar.src = user.avatarUrl || 'https://placehold.co/100x100/1f2937/ffffff?text=U';
+                        userName.textContent = user.name || 'N/A';
+                        userEmail.textContent = user.email || 'N/A';
+                        vipSince.textContent = user.vipSince || 'N/A';
+                        membershipId.textContent = user.membershipId || 'N/A';
+                        accountManager.textContent = user.accountManager || 'N/A';
+                        lastLogin.textContent = user.lastLogin || 'N/A';
+                    } else {
+                        showModal("Could not load user profile.");
+                    }
+                });
+            }
+
+            // Load Notifications from Firebase
+            function loadNotifications() {
+                onValue(notificationsRef, (snapshot) => {
+                    notificationList.innerHTML = '';
+                    let hasUnread = false;
+                    if (!snapshot.exists() || snapshot.val() === null) {
+                        notificationList.innerHTML = `<p class="text-gray-400 text-center py-8">No new notifications.</p>`;
+                    } else {
+                        const notifications = snapshot.val();
+                        Object.values(notifications).reverse().forEach(notif => { // Show newest first
+                            const notifElement = document.createElement('div');
+                            notifElement.className = `flex items-start p-4 rounded-lg transition-colors ${notif.unread ? 'bg-blue-900/50' : 'bg-gray-900/50'}`;
+                            notifElement.innerHTML = `
+                                <i class="fas ${notif.icon || 'fa-info-circle'} text-blue-400 mt-1 mr-4 text-lg"></i>
+                                <div>
+                                    <p class="text-sm text-gray-200">${notif.text}</p>
+                                    <p class="text-xs text-gray-500 mt-1">${new Date(notif.timestamp).toLocaleString()}</p>
+                                </div>
+                            `;
+                            notificationList.appendChild(notifElement);
+                            if (notif.unread) hasUnread = true;
+                        });
+                    }
+                    notificationDotMenu.classList.toggle('hidden', !hasUnread);
+                });
+            }
+            
+            function markNotificationsAsRead() {
+                get(notificationsRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const updates = {};
+                        snapshot.forEach((childSnapshot) => {
+                            updates[childSnapshot.key + '/unread'] = false;
+                        });
+                        set(ref(db, 'VIP/' + userId + '/notifications'), { ...snapshot.val(), ...updates });
+                    }
+                });
+            }
+
+            // Clear Notifications in Firebase
+            clearNotificationsBtn.addEventListener('click', () => {
+                remove(notificationsRef).then(() => {
+                    showModal("All notifications cleared.");
+                }).catch(error => {
+                    showModal("Could not clear notifications.");
+                });
+            });
+
+            // Load Service Request History from Firebase
+            function loadRequestHistory() {
+                 onValue(requestsRef, (snapshot) => {
+                    requestHistoryBody.innerHTML = '';
+                    if (!snapshot.exists()) {
+                        requestHistoryBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-gray-500">No requests found.</td></tr>`;
+                    } else {
+                        const requests = snapshot.val();
+                        Object.keys(requests).reverse().forEach(key => { // Show newest first
+                            const req = requests[key];
+                            const row = document.createElement('tr');
+                            let statusClass = '';
+                            switch(req.status.toLowerCase()) {
+                                case 'completed': statusClass = 'bg-green-800 text-green-200'; break;
+                                case 'in progress': statusClass = 'bg-yellow-800 text-yellow-200'; break;
+                                case 'cancelled': statusClass = 'bg-red-800 text-red-200'; break;
+                                default: statusClass = 'bg-gray-700 text-gray-300';
+                            }
+                            row.innerHTML = `
+                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-300">${key.substring(key.length - 6)}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">${req.service}</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${req.status}</span>
+                                </td>
+                            `;
+                            requestHistoryBody.appendChild(row);
+                        });
+                    }
+                });
+            }
+
+            // Handle Service Request Submission to Firebase
+            serviceRequestForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const serviceType = document.getElementById('service-type').value;
+                const serviceDetails = document.getElementById('service-details').value;
+                if (!serviceDetails.trim()) {
+                    showModal("Please provide details for your service request.");
+                    return;
+                }
+                const newRequestRef = push(requestsRef);
+                set(newRequestRef, {
+                    service: serviceType,
+                    details: serviceDetails,
+                    status: 'In Progress',
+                    timestamp: serverTimestamp()
+                }).then(() => {
+                    showModal(`Your request (ID: ${newRequestRef.key.substring(newRequestRef.key.length - 6)}) has been submitted.`);
+                    serviceRequestForm.reset();
+                }).catch((error) => {
+                    showModal("Failed to submit your request.");
+                });
+            });
+
+            // Load and handle chat messages
+            function loadChatMessages() {
+                onValue(chatRef, (snapshot) => {
+                    chatWindow.innerHTML = '';
+                    if (!snapshot.exists()) {
+                         chatWindow.innerHTML = `<p class="text-gray-400 text-center m-auto">No messages yet. Start the conversation!</p>`;
+                    } else {
+                        const messages = snapshot.val();
+                        Object.values(messages).forEach(msg => addChatMessage(msg.sender, msg.text));
+                    }
+                    chatInput.disabled = false;
+                });
+            }
+            
+            function addChatMessage(sender, text) {
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble p-3 rounded-lg shadow-md';
+                bubble.textContent = text;
+                bubble.classList.add(sender === 'user' ? 'chat-bubble-user' : 'chat-bubble-agent');
+                chatWindow.appendChild(bubble);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+
+            // Handle Chat Submission to Firebase
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const messageText = chatInput.value.trim();
+                if (messageText) {
+                    push(chatRef, { sender: 'user', text: messageText, timestamp: serverTimestamp() });
+                    chatInput.value = '';
+                }
+            });
+            
+            // Seed initial data if the user doesn't exist yet
+            function seedInitialData() {
+                 get(userRef).then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        set(userRef, {
+                            name: "Alex Thompson",
+                            email: "alex.t@vip-services.com",
+                            avatarUrl: "https://placehold.co/100x100/1f2937/ffffff?text=AT",
+                            vipSince: "March 2019",
+                            membershipId: "VIP98765",
+                            accountManager: "Sarah Connor",
+                            lastLogin: "Online"
+                        });
+                        set(vipDataRef, {
+                            notifications: { notif1: { icon: 'fa-gift', text: 'Welcome to the new VIP Portal!', timestamp: serverTimestamp(), unread: true } },
+                            requests: { req1: { service: 'Account Setup', status: 'Completed', timestamp: serverTimestamp() } },
+                            chat: { msg1: { sender: 'agent', text: 'Hello! Welcome to VIP Support. How can I assist you today?', timestamp: serverTimestamp() } }
+                        });
+                        showModal("Welcome! We've set up your new dashboard with some examples.");
+                    }
+                 });
+            }
+
+            // --- INITIAL LOAD ---
+            setupNavigation();
+            seedInitialData(); // Check if we need to create the user profile
+            loadUserData();
+            loadNotifications();
+            loadRequestHistory();
+            loadChatMessages();
+        });
+    </script>
+</body>
+</html>
