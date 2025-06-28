@@ -95,7 +95,7 @@
                         <img id="user-avatar" src="https://placehold.co/100x100/1f2937/ffffff?text=V" alt="User Avatar" class="w-24 h-24 rounded-full mb-4 border-4 border-blue-500">
                         <h2 class="text-3xl font-bold text-white" id="user-name">Loading...</h2>
                         <p class="text-md text-gray-400" id="user-email"></p>
-                        <span class="mt-2 bg-blue-900 text-blue-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">VIP since: <span id="vip-since"></span></span>
+                        <span class="mt-2 bg-blue-900 text-blue-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">DOB: <span id="user-dob"></span></span>
                     </div>
                     <div class="mt-8 border-t border-gray-700 pt-6">
                         <h3 class="text-xl font-semibold text-white mb-4">Account Details</h3>
@@ -193,6 +193,25 @@
             </div>
         </div>
 
+        <!-- Modal for collecting user details -->
+        <div id="user-details-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden z-50">
+            <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md mx-auto border border-gray-700">
+                <h3 class="text-2xl font-bold text-white mb-4">Welcome VIP!</h3>
+                <p class="text-gray-400 mb-6">Please provide your details to personalize your account.</p>
+                <form id="user-details-form">
+                    <div class="mb-4">
+                        <label for="user-name-input" class="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+                        <input type="text" id="user-name-input" required class="mt-1 block w-full pl-3 pr-3 py-2 bg-gray-700 border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-white">
+                    </div>
+                    <div class="mb-6">
+                        <label for="user-dob-input" class="block text-sm font-medium text-gray-300 mb-1">Date of Birth</label>
+                        <input type="date" id="user-dob-input" required class="mt-1 block w-full pl-3 pr-3 py-2 bg-gray-700 border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-white">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300">Save Details</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
     <!-- Firebase SDKs -->
@@ -200,7 +219,7 @@
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, remove, serverTimestamp, get, child, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -251,7 +270,7 @@
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             const userEmail = document.getElementById('user-email');
-            const vipSince = document.getElementById('vip-since');
+            const userDob = document.getElementById('user-dob'); // Changed from vipSince
             const membershipId = document.getElementById('membership-id');
             const accountManager = document.getElementById('account-manager');
             const lastLogin = document.getElementById('last-login');
@@ -267,9 +286,15 @@
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
 
-            const modal = document.getElementById('message-modal');
+            const messageModal = document.getElementById('message-modal');
             const modalMessage = document.getElementById('modal-message');
             const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            // Elements for the new user details modal
+            const userDetailsModal = document.getElementById('user-details-modal');
+            const userDetailsForm = document.getElementById('user-details-form');
+            const userNameInput = document.getElementById('user-name-input');
+            const userDobInput = document.getElementById('user-dob-input');
 
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const sidebar = document.getElementById('sidebar');
@@ -298,8 +323,8 @@
                         });
 
                         // Close sidebar on mobile after clicking a link
-                        if (!sidebar.classList.contains('-translate-x-full')) {
-                           sidebar.classList.add('-translate-x-full');
+                        if (window.innerWidth < 768 && !sidebar.classList.contains('-translate-x-full')) {
+                            sidebar.classList.add('-translate-x-full');
                         }
 
                         if(targetPanelId === 'panel-notifications') {
@@ -313,23 +338,55 @@
 
             function showModal(message) {
                 modalMessage.textContent = message;
-                modal.classList.remove('hidden');
+                messageModal.classList.remove('hidden');
             }
-            modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
+            modalCloseBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
+
+            function promptForUserDetails() {
+                userDetailsModal.classList.remove('hidden');
+            }
+
+            userDetailsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newName = userNameInput.value;
+                const newDob = userDobInput.value;
+
+                if (!newName.trim() || !newDob) {
+                    showModal("Please fill out both your name and date of birth.");
+                    return;
+                }
+
+                update(userRef, {
+                    name: newName,
+                    dob: newDob
+                }).then(() => {
+                    userDetailsModal.classList.add('hidden');
+                    showModal("Your details have been saved successfully!");
+                }).catch(error => {
+                    console.error("Failed to save user details:", error);
+                    showModal("There was an error saving your details.");
+                });
+            });
 
             function loadUserData() {
                 onValue(userRef, (snapshot) => {
                     if (snapshot.exists()) {
                         const user = snapshot.val();
-                        userIdDisplay.textContent = `UID: ${userId.substring(0, 8)}...`;
+                        userIdDisplay.textContent = `UID: ${userId}`;
                         headerUsername.textContent = user.name || 'N/A';
                         userAvatar.src = user.avatarUrl || 'https://placehold.co/100x100/1f2937/ffffff?text=U';
                         userName.textContent = user.name || 'N/A';
                         userEmail.textContent = user.email || 'N/A';
-                        vipSince.textContent = user.vipSince || 'N/A';
+                        userDob.textContent = user.dob || 'N/A';
                         membershipId.textContent = user.membershipId || 'N/A';
                         accountManager.textContent = user.accountManager || 'N/A';
-                        lastLogin.textContent = user.lastLogin || 'N/A';
+                        lastLogin.textContent = new Date().toLocaleString(); // Update last login time on load
+
+                        // Check if name or DOB are missing and prompt user
+                        if (!user.name || user.name === 'New VIP Member' || !user.dob || user.dob === 'N/A') {
+                            promptForUserDetails();
+                        }
+
                     } else {
                         seedInitialData(); // Seed data if the user record doesn't exist.
                     }
@@ -357,7 +414,7 @@
             }
             
             function markNotificationsAsRead() {
-                get(notificationsRef).then((snapshot) => {
+                 get(notificationsRef).then((snapshot) => {
                     if (snapshot.exists()) {
                         const updates = {};
                         snapshot.forEach((childSnapshot) => {
@@ -366,7 +423,8 @@
                             }
                         });
                         if (Object.keys(updates).length > 0) {
-                            set(ref(db, `VIP/${userId}/notifications`), { ...snapshot.val(), ...updates });
+                             // Use update instead of set to avoid overwriting the whole node
+                            update(notificationsRef, updates);
                         }
                     }
                 });
@@ -429,6 +487,7 @@
                         Object.values(messages).forEach(msg => addChatMessage(msg.sender, msg.text));
                     }
                     chatInput.disabled = false;
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
                 });
             }
             
@@ -458,16 +517,15 @@
                             name: "New VIP Member",
                             email: "user@example.com",
                             avatarUrl: "https://placehold.co/100x100/1f2937/ffffff?text=U",
-                            vipSince: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+                            dob: "N/A", // Changed from vipSince
                             membershipId: `VIP${Math.floor(10000 + Math.random() * 90000)}`,
                             accountManager: "System",
-                            lastLogin: "Just now"
+                            lastLogin: new Date().toLocaleString()
                         });
                         set(vipDataRef, {
                             notifications: { notif1: { icon: 'fa-gift', text: 'Welcome to the new VIP Portal!', timestamp: serverTimestamp(), unread: true } },
                             chat: { msg1: { sender: 'agent', text: 'Hello! Welcome to VIP Support. How can I assist you today?', timestamp: serverTimestamp() } }
                         });
-                        showModal("Welcome! We've set up your new dashboard.");
                     }
                  });
             }
