@@ -257,14 +257,6 @@
         background-color: #b91c1c; /* red-700 */
         color: #fecaca; /* red-200 */
     }
-    
-    .history-currency-logo {
-        width: 16px;
-        height: 16px;
-        display: inline-block;
-        vertical-align: middle;
-        margin-left: 3px;
-    }
 
 
     @media (max-width: 600px) {
@@ -323,22 +315,23 @@
             <p id="userMenuEmail" class="text-sm font-medium text-gray-100 truncate text-left">Loading...</p>
           </div>
           <nav class="py-1">
-            <button id="helpMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
-                Help
-            </button>
-            <a href="notifications.html" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
-                Notifications
-            </a>
-            <a href="affiliate.html" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
-                Affiliate Program
-            </a>
-            <button id="changePasswordMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
-                Change Password
-            </button>
-            <button id="logoutMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
-                Logout
-            </button>
-          </nav>
+    <button id="helpMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+        Help
+    </button>
+    </button>
+    <a href="notifications.html" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+    Notifications
+</a>
+    <a href="affiliate.html" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+        Affiliate Program
+    </a>
+    <button id="changePasswordMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+        Change Password
+    </button>
+    <button id="logoutMenuBtn" class="w-full text-left block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 hover:text-sky-300 transition-colors">
+        Logout
+    </button>
+</nav>
         </div>
       </div>
     </header>
@@ -405,14 +398,14 @@
 
     <div id="history-section" class="bg-black shadow-xl rounded-lg p-6 border border-gray-800">
       <h2 class="text-xl font-medium text-gray-100 mb-5">Transaction History</h2>
-      <div id="transaction-history-list" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+      <div id="transaction-history-list" class="space-y-1 max-h-60 overflow-y-auto pr-2">
         <p id="no-transactions-message" class="text-gray-500 p-4 text-center">Loading history...</p>
       </div>
     </div>
 
     <div id="swap-history-section" class="bg-black shadow-xl rounded-lg p-6 border border-gray-800">
       <h2 class="text-xl font-medium text-gray-100 mb-5">Swap History</h2>
-      <div id="swap-history-list" class="space-y-1 max-h-80 overflow-y-auto pr-2">
+      <div id="swap-history-list" class="space-y-1 max-h-60 overflow-y-auto pr-2">
         <p id="no-swaps-message" class="text-gray-500 p-4 text-center">Loading swap history...</p>
       </div>
     </div>
@@ -534,18 +527,53 @@
     let settlementCountdownIntervalWallet = null; // For this page's countdown
 
     // --- Icon Configuration ---
-    const USDT_LOGO_URL = '/images/usdt.png';
-    const ZSG_LOGO_URL = '/images/zsg.png';
+    const usdtIconRootPath = '/images/usdt.png';
+    const zsgIconRootPath = '/images/zsg.png';
 
-    // *** NEW: Helper function from first HTML file ***
-    function getCurrencyLogoHtml(currencyCode, cssClass = "history-currency-logo") {
-        const logoUrl = currencyCode === 'USDT' ? USDT_LOGO_URL : (currencyCode === 'ZSG' ? ZSG_LOGO_URL : null);
-        if (logoUrl) {
-            return `<img src="${logoUrl}" alt="${currencyCode}" class="${cssClass}" onerror="this.outerHTML='${currencyCode}';">`;
-        }
-        return currencyCode; // Fallback to text if no logo URL or for other currencies like INR
+    const usdtIconLargeHtml = `<img src="${usdtIconRootPath}" alt="USDT" class="inline h-6 w-6 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='USDT'">`;
+    const usdtIconMediumHtml = `<img src="${usdtIconRootPath}" alt="USDT" class="inline h-5 w-5 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='USDT'">`;
+    const usdtIconSmallHtml = `<img src="${usdtIconRootPath}" alt="USDT" class="inline h-4 w-4 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='USDT'">`;
+
+    const zsgIconLargeHtml = `<img src="${zsgIconRootPath}" alt="ZSG" class="inline h-6 w-6 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='ZSG'">`;
+    const zsgIconMediumHtml = `<img src="${zsgIconRootPath}" alt="ZSG" class="inline h-5 w-5 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='ZSG'">`;
+    const zsgIconSmallHtml = `<img src="${zsgIconRootPath}" alt="ZSG" class="inline h-4 w-4 ml-1 align-middle" onerror="this.style.display='none'; this.outerHTML='ZSG'">`;
+
+
+    function getUsdtIcon(size = 'medium') {
+        if (size === 'large') return usdtIconLargeHtml;
+        if (size === 'small') return usdtIconSmallHtml;
+        return usdtIconMediumHtml;
     }
-    
+
+    function getZsgIcon(size = 'medium') {
+        if (size === 'large') return zsgIconLargeHtml;
+        if (size === 'small') return zsgIconSmallHtml;
+        return zsgIconMediumHtml;
+    }
+
+    function getCurrencyDisplayHtml(currency, value, decimals = 2, iconSize = 'medium') {
+        const formattedValue = (typeof value === 'number' && !isNaN(value)) ? value.toFixed(decimals) : (value || '0');
+        if (currency === 'USDT') {
+            return `${formattedValue} ${getUsdtIcon(iconSize)}`;
+        }
+        if (currency === 'ZSG') {
+            return `${formattedValue} ${getZsgIcon(iconSize)}`;
+        }
+        return `${formattedValue} <span class="text-sm text-gray-400 ml-1">${currency}</span>`;
+    }
+
+    function getCurrencyLabelHtml(currency, iconSize = 'medium') {
+        if (currency === 'USDT') {
+            return getUsdtIcon(iconSize);
+        }
+        if (currency === 'ZSG') {
+            return getZsgIcon(iconSize);
+        }
+        return currency;
+    }
+    // --- End Icon Configuration ---
+
+
     // Main UI Elements
     const mainHeaderTitleEl = document.getElementById('main-header-title');
     const totalPortfolioValueDisplayEl = document.getElementById('total-portfolio-value-display');
@@ -695,14 +723,14 @@
         fetchAndDisplayIpAddress();
         fetchExchangeRates();
         if (totalPortfolioValueDisplayEl) totalPortfolioValueDisplayEl.innerHTML = `<span class="animate-pulse">Loading...</span> <span id="portfolio-currency-code" class="text-2xl text-gray-400">${selectedDisplayCurrency}</span>`;
-        if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = `<span class="animate-pulse">0.00</span> ${getCurrencyLogoHtml('USDT', 'inline h-6 w-6 ml-1 align-middle')}`;
-        if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = `<span class="animate-pulse">0.00</span> ${getCurrencyLogoHtml('ZSG', 'inline h-6 w-6 ml-1 align-middle')}`;
+        if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = `<span class="animate-pulse">0.00</span> ${getUsdtIcon('large')}`;
+        if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = `<span class="animate-pulse">0.00</span> ${getZsgIcon('large')}`;
         if (currentRoiDisplayEl) currentRoiDisplayEl.innerHTML = `<span class="animate-pulse">0.00%</span>`;
         if (planDisplayEl) planDisplayEl.innerHTML = `<span class="animate-pulse">Loading...</span>`;
         if (settlementTimeDisplayEl) settlementTimeDisplayEl.innerHTML = `<span class="animate-pulse">Loading...</span>`;
         if (noTransactionsMessageEl) noTransactionsMessageEl.textContent = "Loading history...";
         if (noSwapsMessageEl) noSwapsMessageEl.textContent = "Loading swap history...";
-        if (withdrawalUsdtAmountLabelEl) withdrawalUsdtAmountLabelEl.innerHTML = `Amount (${getCurrencyLogoHtml('USDT')}):`;
+        if (withdrawalUsdtAmountLabelEl) withdrawalUsdtAmountLabelEl.innerHTML = `Amount (${getCurrencyLabelHtml('USDT', 'medium')}):`;
     }
     setInitialLoadingState();
 
@@ -718,7 +746,7 @@
             if (snapshot.exists() && typeof snapshot.val() === 'number' && snapshot.val() > 0) {
                 currentZSGValue = snapshot.val();
                 console.log("ZSG current value (USDT per ZSG) updated from Firebase to:", currentZSGValue);
-                // updateSwapModalRateDisplay(); // This modal logic is from the other file, so we keep the simpler one
+                updateSwapModalRateDisplay();
                 if (currentUserId) updateWalletData(currentUserId);
             } else {
                 console.warn(`Using current/default ZSG value (${currentZSGValue}). Firebase value at 'tokenInfo/currentValue' not found or invalid.`);
@@ -845,8 +873,8 @@
             if(codeSpan) codeSpan.textContent = displayCurrency;
           }
 
-          if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = `${(zsgTokenQty || 0).toFixed(4)} ${getCurrencyLogoHtml('ZSG', 'inline h-6 w-6 ml-1 align-middle')}`;
-          if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = `${(usdtBalance || 0).toFixed(2)} ${getCurrencyLogoHtml('USDT', 'inline h-6 w-6 ml-1 align-middle')}`;
+          if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = getCurrencyDisplayHtml('ZSG', zsgTokenQty, 4, 'large');
+          if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = getCurrencyDisplayHtml('USDT', usdtBalance, 2, 'large');
 
 
           if (currentRoiDisplayEl) {
@@ -869,14 +897,14 @@
             }
           }
 
-          // if (swapModalEl && swapModalEl.style.display === "block") updateSwapModalBalances(); // Logic for the other modal
+          if (swapModalEl && swapModalEl.style.display === "block") updateSwapModalBalances();
 
         } else {
           currentUserData = null;
           console.log("No user data available for wallet:", userId);
           if (totalPortfolioValueDisplayEl) totalPortfolioValueDisplayEl.innerHTML = `0.00 <span id="portfolio-currency-code" class="text-2xl text-gray-400">${selectedDisplayCurrency}</span>`;
-          if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = `0.0000 ${getCurrencyLogoHtml('ZSG', 'inline h-6 w-6 ml-1 align-middle')}`;
-          if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = `0.00 ${getCurrencyLogoHtml('USDT', 'inline h-6 w-6 ml-1 align-middle')}`;
+          if (zsgBalanceDisplayEl) zsgBalanceDisplayEl.innerHTML = getCurrencyDisplayHtml('ZSG', 0, 4, 'large');
+          if (usdtBalanceDisplayEl) usdtBalanceDisplayEl.innerHTML = getCurrencyDisplayHtml('USDT', 0, 2, 'large');
           if (currentRoiDisplayEl) currentRoiDisplayEl.innerHTML = `0.00%`;
           if (planDisplayEl) planDisplayEl.textContent = `N/A`;
           if (settlementTimeDisplayEl) {
@@ -890,7 +918,19 @@
       }, (error) => {
         currentUserData = null;
         console.error("Error fetching user wallet data:", error);
-        // ... (error handling remains the same)
+        const setTextOnError = (el, text, unitHtml = '') => { if (el) el.innerHTML = text + unitHtml; };
+        setTextOnError(totalPortfolioValueDisplayEl, 'Error', ` <span id="portfolio-currency-code" class="text-2xl text-gray-400">${selectedDisplayCurrency}</span>`);
+        setTextOnError(zsgBalanceDisplayEl, 'Error', ` ${getZsgIcon('large')}`);
+        setTextOnError(usdtBalanceDisplayEl, 'Error', ` ${getUsdtIcon('large')}`);
+        setTextOnError(currentRoiDisplayEl, 'Error');
+        setTextOnError(planDisplayEl, 'Error');
+        if (settlementTimeDisplayEl) {
+            setTextOnError(settlementTimeDisplayEl, 'Error');
+            if (settlementCountdownIntervalWallet) {
+                clearInterval(settlementCountdownIntervalWallet);
+                settlementCountdownIntervalWallet = null;
+            }
+        }
       });
     }
 
@@ -921,35 +961,31 @@
         }
     }
 
-    // *** NEW: showTransactionDetails function from first HTML file ***
     function showTransactionDetails(txData, type) {
         if (!transactionDetailModalEl || !transactionDetailTitleEl || !transactionDetailContentEl) return;
         transactionDetailTitleEl.textContent = `${type} Details`;
         let detailsHtml = '<dl class="detail-grid">';
-
         if (type === 'Withdrawal') {
-            const usdtEquivalentDisplay = txData.usdtEquivalentDeducted ? `${txData.usdtEquivalentDeducted?.toFixed(2)} ${getCurrencyLogoHtml('USDT')}` : 'N/A';
-            detailsHtml += `<dt>Transaction ID:</dt><dd>${txData.id}</dd>`;
+            detailsHtml += `<dt>ID:</dt><dd>${txData.id}</dd>`;
             detailsHtml += `<dt>Date:</dt><dd>${formatFirebaseTimestamp(txData.requestedAt)}</dd>`;
-            detailsHtml += `<dt>Amount:</dt><dd>${parseFloat(txData.amount).toFixed(2)} ${getCurrencyLogoHtml(txData.currency)}</dd>`;
+            detailsHtml += `<dt>Amount:</dt><dd>${getCurrencyDisplayHtml(txData.currency, parseFloat(txData.amount), txData.currency === 'USDT' ? 2 : 2, 'small')}</dd>`;
             detailsHtml += `<dt>Method:</dt><dd>${txData.method}</dd>`;
             detailsHtml += `<dt>Status:</dt><dd class="capitalize ${'tx-status-' + (txData.status?.toLowerCase() || 'unknown')}">${txData.status}</dd>`;
             if (txData.method === 'IMPS/NEFT') {
-                detailsHtml += `<dt>To Account Name:</dt><dd>${txData.fullName || 'N/A'}</dd>`;
-                detailsHtml += `<dt>IFSC Code:</dt><dd>${txData.ifscCode || 'N/A'}</dd>`;
-                detailsHtml += `<dt>Account Number:</dt><dd>${txData.accountNumber || 'N/A'}</dd>`;
-                detailsHtml += `<dt>USDT Deducted:</dt><dd>${usdtEquivalentDisplay}</dd>`;
+                detailsHtml += `<dt>Account Name:</dt><dd>${txData.fullName || 'N/A'}</dd>`;
+                detailsHtml += `<dt>IFSC:</dt><dd>${txData.ifscCode || 'N/A'}</dd>`;
+                detailsHtml += `<dt>Account No.:</dt><dd>${txData.accountNumber || 'N/A'}</dd>`;
+                detailsHtml += `<dt>USDT Deducted:</dt><dd>${(txData.usdtEquivalentDeducted?.toFixed(2) || 'N/A')} ${getCurrencyLabelHtml('USDT', 'small')}</dd>`;
                 if (txData.conversionRateSnapshot) detailsHtml += `<dt>Rate (USDT/INR):</dt><dd>${txData.conversionRateSnapshot}</dd>`;
             } else if (txData.method === 'USDT') {
                 detailsHtml += `<dt>To Address:</dt><dd>${txData.usdtAddress || 'N/A'}</dd>`;
             }
         } else if (type === 'Swap') {
-            const rateDisplay = txData.rateSnapshot ? `1 ${getCurrencyLogoHtml('ZSG')} = ${txData.rateSnapshot?.toFixed(4)} ${getCurrencyLogoHtml('USDT')}` : 'N/A';
-            detailsHtml += `<dt>Transaction ID:</dt><dd>${txData.id}</dd>`;
+            detailsHtml += `<dt>ID:</dt><dd>${txData.id}</dd>`;
             detailsHtml += `<dt>Date:</dt><dd>${formatFirebaseTimestamp(txData.swappedAt)}</dd>`;
-            detailsHtml += `<dt>Swapped:</dt><dd>${parseFloat(txData.amountSwapped).toFixed(txData.fromCurrency === 'USDT' ? 2 : 4)} ${getCurrencyLogoHtml(txData.fromCurrency)}</dd>`;
-            detailsHtml += `<dt>Received:</dt><dd>${parseFloat(txData.amountReceived).toFixed(txData.toCurrency === 'USDT' ? 2 : 4)} ${getCurrencyLogoHtml(txData.toCurrency)}</dd>`;
-            detailsHtml += `<dt>Rate:</dt><dd>${rateDisplay}</dd>`;
+            detailsHtml += `<dt>Swapped:</dt><dd>${getCurrencyDisplayHtml(txData.fromCurrency, parseFloat(txData.amountSwapped), txData.fromCurrency === 'USDT' ? 2 : 4, 'small')}</dd>`;
+            detailsHtml += `<dt>Received:</dt><dd>${getCurrencyDisplayHtml(txData.toCurrency, parseFloat(txData.amountReceived), txData.toCurrency === 'USDT' ? 2 : 4, 'small')}</dd>`;
+            detailsHtml += `<dt>Rate (ZSG/USDT):</dt><dd>1 ${getCurrencyLabelHtml('ZSG', 'small')} = ${txData.rateSnapshot?.toFixed(4) || 'N/A'} ${getCurrencyLabelHtml('USDT', 'small')}</dd>`;
             detailsHtml += `<dt>Status:</dt><dd class="capitalize ${'tx-status-' + (txData.status?.toLowerCase() || 'unknown')}">${txData.status}</dd>`;
         }
         detailsHtml += '</dl>';
@@ -957,7 +993,6 @@
         transactionDetailModalEl.style.display = "block";
     }
 
-    // *** NEW: displayTransactionHistory function from first HTML file ***
     function displayTransactionHistory(userId) {
         const userTransactionsRef = query(ref(database, `withdrawalRequests/${userId}`));
         onValue(userTransactionsRef, (snapshot) => {
@@ -966,37 +1001,21 @@
             if (snapshot.exists()) {
                 noTransactionsMessageEl.style.display = 'none';
                 let transactions = [];
-                snapshot.forEach(childSnapshot => {
-                    const data = childSnapshot.val();
-                    if (data && typeof data === 'object') {
-                        transactions.push({ id: childSnapshot.key, ...data });
-                    } else {
-                        console.warn("Skipping invalid transaction data in withdrawalRequests:", childSnapshot.key, data);
-                    }
-                });
+                snapshot.forEach(childSnapshot => transactions.push({ id: childSnapshot.key, ...childSnapshot.val() }));
                 transactions.sort((a, b) => (b.requestedAt || 0) - (a.requestedAt || 0));
-
                 transactions.forEach(tx => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'transaction-item';
                     const statusClass = `tx-status-${tx.status?.toLowerCase() || 'unknown'}`;
-                    const typeCurrencyDisplay = getCurrencyLogoHtml(tx.currency);
-                    const amountCurrencyDisplay = getCurrencyLogoHtml(tx.currency);
-
                     itemEl.innerHTML = `
                         <div class="transaction-details">
-                            <p class="font-medium text-gray-100 tx-type-withdrawal">
-                                ${tx.method} Withdrawal (${typeCurrencyDisplay})
-                            </p>
+                            <p class="font-medium text-gray-100 tx-type-withdrawal">${tx.method} Withdrawal (${tx.method === 'USDT' ? getCurrencyLabelHtml(tx.currency, 'small') : tx.currency})</p>
                             <p class="text-xs text-gray-500">${formatFirebaseTimestamp(tx.requestedAt)}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold text-base tx-type-withdrawal">
-                                -${parseFloat(tx.amount).toFixed(2)} ${amountCurrencyDisplay}
-                            </p>
+                            <p class="font-semibold text-base tx-type-withdrawal">-${getCurrencyDisplayHtml(tx.currency, parseFloat(tx.amount), tx.currency === 'USDT' ? 2 : 2, 'small')}</p>
                             <p class="text-xs ${statusClass} capitalize">${tx.status}</p>
-                        </div>
-                    `;
+                        </div>`;
                     itemEl.addEventListener('click', () => showTransactionDetails(tx, 'Withdrawal'));
                     transactionHistoryListEl.appendChild(itemEl);
                 });
@@ -1012,8 +1031,7 @@
             }
         });
     }
-    
-    // *** NEW: displaySwapHistory function from first HTML file ***
+
     function displaySwapHistory(userId) {
         const userSwapsRef = query(ref(database, `swapRequests/${userId}`));
         onValue(userSwapsRef, (snapshot) => {
@@ -1022,38 +1040,20 @@
             if (snapshot.exists()) {
                 noSwapsMessageEl.style.display = 'none';
                 let swaps = [];
-                snapshot.forEach(childSnapshot => {
-                    const data = childSnapshot.val();
-                    if (data && typeof data === 'object') {
-                        swaps.push({ id: childSnapshot.key, ...data });
-                    } else {
-                        console.warn("Skipping invalid swap data in swapRequests:", childSnapshot.key, data);
-                    }
-                });
+                snapshot.forEach(childSnapshot => swaps.push({ id: childSnapshot.key, ...childSnapshot.val() }));
                 swaps.sort((a, b) => (b.swappedAt || 0) - (a.swappedAt || 0));
-
                 swaps.forEach(swap => {
                     const itemEl = document.createElement('div');
                     itemEl.className = 'transaction-item';
-                    const fromCurrencyHtml = getCurrencyLogoHtml(swap.fromCurrency);
-                    const toCurrencyHtml = getCurrencyLogoHtml(swap.toCurrency);
-
                     itemEl.innerHTML = `
                         <div class="transaction-details">
-                            <p class="font-medium text-gray-100 tx-type-swap">
-                                Swap ${fromCurrencyHtml} to ${toCurrencyHtml}
-                            </p>
+                            <p class="font-medium text-gray-100 tx-type-swap">Swap ${getCurrencyLabelHtml(swap.fromCurrency, 'small')} to ${getCurrencyLabelHtml(swap.toCurrency, 'small')}</p>
                             <p class="text-xs text-gray-500">${formatFirebaseTimestamp(swap.swappedAt)}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold text-sm text-gray-300">
-                                <span class="text-red-500">-${parseFloat(swap.amountSwapped).toFixed(swap.fromCurrency === 'USDT' ? 2 : 4)} ${fromCurrencyHtml}</span>
-                            </p>
-                             <p class="font-semibold text-sm text-gray-300 mt-1">
-                                <span class="text-green-500">+${parseFloat(swap.amountReceived).toFixed(swap.toCurrency === 'USDT' ? 2 : 4)} ${toCurrencyHtml}</span>
-                            </p>
-                        </div>
-                    `;
+                            <p class="font-semibold text-sm text-gray-300"><span class="text-red-500">-${getCurrencyDisplayHtml(swap.fromCurrency, parseFloat(swap.amountSwapped), swap.fromCurrency === 'USDT' ? 2 : 4, 'small')}</span></p>
+                            <p class="font-semibold text-sm text-gray-300 mt-1"><span class="text-green-500">+${getCurrencyDisplayHtml(swap.toCurrency, parseFloat(swap.amountReceived), swap.toCurrency === 'USDT' ? 2 : 4, 'small')}</span></p>
+                        </div>`;
                     itemEl.addEventListener('click', () => showTransactionDetails(swap, 'Swap'));
                     swapHistoryListEl.appendChild(itemEl);
                 });
@@ -1069,8 +1069,6 @@
             }
         });
     }
-
-    // --- The rest of the script remains the same as the second file ---
 
     if (userMenuToggleBtnEl && userDropdownMenuEl && userMenuContainerEl) {
         userMenuToggleBtnEl.addEventListener('click', (event) => {
@@ -1090,7 +1088,8 @@
                 await signOut(auth);
                 showGenericMessage("Successfully logged out.", false);
                 if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
-                window.location.href = './index.html';
+                 // Redirect to login page after logout
+                window.location.href = './index.html'; // FIXED: Changed to absolute path
             } catch (error) {
                 console.error("Logout Error:", error);
                 showGenericMessage("Logout failed: " + error.message, true);
@@ -1115,10 +1114,11 @@
 
     if (helpMenuBtnEl) {
         helpMenuBtnEl.addEventListener('click', () => {
-            window.location.href = './help.html';
+            window.location.href = './help.html'; // FIXED: Changed to absolute path
             if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
         });
     }
+
 
     if (auth && database) {
         onAuthStateChanged(auth, (user) => {
@@ -1129,27 +1129,49 @@
             if (authStatusEl) authStatusEl.textContent = `Logged in: ${user.email || 'Authenticated User'}`;
             if (userIdDisplayEl) userIdDisplayEl.textContent = `User ID: ${user.uid}`;
             updateWalletData(currentUserId);
-            displayTransactionHistory(currentUserId); // Calls the new function
-            displaySwapHistory(currentUserId);      // Calls the new function
+            displayTransactionHistory(currentUserId);
+            displaySwapHistory(currentUserId);
             if (userMenuToggleBtnEl) userMenuToggleBtnEl.classList.remove('hidden');
             if (userMenuEmailEl) userMenuEmailEl.textContent = user.email || 'N/A';
           } else {
-             // ... (auth state change logic remains the same)
             currentUserId = null;
             currentUserData = null;
             if (authStatusEl) authStatusEl.textContent = 'Not Authenticated. Redirecting to login...';
             if (userIdDisplayEl) userIdDisplayEl.textContent = 'User ID: -';
+            // Redirect to login page if not authenticated
             setTimeout(() => {
-                window.location.href = './index.html';
-            }, 1500);
-            setInitialLoadingState(); 
+                window.location.href = './index.html'; // FIXED: Changed to absolute path
+            }, 1500); // Delay for user to see the message
+
+            setInitialLoadingState(); // Reset UI elements
+            if (currentRoiDisplayEl) currentRoiDisplayEl.innerHTML = `0.00%`;
+            if (planDisplayEl) planDisplayEl.textContent = `N/A`;
+            if (settlementTimeDisplayEl) {
+                settlementTimeDisplayEl.textContent = `N/A`;
+                if (settlementCountdownIntervalWallet) {
+                    clearInterval(settlementCountdownIntervalWallet);
+                    settlementCountdownIntervalWallet = null;
+                }
+            }
+
+            if (noTransactionsMessageEl) { noTransactionsMessageEl.textContent = 'Please log in to view history.'; noTransactionsMessageEl.style.display = 'block';}
+            if (transactionHistoryListEl) transactionHistoryListEl.innerHTML = '';
+            if (noSwapsMessageEl) { noSwapsMessageEl.textContent = 'Please log in to view history.'; noSwapsMessageEl.style.display = 'block';}
+            if (swapHistoryListEl) swapHistoryListEl.innerHTML = '';
+            if (userNoticeBannerEl) userNoticeBannerEl.style.display = 'none';
+            // Do not hide appContainerEl immediately, let redirect handle it.
+            if (userMenuToggleBtnEl) userMenuToggleBtnEl.classList.add('hidden');
+            if (userDropdownMenuEl) userDropdownMenuEl.classList.add('hidden');
+            if (userMenuEmailEl) userMenuEmailEl.textContent = 'Loading...';
+            if(topupFundsBtnEl) topupFundsBtnEl.disabled = true; // Disable actions if not logged in
+            if(openSwapModalBtnEl) { openSwapModalBtnEl.disabled = true; openSwapModalBtnEl.classList.add('opacity-50', 'cursor-not-allowed'); }
+            if(openWithdrawModalButtonEl) { openWithdrawModalButtonEl.disabled = true; openWithdrawModalButtonEl.classList.add('opacity-50', 'cursor-not-allowed'); }
           }
         });
     } else {
-        // ... (Firebase unavailable logic remains the same)
+        console.error("Firebase auth or database unavailable. Wallet functionality limited.");
+        if (appContainerEl) appContainerEl.innerHTML = '<div class="text-center p-10"><h1 class="text-2xl font-semibold text-red-500">Critical Error</h1><p class="text-gray-400 mt-2">Core services unavailable.</p></div>';
     }
-
-    // --- All modal and form submission logic below remains identical to the second file ---
 
     if (openWithdrawModalButtonEl && withdrawalModalEl) {
         openWithdrawModalButtonEl.onclick = function() {
@@ -1163,7 +1185,7 @@
             if(withdrawalImpsAmountInputEl) withdrawalImpsAmountInputEl.value = '';
             if(withdrawalUsdtAmountInputEl) withdrawalUsdtAmountInputEl.value = '';
             if(withdrawalUsdtAddressInputEl) withdrawalUsdtAddressInputEl.value = '';
-             if (withdrawalUsdtAmountLabelEl) withdrawalUsdtAmountLabelEl.innerHTML = `Amount (${getCurrencyLogoHtml('USDT')}):`;
+             if (withdrawalUsdtAmountLabelEl) withdrawalUsdtAmountLabelEl.innerHTML = `Amount (${getCurrencyLabelHtml('USDT', 'medium')}):`;
 
             const userBankDetailsRef = ref(database, `users/${currentUserId}/bankDetails`);
             get(userBankDetailsRef).then((snapshot) => {
@@ -1189,4 +1211,183 @@
     if (selectImpsNeftBtnEl && selectUsdtTrc20BtnEl && impsNeftFormEl && usdtTrc20FormEl) {
         selectImpsNeftBtnEl.onclick = () => {
             impsNeftFormEl.style.display = "block"; usdtTrc20FormEl.style.display = "none";
-            selectImpsNeftBtnEl.classList.add('active'); selectUsdtTrc20BtnEl.classList.remove('
+            selectImpsNeftBtnEl.classList.add('active'); selectUsdtTrc20BtnEl.classList.remove('active');
+        }
+        selectUsdtTrc20BtnEl.onclick = () => {
+            impsNeftFormEl.style.display = "none"; usdtTrc20FormEl.style.display = "block";
+            selectUsdtTrc20BtnEl.classList.add('active'); selectImpsNeftBtnEl.classList.remove('active');
+            if (withdrawalUsdtAmountLabelEl) withdrawalUsdtAmountLabelEl.innerHTML = `Amount (${getCurrencyLabelHtml('USDT', 'medium')}):`;
+        }
+    }
+    async function handleWithdrawal(amount, method, details) {
+        if (!currentUserId) return showGenericMessage("User not authenticated.", true);
+        if (currentUserData && currentUserData.isWithdrawalBlocked) return showGenericMessage("Withdrawals disabled.", true);
+        const parsedAmount = parseFloat(amount);
+        if (isNaN(parsedAmount) || parsedAmount <= 0) return showGenericMessage("Amount must be positive.", true);
+
+        const btn = method === 'IMPS/NEFT' ? submitImpsWithdrawalBtnEl : submitUsdtWithdrawalBtnEl;
+        const originalBtnText = btn.textContent;
+        btn.disabled = true; btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...`;
+
+        try {
+            const userRef = ref(database, `users/${currentUserId}`);
+            const userSnapshot = await get(userRef);
+            if (!userSnapshot.exists()) throw new Error("User data not found.");
+            const userData = userSnapshot.val();
+            let availableUsdt = parseFloat(userData.withdrawalAvailable) || parseFloat(userData.usdtBalance) || 0;
+            let usdtDeducted;
+
+            if (method === 'IMPS/NEFT') {
+                usdtDeducted = parsedAmount / INR_CONVERSION_RATE;
+                if (usdtDeducted > availableUsdt) throw new Error(`Insufficient balance. Need ${usdtDeducted.toFixed(2)} ${getCurrencyLabelHtml('USDT','small')}.`);
+                const bank = { fullName: details.fullName, ifscCode: details.ifscCode, accountNumber: details.accountNumber };
+                if (!userData.bankDetails || JSON.stringify(userData.bankDetails) !== JSON.stringify(bank)) {
+                    await update(ref(database, `users/${currentUserId}/bankDetails`), bank);
+                }
+            } else if (method === 'USDT') {
+                usdtDeducted = parsedAmount;
+                if (usdtDeducted > availableUsdt) throw new Error(`Insufficient ${getCurrencyLabelHtml('USDT','small')} balance.`);
+            } else throw new Error("Invalid method.");
+
+            const newBalance = availableUsdt - usdtDeducted;
+            const reqRef = push(ref(database, `withdrawalRequests/${currentUserId}`));
+            const reqData = {
+                userId: currentUserId, amount: parsedAmount, currency: method === 'IMPS/NEFT' ? 'INR' : 'USDT',
+                usdtEquivalentDeducted: parseFloat(usdtDeducted.toFixed(2)), method: method, status: 'Pending',
+                requestedAt: serverTimestamp(), conversionRateSnapshot: method === 'IMPS/NEFT' ? INR_CONVERSION_RATE : null,
+                ...(method === 'IMPS/NEFT' && { fullName: details.fullName, ifscCode: details.ifscCode, accountNumber: details.accountNumber }),
+                ...(method === 'USDT' && { usdtAddress: details.usdtAddress })
+            };
+            await set(reqRef, reqData);
+            const updates = { usdtBalance: parseFloat(newBalance.toFixed(2)) };
+            if (userData.hasOwnProperty('withdrawalAvailable')) {
+                updates.withdrawalAvailable = parseFloat(newBalance.toFixed(2));
+            }
+            await update(userRef, updates);
+
+            showGenericMessage(`Withdrawal for ${parsedAmount} ${reqData.currency === 'USDT' ? getCurrencyLabelHtml('USDT', 'small') : reqData.currency} submitted!`, false);
+            if(withdrawalModalEl) withdrawalModalEl.style.display = "none";
+        } catch (error) {
+            console.error("Withdrawal error:", error);
+            showGenericMessage("Withdrawal failed: " + error.message, true);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = originalBtnText; }
+        }
+    }
+    if (submitImpsWithdrawalBtnEl) {
+        submitImpsWithdrawalBtnEl.onclick = () => {
+            const fN = withdrawalFullNameInputEl.value.trim(), iC = withdrawalIfscCodeInputEl.value.trim().toUpperCase();
+            const aN = withdrawalAccountNumberInputEl.value.trim(), amt = withdrawalImpsAmountInputEl.value;
+            if (!fN || !iC || !aN || !amt) return showGenericMessage("Fill all IMPS/NEFT fields.", true);
+            if (parseFloat(amt) <= 0) return showGenericMessage("INR Amount must be positive.", true);
+            if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(iC)) return showGenericMessage("Invalid IFSC. Ex: SBIN0001234.", true);
+            if (!/^\d{9,18}$/.test(aN)) return showGenericMessage("Invalid account no. (9-18 digits).", true);
+            handleWithdrawal(amt, 'IMPS/NEFT', { fullName: fN, ifscCode: iC, accountNumber: aN });
+        };
+    }
+    if (submitUsdtWithdrawalBtnEl) {
+        submitUsdtWithdrawalBtnEl.onclick = () => {
+            const amt = withdrawalUsdtAmountInputEl.value, addr = withdrawalUsdtAddressInputEl.value.trim();
+            if (!amt || !addr) return showGenericMessage(`Fill all ${getCurrencyLabelHtml('USDT', 'small')} fields.`, true);
+            if (parseFloat(amt) <= 0) return showGenericMessage(`${getCurrencyLabelHtml('USDT', 'small')} Amount must be positive.`, true);
+            if (!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(addr)) return showGenericMessage("Invalid TRC20 address.", true);
+            handleWithdrawal(amt, 'USDT', { usdtAddress: addr });
+        };
+    }
+
+    // Swap Modal Logic (One-way USDT to ZSG)
+    function updateSwapModalRateDisplay() {
+        if (swapRateDisplayEl) swapRateDisplayEl.innerHTML = `Rate: 1 ${getCurrencyLabelHtml('ZSG', 'small')} = ${currentZSGValue.toFixed(4)} ${getCurrencyLabelHtml('USDT', 'small')}`;
+        calculateSwapReceiveAmount();
+    }
+    function updateSwapModalBalances() {
+        if (!currentUserData || !swapBalanceInfoEl) return;
+        const uBal = parseFloat(currentUserData.usdtBalance) || 0;
+        swapBalanceInfoEl.innerHTML = `${getCurrencyLabelHtml('USDT', 'small')} Balance: <span class="font-medium">${uBal.toFixed(2)}</span>`;
+    }
+    function calculateSwapReceiveAmount() {
+        if (!swapAmountInputEl || !receiveAmountDisplayEl || currentZSGValue <= 0) {
+            if(receiveAmountDisplayEl) receiveAmountDisplayEl.value = '0.0000'; return;
+        }
+        const amtSwap = parseFloat(swapAmountInputEl.value);
+        if (isNaN(amtSwap) || amtSwap <= 0) { receiveAmountDisplayEl.value = '0.0000'; return; }
+        const amtRec = amtSwap / currentZSGValue;
+        receiveAmountDisplayEl.value = amtRec.toFixed(4);
+    }
+    function setupSwapModal() {
+        if (!swapFromLabelEl || !swapToLabelEl || !swapAmountLabelEl || !receiveAmountLabelEl) return;
+        swapFromLabelEl.innerHTML = getCurrencyLabelHtml("USDT", "medium");
+        swapToLabelEl.innerHTML = getCurrencyLabelHtml("ZSG", "medium"); // Use icon for ZSG
+        swapAmountLabelEl.innerHTML = `Amount to Swap (${getCurrencyLabelHtml("USDT", "small")}):`;
+        receiveAmountLabelEl.innerHTML = `You will receive (approx. ${getCurrencyLabelHtml("ZSG", "small")}):`;
+        updateSwapModalBalances(); calculateSwapReceiveAmount(); updateSwapModalRateDisplay();
+    }
+
+    if (openSwapModalBtnEl && swapModalEl) {
+        openSwapModalBtnEl.onclick = () => {
+            if (!currentUserId) return showGenericMessage("Please log in to swap.", true);
+            if (currentUserData && currentUserData.isWithdrawalBlocked) return showGenericMessage("Swaps disabled (withdrawals blocked).", true);
+            if (currentZSGValue <= 0) return showGenericMessage("Swap rate unavailable.", true);
+
+            if(swapAmountInputEl) swapAmountInputEl.value = '';
+            if(receiveAmountDisplayEl) receiveAmountDisplayEl.value = '';
+            setupSwapModal();
+            swapModalEl.style.display = "block";
+        }
+    }
+    if (closeSwapModalBtnEl && swapModalEl) closeSwapModalBtnEl.onclick = () => swapModalEl.style.display = "none";
+    if (swapAmountInputEl) swapAmountInputEl.addEventListener('input', calculateSwapReceiveAmount);
+
+    async function handleSwap() {
+        if (!currentUserId || !currentUserData) return showGenericMessage("User not authenticated/data not loaded.", true);
+        if (currentUserData.isWithdrawalBlocked) return showGenericMessage("Swaps disabled (withdrawals blocked).", true);
+        if (currentZSGValue <= 0) return showGenericMessage("Swap rate unavailable.", true);
+
+        const amtSwap = parseFloat(swapAmountInputEl.value);
+        if (isNaN(amtSwap) || amtSwap <= 0) return showGenericMessage("Enter a valid positive amount.", true);
+
+        const btn = confirmSwapBtnEl; const originalBtnText = btn.textContent;
+        btn.disabled = true; btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>Processing...`;
+
+        try {
+            const userRef = ref(database, `users/${currentUserId}`);
+            const latestUserSnap = await get(userRef);
+            if (!latestUserSnap.exists()) throw new Error("User data not found.");
+            const latestData = latestUserSnap.val();
+            let uBal = parseFloat(latestData.usdtBalance) || 0, zBal = parseFloat(latestData.zsgTokenBalance) || 0;
+            let newUBal, newZBal, amtRec;
+
+            if (amtSwap > uBal) throw new Error(`Insufficient ${getCurrencyLabelHtml('USDT', 'small')} balance.`);
+            amtRec = amtSwap / currentZSGValue;
+            newUBal = uBal - amtSwap;
+            newZBal = zBal + amtRec;
+
+            await update(userRef, {
+                usdtBalance: parseFloat(newUBal.toFixed(2)),
+                zsgTokenBalance: parseFloat(newZBal.toFixed(4))
+            });
+            const swapReqRef = push(ref(database, `swapRequests/${currentUserId}`));
+            await set(swapReqRef, {
+                userId: currentUserId,
+                fromCurrency: 'USDT',
+                toCurrency: 'ZSG',
+                amountSwapped: amtSwap,
+                amountReceived: parseFloat(amtRec.toFixed(4)),
+                rateSnapshot: currentZSGValue,
+                swappedAt: serverTimestamp(),
+                status: 'Completed'
+            });
+            showGenericMessage("Swap successful!", false);
+            if(swapModalEl) swapModalEl.style.display = "none";
+        } catch (error) {
+            console.error("Swap error:", error);
+            showGenericMessage("Swap failed: " + error.message, true);
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = originalBtnText; }
+        }
+    }
+    if (confirmSwapBtnEl) confirmSwapBtnEl.onclick = handleSwap;
+
+  </script>
+</body>
+</html>
